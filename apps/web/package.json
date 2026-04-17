@@ -11,6 +11,7 @@
     "logos:sync": "node scripts/sync-logos.mjs && node scripts/fix-black-logos.mjs"
   },
   "dependencies": {
+    "@veloz-stack/template-generator": "workspace:*",
     "@veloz-stack/types": "workspace:*",
     "lucide-react": "^0.469.0",
     "next": "^15.1.6",

@@ -5,6 +5,8 @@ import type { VirtualFs } from "../vfs";
 const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
   abacatepay: "abacatepay",
   asaas: "asaas",
+  pagarme: "pagarme",
+  mercadopago: "mercadopago",
   "stripe-br": "stripe",
   "ararahq-sms": "ararahq",
   "ararahq-wa": "ararahq",

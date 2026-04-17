@@ -10,7 +10,7 @@ import {
   type ModuleId,
   validateConfig,
 } from "@veloz-stack/types";
-import { scaffold } from "@veloz-stack/template-generator";
+import { scaffold } from "@veloz-stack/template-generator/scaffold";
 import { gatherInteractive } from "./prompts.js";
 
 export type CreateInput = Partial<ProjectConfig> & {

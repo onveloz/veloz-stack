@@ -369,6 +369,24 @@ describe("module workspace wiring", () => {
     expect(pkg.dependencies["@test-app/stripe"]).toBe("workspace:*");
   });
 
+  it("mercadopago module ships a typed client + HMAC webhook verifier", () => {
+    const vfs = generate(cfg({ modules: ["mercadopago"] }));
+    expect(vfs.read("packages/mercadopago/src/index.ts")).toContain("createPixPayment");
+    expect(vfs.read("packages/mercadopago/src/webhook.ts")).toContain(
+      "verifyMercadoPagoWebhook",
+    );
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/mercadopago"]).toBe("workspace:*");
+  });
+
+  it("pagarme module ships fetch-based v5 client + Basic-auth webhook verifier", () => {
+    const vfs = generate(cfg({ modules: ["pagarme"] }));
+    expect(vfs.read("packages/pagarme/src/index.ts")).toContain("createPixOrder");
+    expect(vfs.read("packages/pagarme/src/webhook.ts")).toContain("verifyPagarmeWebhook");
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/pagarme"]).toBe("workspace:*");
+  });
+
   it("posthog module ships @proj/analytics with shutdownPosthog helper", () => {
     const vfs = generate(cfg({ modules: ["posthog"] }));
     expect(vfs.read("packages/analytics/src/index.ts")).toContain("shutdownPosthog");

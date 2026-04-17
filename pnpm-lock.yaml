@@ -78,6 +78,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@veloz-stack/template-generator':
+        specifier: workspace:*
+        version: link:../../packages/template-generator
       '@veloz-stack/types':
         specifier: workspace:*
         version: link:../../packages/types

@@ -38,6 +38,7 @@ import { Logo } from "@/components/logo";
 import { BrandLogo } from "@/components/brand-logo";
 import { CopyButton } from "@/components/copy-button";
 import { ConfirmCascadeDialog } from "@/components/confirm-dialog";
+import { PreviewPanel } from "./preview-panel";
 import { resolveConfig, type ConfigChange } from "@/lib/resolve-config";
 
 type OptionTile = {
@@ -242,7 +243,7 @@ export function StackBuilder() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] min-h-[calc(100vh-44px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_320px] min-h-[calc(100vh-44px)]">
         {/* Left sidebar */}
         <aside className="border-r border-border bg-secondary/30 p-5 lg:sticky lg:top-11 lg:self-start lg:h-[calc(100vh-44px)] lg:overflow-y-auto">
           <div className="mb-5">
@@ -508,6 +509,11 @@ export function StackBuilder() {
             </div>
           </section>
         </main>
+
+        {/* Right preview panel */}
+        <aside className="hidden lg:block border-l border-border bg-secondary/20 lg:sticky lg:top-11 lg:self-start lg:h-[calc(100vh-44px)]">
+          <PreviewPanel config={config} />
+        </aside>
       </div>
 
       <ConfirmCascadeDialog
