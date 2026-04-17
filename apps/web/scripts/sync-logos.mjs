@@ -70,6 +70,11 @@ const LOGO_MAP = {
   pnpm: ["pnpm"],
   npm: ["npm"],
 
+  // addons
+  turborepo: ["Turborepo", "Turbo"],
+  biome: ["Biome"],
+  husky: ["Husky"],
+
   // modules — tech brands that exist on svgl
   claude: ["Claude AI", "Claude", "Anthropic"],
   stripe: ["Stripe"],

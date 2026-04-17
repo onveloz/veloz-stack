@@ -4,12 +4,14 @@ import Link from "next/link";
 import { ArrowLeft, Check, Share2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
+  AddonId,
   ApiId,
   AuthId,
   BackendId,
   DbHostingId,
   DbId,
   DeployId,
+  ExampleId,
   FrontendId,
   MODULES,
   MODULE_CATEGORIES,
@@ -91,6 +93,23 @@ export function StackBuilder() {
     const has = config.modules.includes(id);
     void setState({
       modules: has ? config.modules.filter((m) => m !== id) : [...config.modules, id],
+      preset: "custom",
+    });
+  }
+
+  function toggleAddon(id: (typeof AddonId.options)[number]) {
+    const has = config.addons.includes(id);
+    void setState({
+      addons: has ? config.addons.filter((a) => a !== id) : [...config.addons, id],
+      preset: "custom",
+    });
+  }
+
+  function toggleExample(id: (typeof ExampleId.options)[number]) {
+    if (id === "none") return;
+    const has = config.examples.includes(id);
+    void setState({
+      examples: has ? config.examples.filter((e) => e !== id) : [...config.examples, id],
       preset: "custom",
     });
   }
@@ -392,6 +411,102 @@ export function StackBuilder() {
               );
             })}
           </section>
+
+          {/* Addons */}
+          <section className="mb-10">
+            <div className="flex items-baseline justify-between mb-3">
+              <h2 className="font-heading text-lg font-semibold">Addons</h2>
+              <span className="text-xs text-muted-foreground">
+                {config.addons.length} of {AddonId.options.length} on
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {AddonId.options.map((id) => {
+                const active = config.addons.includes(id);
+                const meta = ADDON_META[id];
+                return (
+                  <button
+                    key={id}
+                    onClick={() => toggleAddon(id)}
+                    className={
+                      "group text-left p-3 border transition-colors relative flex items-center gap-3 min-h-[64px] " +
+                      (active
+                        ? "border-brand bg-brand-subtle"
+                        : "border-border hover:border-border-strong hover:bg-secondary")
+                    }
+                  >
+                    <div className="flex items-center justify-center w-10 h-10 shrink-0">
+                      <BrandLogo id={id} label={meta.label} height={28} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-sm">{meta.label}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">
+                        {meta.tagline}
+                      </div>
+                    </div>
+                    <div
+                      className={
+                        "w-4 h-4 border flex items-center justify-center shrink-0 " +
+                        (active ? "bg-brand border-brand" : "border-border-strong")
+                      }
+                    >
+                      {active && <Check className="w-3 h-3 text-brand-foreground" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Examples */}
+          <section className="mb-10">
+            <div className="flex items-baseline justify-between mb-3">
+              <h2 className="font-heading text-lg font-semibold">Starter examples</h2>
+              <span className="text-xs text-muted-foreground">
+                {config.examples.length} selected
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {ExampleId.options
+                .filter((id) => id !== "none")
+                .map((id) => {
+                  const active = config.examples.includes(id);
+                  const meta = EXAMPLE_META[id];
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => toggleExample(id)}
+                      className={
+                        "group text-left p-3 border transition-colors min-h-[64px] flex items-center gap-3 " +
+                        (active
+                          ? "border-brand bg-brand-subtle"
+                          : "border-border hover:border-border-strong hover:bg-secondary")
+                      }
+                    >
+                      <div className="w-10 h-10 flex items-center justify-center bg-secondary border border-border-strong shrink-0">
+                        <span className="text-brand font-heading font-bold text-lg">
+                          {meta.label[0]}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-sm">{meta.label}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
+                          {meta.tagline}
+                        </div>
+                      </div>
+                      <div
+                        className={
+                          "w-4 h-4 border flex items-center justify-center shrink-0 " +
+                          (active ? "bg-brand border-brand" : "border-border-strong")
+                        }
+                      >
+                        {active && <Check className="w-3 h-3 text-brand-foreground" />}
+                      </div>
+                    </button>
+                  );
+                })}
+            </div>
+          </section>
         </main>
       </div>
 
@@ -428,6 +543,39 @@ function StackLine({ k, v }: { k: string; v: string }) {
     </li>
   );
 }
+
+const ADDON_META: Record<(typeof AddonId.options)[number], { label: string; tagline: string }> = {
+  turborepo: {
+    label: "Turborepo",
+    tagline: "Task graph + remote cache — root scripts become `turbo run …`",
+  },
+  biome: {
+    label: "Biome",
+    tagline: "Formatter + linter — adds format / lint / check scripts",
+  },
+  husky: {
+    label: "Husky + lint-staged",
+    tagline: "Pre-commit hook running lint-staged (Biome if enabled)",
+  },
+};
+
+const EXAMPLE_META: Record<
+  Exclude<(typeof ExampleId.options)[number], "none">,
+  { label: string; tagline: string }
+> = {
+  todo: {
+    label: "Todo CRUD",
+    tagline: "oRPC router + Drizzle schema + frontend — classic starter",
+  },
+  "ai-chat": {
+    label: "AI chat (soon)",
+    tagline: "Streaming chat with Claude — lands in Wave 2d",
+  },
+  "pix-checkout": {
+    label: "PIX checkout (soon)",
+    tagline: "AbacatePay QR + webhook verifier — lands in Wave 2d",
+  },
+};
 
 function CategorySection({
   label,
