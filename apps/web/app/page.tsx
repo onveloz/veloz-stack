@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles, Terminal, Zap } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { CopyButton } from "@/components/copy-button";
+import { HeroShader } from "@/components/hero-shader";
 
 const INSTALL_CMD = "bun create veloz-stack@latest";
 
@@ -55,8 +56,9 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="dot-grid border-b border-border">
-          <div className="max-w-5xl mx-auto px-6 py-24 text-center">
+        <section className="relative border-b border-border overflow-hidden">
+          <HeroShader />
+          <div className="relative max-w-5xl mx-auto px-6 py-24 text-center">
             <div className="inline-flex items-center gap-1.5 text-[11px] font-medium border border-border-strong px-2 py-1 mb-8">
               <span className="w-1.5 h-1.5 bg-brand rounded-full" />
               <span className="text-muted-foreground">
