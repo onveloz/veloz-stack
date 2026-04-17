@@ -68,9 +68,19 @@ function emitWorkspaceFile(vfs: VirtualFs, config: ProjectConfig): void {
 }
 
 function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
+  const hasTurbo = config.addons.includes("turborepo");
+  const hasBiome = config.addons.includes("biome");
+  const pm = config.pm;
+
   vfs.updateJson<Record<string, any>>("package.json", (pkg) => {
-    const pm = config.pm;
-    const run = pm === "pnpm" ? "pnpm -r --parallel" : pm === "bun" ? "bun run --filter '*'" : "npm run -ws";
+    const run = hasTurbo
+      ? "turbo run"
+      : pm === "pnpm"
+      ? "pnpm -r --parallel"
+      : pm === "bun"
+      ? "bun run --filter '*'"
+      : "npm run -ws";
+
     pkg.scripts = {
       ...pkg.scripts,
       dev: `${run} dev`,
@@ -82,6 +92,19 @@ function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
             "db:studio": pm === "pnpm" ? "pnpm -F @*/db db:studio" : `${pm} --cwd packages/db run db:studio`,
           }
         : {}),
+      ...(hasBiome
+        ? {
+            format: "biome format --write .",
+            lint: "biome lint .",
+            check: "biome check --write .",
+          }
+        : {}),
+    };
+
+    pkg.devDependencies = {
+      ...(pkg.devDependencies ?? {}),
+      ...(hasTurbo ? { turbo: "^2.6.3" } : {}),
+      ...(hasBiome ? { "@biomejs/biome": "^1.9.4" } : {}),
     };
     return pkg;
   });

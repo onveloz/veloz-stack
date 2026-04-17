@@ -1,4 +1,5 @@
 import type { ProjectConfig } from "@veloz-stack/types";
+import { processAddons } from "./handlers/addons.js";
 import { processApi } from "./handlers/api.js";
 import { processAuth } from "./handlers/auth.js";
 import { processBackend } from "./handlers/backend.js";
@@ -31,6 +32,7 @@ export function generate(config: ProjectConfig): VirtualFs {
   processDeploy(vfs, config);
   processExamples(vfs, config);
   processModules(vfs, config);
+  processAddons(vfs, config);
   postProcess(vfs, config);
   return vfs;
 }

@@ -174,6 +174,41 @@ describe("modules", () => {
   });
 });
 
+describe("addons", () => {
+  it("turborepo addon emits turbo.json and scripts → `turbo run …`", () => {
+    const vfs = generate(cfg({ addons: ["turborepo"] }));
+    expect(vfs.read("turbo.json")).toContain("turbo.build/schema.json");
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts.dev).toBe("turbo run dev");
+    expect(pkg.devDependencies.turbo).toBeDefined();
+  });
+
+  it("biome addon emits biome.json + format/lint scripts", () => {
+    const vfs = generate(cfg({ addons: ["biome"] }));
+    expect(vfs.read("biome.json")).toContain("biomejs.dev/schemas");
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts.format).toBe("biome format --write .");
+    expect(pkg.scripts.lint).toBe("biome lint .");
+    expect(pkg.devDependencies["@biomejs/biome"]).toBeDefined();
+  });
+
+  it("no turborepo → scripts use package-manager filter, not turbo", () => {
+    const vfs = generate(cfg({ addons: [], pm: "pnpm" }));
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts.dev).toBe("pnpm -r --parallel dev");
+    expect(pkg.devDependencies.turbo).toBeUndefined();
+  });
+
+  it("both addons: turbo scripts + biome commands coexist", () => {
+    const vfs = generate(cfg({ addons: ["turborepo", "biome"] }));
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts.dev).toBe("turbo run dev");
+    expect(pkg.scripts.format).toBe("biome format --write .");
+    expect(pkg.devDependencies.turbo).toBeDefined();
+    expect(pkg.devDependencies["@biomejs/biome"]).toBeDefined();
+  });
+});
+
 describe("examples: todo", () => {
   it("picking todo emits router + schema + wires into index", () => {
     const vfs = generate(cfg({ examples: ["todo"] }));

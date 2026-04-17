@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  AddonId,
   DEFAULT_CONFIG,
   MODULE_IDS,
   PRESETS,
@@ -16,6 +17,7 @@ export type CreateInput = Partial<ProjectConfig> & {
   projectName?: string;
   modules?: string;
   examples?: string;
+  addons?: string;
   yes?: boolean;
   dryRun?: boolean;
 };
@@ -103,6 +105,13 @@ function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectCo
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean) as ProjectConfig["examples"];
+  }
+  if (typeof input.addons === "string") {
+    const valid = new Set(AddonId.options);
+    out.addons = input.addons
+      .split(",")
+      .map((s) => s.trim())
+      .filter((a) => a && valid.has(a as any)) as ProjectConfig["addons"];
   }
   // If no modules flag passed and we're on a non-veloz preset, base already
   // has the right modules array.

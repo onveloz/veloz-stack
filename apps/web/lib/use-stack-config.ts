@@ -9,6 +9,7 @@ import {
 } from "nuqs";
 import type { ProjectConfig } from "@veloz-stack/types";
 import {
+  AddonId,
   ApiId,
   AuthId,
   BackendId,
@@ -49,6 +50,9 @@ export function useStackConfig() {
       examples: parseAsArrayOf(parseAsStringEnum(enumVals(ExampleId))).withDefault(
         DEFAULT_CONFIG.examples,
       ),
+      addons: parseAsArrayOf(parseAsStringEnum(enumVals(AddonId))).withDefault(
+        DEFAULT_CONFIG.addons,
+      ),
       git: parseAsBoolean.withDefault(DEFAULT_CONFIG.git),
       install: parseAsBoolean.withDefault(DEFAULT_CONFIG.install),
     },
@@ -70,6 +74,7 @@ export function useStackConfig() {
     pm: state.pm,
     modules: state.modules,
     examples: state.examples,
+    addons: state.addons,
     git: state.git,
     install: state.install,
   };

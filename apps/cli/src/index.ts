@@ -63,6 +63,7 @@ const cli = Cli.create("create-veloz-stack", {
     pm: PackageManagerId.optional().describe("Package manager"),
     modules: z.string().optional().describe("Comma-separated feature modules"),
     examples: z.string().optional().describe("Comma-separated example apps"),
+    addons: z.string().optional().describe("Comma-separated addons (turborepo, biome, husky)"),
     yes: z.boolean().optional().describe("Skip prompts, use defaults/flags"),
     install: z.boolean().optional().describe("Install dependencies after scaffold"),
     git: z.boolean().optional().describe("Initialize git repo after scaffold"),

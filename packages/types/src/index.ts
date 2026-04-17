@@ -68,6 +68,9 @@ export const PresetId = z.enum([
 ]);
 export type PresetId = z.infer<typeof PresetId>;
 
+export const AddonId = z.enum(["turborepo", "biome", "husky"]);
+export type AddonId = z.infer<typeof AddonId>;
+
 export const ModuleId = z.enum(MODULE_IDS);
 export type ModuleId = z.infer<typeof ModuleId>;
 
@@ -87,6 +90,7 @@ export const ProjectConfig = z.object({
   pm: PackageManagerId,
   examples: z.array(ExampleId).default([]),
   modules: z.array(ModuleId).default([]),
+  addons: z.array(AddonId).default([]),
   git: z.boolean().default(true),
   install: z.boolean().default(true),
   preset: PresetId.default("custom"),
