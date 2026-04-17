@@ -62,6 +62,14 @@ describe("generate()", () => {
     expect(files).not.toContain("apps/web/next.config.mjs");
   });
 
+  it("--frontend svelte-kit produces a SvelteKit project", () => {
+    const files = paths(cfg({ frontend: "svelte-kit" }));
+    expect(files).toContain("apps/web/svelte.config.js");
+    expect(files).toContain("apps/web/src/routes/+page.svelte");
+    expect(files).toContain("apps/web/src/routes/+layout.svelte");
+    expect(files).toContain("apps/web/src/lib/orpc.ts");
+  });
+
   it("--frontend astro produces an Astro project with SSR adapter", () => {
     const files = paths(cfg({ frontend: "astro" }));
     expect(files).toContain("apps/web/astro.config.mjs");
