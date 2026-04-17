@@ -144,6 +144,34 @@ describe("deploy targets", () => {
     expect(files).toContain("Dockerfile");
   });
 
+  it("veloz.json matches the official veloz-config.schema shape", () => {
+    const vfs = generate(cfg({ deploy: "veloz" }));
+    const doc = JSON.parse(vfs.read("veloz.json")!);
+    expect(doc.$schema).toBe("https://onveloz.com/schemas/veloz-config.schema.json");
+    expect(doc.version).toBe("1.0");
+    expect(doc.project.name).toBe("test-app");
+    // services is an OBJECT keyed by path, not an array
+    expect(Array.isArray(doc.services)).toBe(false);
+    expect(doc.services["apps/server"].type).toBe("web");
+    expect(doc.services["apps/server"].build.method).toBe("turborepo");
+    // web service emitted when frontend is set
+    expect(doc.services["apps/web"]).toBeDefined();
+    expect(doc.services["apps/web"].runtime.port).toBe(3001);
+  });
+
+  it("veloz.json drops apps/web when frontend is none", () => {
+    const vfs = generate(cfg({ deploy: "veloz", frontend: "none" }));
+    const doc = JSON.parse(vfs.read("veloz.json")!);
+    expect(doc.services["apps/web"]).toBeUndefined();
+    expect(doc.services["apps/server"]).toBeDefined();
+  });
+
+  it("veloz.json uses dockerfile build method when turborepo addon is off", () => {
+    const vfs = generate(cfg({ deploy: "veloz", addons: [] }));
+    const doc = JSON.parse(vfs.read("veloz.json")!);
+    expect(doc.services["apps/server"].build.method).toBe("dockerfile");
+  });
+
   it("fly emits fly.toml + Dockerfile", () => {
     const files = paths(cfg({ deploy: "fly" }));
     expect(files).toContain("fly.toml");

@@ -44,40 +44,105 @@ export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
   }
 }
 
+/**
+ * Emit a veloz.json aligned with the official schema:
+ *   https://onveloz.com/schemas/veloz-config.schema.json
+ *
+ * Notes:
+ *   - `services` is an object keyed by a service path, NOT an array.
+ *   - `type` is lowercase ('web' | 'static' | 'worker' | 'database').
+ *   - `build.method` is the discriminator ('dockerfile' | 'nixpacks' |
+ *     'turborepo' | 'nx' | 'moon').
+ *   - `project.id` + `service.id` are populated by `veloz init` / `veloz
+ *     link`. We leave them out so the CLI picks them up on first link.
+ */
 function velozJson(config: ProjectConfig): string {
-  return (
-    JSON.stringify(
-      {
-        $schema: "https://onveloz.com/schemas/veloz.schema.json",
-        name: config.projectName,
-        services: [
-          {
-            name: "server",
-            type: "WEB",
-            rootDirectory: "apps/server",
-            build: { type: "docker", dockerfile: "../../Dockerfile" },
-            healthCheck: { path: "/health" },
-            envFromSecrets: deployEnv(config),
+  const hasTurborepo = config.addons.includes("turborepo");
+  const services: Record<string, unknown> = {};
+
+  // Server — always emitted when backend != none
+  if (config.backend !== "none") {
+    services["apps/server"] = {
+      name: "server",
+      type: "web",
+      root: "apps/server",
+      build: hasTurborepo
+        ? {
+            method: "turborepo",
+            command: `${config.pm} run build`,
+            appName: `@${config.projectName}/server`,
+          }
+        : {
+            method: "dockerfile",
+            dockerfile: "../../Dockerfile",
           },
-        ],
+      runtime: {
+        port: 3000,
+        command: runtimeCommand(config),
       },
-      null,
-      2,
-    ) + "\n"
-  );
+      healthCheck: { path: "/health" },
+    };
+  }
+
+  // Web — when a server-rendered frontend is picked. Expo doesn't deploy
+  // to Veloz; `none` obviously skips; static Astro could use `static` type
+  // but we ship with SSR adapter so it's a web service.
+  const webService = webServiceShape(config);
+  if (webService) {
+    services["apps/web"] = webService;
+  }
+
+  const doc = {
+    $schema: "https://onveloz.com/schemas/veloz-config.schema.json",
+    version: "1.0" as const,
+    project: {
+      name: config.projectName,
+    },
+    services,
+  };
+
+  return JSON.stringify(doc, null, 2) + "\n";
 }
 
-function deployEnv(config: ProjectConfig): string[] {
-  const keys: string[] = [];
-  if (config.db !== "none") keys.push("DATABASE_URL");
-  if (config.auth === "better-auth") {
-    keys.push("BETTER_AUTH_SECRET");
-    keys.push("BETTER_AUTH_URL");
+function runtimeCommand(config: ProjectConfig): string {
+  if (config.runtime === "bun") return "bun run src/index.ts";
+  if (config.runtime === "node") return "node --experimental-strip-types src/index.ts";
+  // workers runs via `wrangler dev` — Veloz doesn't host Workers so this
+  // path is mostly dead code, but emit something sensible.
+  return "echo 'Workers: use wrangler deploy'";
+}
+
+function webServiceShape(
+  config: ProjectConfig,
+): Record<string, unknown> | null {
+  if (config.frontend === "none" || config.frontend === "native-expo") return null;
+
+  const hasTurborepo = config.addons.includes("turborepo");
+  const build = hasTurborepo
+    ? {
+        method: "turborepo" as const,
+        command: `${config.pm} run build`,
+        appName: `@${config.projectName}/web`,
+      }
+    : {
+        method: "nixpacks" as const,
+      };
+
+  const runtime: Record<string, unknown> = { port: 3001 };
+  if (config.frontend === "next") {
+    runtime.command = `${config.pm} --filter @${config.projectName}/web exec next start`;
+  } else if (config.frontend === "nuxt") {
+    runtime.command = `${config.pm} --filter @${config.projectName}/web exec nuxt preview`;
+  } else {
+    // tanstack-start, svelte-kit, astro all wire their own `start` script
+    runtime.command = `${config.pm} --filter @${config.projectName}/web start`;
   }
-  if (config.modules.includes("abacatepay")) keys.push("ABACATE_KEY");
-  if (config.modules.includes("ararahq-sms") || config.modules.includes("ararahq-wa")) {
-    keys.push("ARARA_KEY");
-  }
-  if (config.modules.includes("claude")) keys.push("ANTHROPIC_API_KEY");
-  return keys;
+
+  return {
+    name: "web",
+    type: "web",
+    root: "apps/web",
+    build,
+    runtime,
+  };
 }
