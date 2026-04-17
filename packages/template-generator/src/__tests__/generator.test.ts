@@ -251,6 +251,29 @@ describe("module workspace wiring", () => {
     expect(pkg.dependencies["@test-app/email"]).toBe("workspace:*");
   });
 
+  it("asaas module ships fetch-based client + shared-token webhook verifier", () => {
+    const vfs = generate(cfg({ modules: ["asaas"] }));
+    expect(vfs.read("packages/asaas/src/index.ts")).toContain("createPayment");
+    expect(vfs.read("packages/asaas/src/webhook.ts")).toContain("verifyAsaasWebhook");
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/asaas"]).toBe("workspace:*");
+  });
+
+  it("stripe-br module ships typed client + webhook constructor", () => {
+    const vfs = generate(cfg({ modules: ["stripe-br"] }));
+    expect(vfs.read("packages/stripe/src/index.ts")).toContain("createBrPaymentIntent");
+    expect(vfs.read("packages/stripe/src/webhook.ts")).toContain("constructEvent");
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/stripe"]).toBe("workspace:*");
+  });
+
+  it("posthog module ships @proj/analytics with shutdownPosthog helper", () => {
+    const vfs = generate(cfg({ modules: ["posthog"] }));
+    expect(vfs.read("packages/analytics/src/index.ts")).toContain("shutdownPosthog");
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/analytics"]).toBe("workspace:*");
+  });
+
   it("pt-br-i18n wires @proj/i18n into apps/web, not apps/server", () => {
     const vfs = generate(cfg({ modules: ["pt-br-i18n"] }));
     const web = JSON.parse(vfs.read("apps/web/package.json")!);
