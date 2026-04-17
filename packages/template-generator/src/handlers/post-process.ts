@@ -15,6 +15,7 @@ const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
   brasilapi: "brasilapi",
   posthog: "analytics",
   sentry: "errors",
+  "upstash-redis": "cache",
 };
 
 const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
@@ -22,6 +23,7 @@ const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
   "lgpd-consent": "lgpd",
   "cpf-cnpj": "br-identity",
   viacep: "br-identity",
+  himetrica: "himetrica",
 };
 
 /**
