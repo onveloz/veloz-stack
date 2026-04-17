@@ -26,6 +26,8 @@ export const DEPENDENCY_VERSIONS = {
   "drizzle-orm": "^0.36.0",
   "drizzle-kit": "^0.28.0",
   postgres: "^3.4.5",
+  prisma: "^6.19.3",
+  "@prisma/client": "^6.19.3",
 
   // Validation
   zod: "^3.23.8",

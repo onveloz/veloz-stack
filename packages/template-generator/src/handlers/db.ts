@@ -3,10 +3,16 @@ import { processTemplatesFromPrefix } from "../template-utils.js";
 import type { VirtualFs } from "../vfs.js";
 
 export function processDb(vfs: VirtualFs, config: ProjectConfig): void {
-  if (config.db === "none") return;
+  if (config.db === "none" || config.orm === "none") return;
 
-  // Wave 2b: Drizzle + Postgres only. Prisma / MongoDB / MySQL come later.
   if (config.orm === "drizzle" && config.db === "postgres") {
     processTemplatesFromPrefix(vfs, "db/drizzle-postgres/", "", config);
+    return;
   }
+  if (config.orm === "prisma") {
+    processTemplatesFromPrefix(vfs, "db/prisma/", "", config);
+    return;
+  }
+  // Other combinations (Drizzle+MySQL, Prisma+Mongo via Mongoose, …) land
+  // in future waves.
 }

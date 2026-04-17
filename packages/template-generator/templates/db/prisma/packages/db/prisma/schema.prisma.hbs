@@ -1,0 +1,11 @@
+generator client {
+  provider        = "prisma-client-js"
+  {{#if (eq auth "better-auth")}}
+  previewFeatures = ["prismaSchemaFolder"]
+  {{/if}}
+}
+
+datasource db {
+  provider = "{{#if (eq db "postgres")}}postgresql{{else if (eq db "mysql")}}mysql{{else if (eq db "sqlite")}}sqlite{{else}}mongodb{{/if}}"
+  url      = env("DATABASE_URL")
+}

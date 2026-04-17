@@ -174,6 +174,48 @@ describe("modules", () => {
   });
 });
 
+describe("Prisma", () => {
+  it("--orm prisma emits schema.prisma + PrismaClient export instead of Drizzle files", () => {
+    const vfs = generate(cfg({ orm: "prisma" }));
+    expect(vfs.read("packages/db/prisma/schema.prisma")).toContain("generator client");
+    expect(vfs.read("packages/db/prisma/schema.prisma")).toContain("postgresql");
+    expect(vfs.read("packages/db/src/index.ts")).toContain("PrismaClient");
+    // Drizzle artefacts must NOT ship
+    expect(vfs.read("packages/db/drizzle.config.ts")).toBeUndefined();
+    expect(vfs.read("packages/db/src/schema/auth.ts")).toBeUndefined();
+  });
+
+  it("--orm prisma + better-auth drops auth.prisma into packages/db/prisma", () => {
+    const vfs = generate(cfg({ orm: "prisma" }));
+    const auth = vfs.read("packages/db/prisma/auth.prisma");
+    expect(auth).toContain("model User");
+    expect(auth).toContain("model Session");
+  });
+
+  it("--orm prisma auth package uses prismaAdapter, not drizzleAdapter", () => {
+    const vfs = generate(cfg({ orm: "prisma" }));
+    const authSrc = vfs.read("packages/auth/src/index.ts")!;
+    expect(authSrc).toContain("prismaAdapter");
+    expect(authSrc).not.toContain("drizzleAdapter");
+    expect(authSrc).toContain('provider: "postgresql"');
+  });
+
+  it("--orm drizzle auth package uses drizzleAdapter", () => {
+    const vfs = generate(cfg({ orm: "drizzle" }));
+    const authSrc = vfs.read("packages/auth/src/index.ts")!;
+    expect(authSrc).toContain("drizzleAdapter");
+    expect(authSrc).not.toContain("prismaAdapter");
+    expect(authSrc).toContain('provider: "pg"');
+  });
+
+  it("prisma package.json ships postinstall: prisma generate", () => {
+    const vfs = generate(cfg({ orm: "prisma" }));
+    const pkg = JSON.parse(vfs.read("packages/db/package.json")!);
+    expect(pkg.scripts.postinstall).toBe("prisma generate");
+    expect(pkg.dependencies["@prisma/client"]).toBeDefined();
+  });
+});
+
 describe("validateConfig", () => {
   it("rejects better-auth + db:none", () => {
     const errs = validateConfig(cfg({ db: "none", orm: "none", dbHosting: "none" }));
