@@ -1,5 +1,21 @@
-import type { ProjectConfig } from "@veloz-stack/types";
+import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
 import type { VirtualFs } from "../vfs.js";
+
+/** Modules that ship a workspace package, and the directory under `packages/` each creates. */
+const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
+  abacatepay: "abacatepay",
+  "ararahq-sms": "ararahq",
+  "ararahq-wa": "ararahq",
+  resend: "email",
+  brasilapi: "brasilapi",
+};
+
+const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
+  "pt-br-i18n": "i18n",
+  "lgpd-consent": "lgpd",
+  "cpf-cnpj": "br-identity",
+  viacep: "br-identity",
+};
 
 /**
  * Post-processors run after every handler has written into the VFS.
@@ -9,7 +25,37 @@ import type { VirtualFs } from "../vfs.js";
 export function postProcess(vfs: VirtualFs, config: ProjectConfig): void {
   setRootScripts(vfs, config);
   emitWorkspaceFile(vfs, config);
+  wireModuleDependencies(vfs, config);
   appendModuleEnvVars(vfs, config);
+}
+
+function wireModuleDependencies(vfs: VirtualFs, config: ProjectConfig): void {
+  const serverDeps: Record<string, string> = {};
+  const webDeps: Record<string, string> = {};
+
+  for (const m of config.modules) {
+    const srv = SERVER_WORKSPACE_PACKAGES[m];
+    if (srv && vfs.exists(`packages/${srv}/package.json`)) {
+      serverDeps[`@${config.projectName}/${srv}`] = "workspace:*";
+    }
+    const web = WEB_WORKSPACE_PACKAGES[m];
+    if (web && vfs.exists(`packages/${web}/package.json`)) {
+      webDeps[`@${config.projectName}/${web}`] = "workspace:*";
+    }
+  }
+
+  if (Object.keys(serverDeps).length > 0 && vfs.exists("apps/server/package.json")) {
+    vfs.updateJson<Record<string, any>>("apps/server/package.json", (pkg) => {
+      pkg.dependencies = { ...pkg.dependencies, ...serverDeps };
+      return pkg;
+    });
+  }
+  if (Object.keys(webDeps).length > 0 && vfs.exists("apps/web/package.json")) {
+    vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {
+      pkg.dependencies = { ...pkg.dependencies, ...webDeps };
+      return pkg;
+    });
+  }
 }
 
 function emitWorkspaceFile(vfs: VirtualFs, config: ProjectConfig): void {

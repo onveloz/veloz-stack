@@ -41,12 +41,12 @@ export const DEPENDENCY_VERSIONS = {
   "@vitejs/plugin-react": "^4.3.4",
 
   // Modules — BR SaaS
-  "abacatepay-nodejs-sdk": "^0.2.0",
-  "@ararahq/sdk": "^1.0.0",
+  "abacatepay-nodejs-sdk": "^1.6.0",
+  "@ararahq/sdk": "^1.8.0",
 
   // Modules — global
   "@anthropic-ai/sdk": "^0.32.0",
-  resend: "^4.0.0",
+  resend: "^6.12.0",
   "posthog-node": "^4.3.0",
   "@sentry/node": "^8.47.0",
 } as const satisfies Record<string, string>;

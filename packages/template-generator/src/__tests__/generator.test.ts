@@ -190,6 +190,43 @@ describe("validateConfig", () => {
   });
 });
 
+describe("module workspace wiring", () => {
+  it("abacatepay module wires @proj/abacatepay into apps/server", () => {
+    const vfs = generate(cfg({ modules: ["abacatepay"] }));
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/abacatepay"]).toBe("workspace:*");
+  });
+
+  it("ararahq-sms + ararahq-wa wire @proj/ararahq exactly once", () => {
+    const both = generate(cfg({ modules: ["ararahq-sms", "ararahq-wa"] }));
+    const pkg = JSON.parse(both.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/ararahq"]).toBe("workspace:*");
+  });
+
+  it("resend wires @proj/email into apps/server", () => {
+    const vfs = generate(cfg({ modules: ["resend"] }));
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/email"]).toBe("workspace:*");
+  });
+
+  it("pt-br-i18n wires @proj/i18n into apps/web, not apps/server", () => {
+    const vfs = generate(cfg({ modules: ["pt-br-i18n"] }));
+    const web = JSON.parse(vfs.read("apps/web/package.json")!);
+    const server = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(web.dependencies["@test-app/i18n"]).toBe("workspace:*");
+    expect(server.dependencies["@test-app/i18n"]).toBeUndefined();
+  });
+
+  it("no modules → no added workspace deps on apps/server beyond api + auth", () => {
+    const vfs = generate(cfg({ modules: [] }));
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    const extras = Object.keys(pkg.dependencies).filter(
+      (k) => k.startsWith("@test-app/") && !["@test-app/api", "@test-app/auth"].includes(k),
+    );
+    expect(extras).toEqual([]);
+  });
+});
+
 describe("package.json mutations", () => {
   it("apps/server gets workspace deps on api + auth when enabled", () => {
     const vfs = generate(cfg({}));
