@@ -147,6 +147,73 @@ function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.modules.includes("resend")) {
     additions.push("\n# Resend", "RESEND_API_KEY=");
   }
+  if (config.modules.includes("better-auth-social")) {
+    additions.push(
+      "\n# OAuth providers (Better Auth social — populate the ones you want)",
+      "GOOGLE_CLIENT_ID=",
+      "GOOGLE_CLIENT_SECRET=",
+      "GITHUB_CLIENT_ID=",
+      "GITHUB_CLIENT_SECRET=",
+      "APPLE_CLIENT_ID=",
+      "APPLE_CLIENT_SECRET=",
+    );
+  }
+  if (config.modules.includes("posthog")) {
+    additions.push("\n# PostHog", "POSTHOG_KEY=", "POSTHOG_HOST=https://us.i.posthog.com");
+  }
+  if (config.modules.includes("sentry")) {
+    additions.push("\n# Sentry", "SENTRY_DSN=");
+  }
+  if (config.modules.includes("twilio")) {
+    additions.push(
+      "\n# Twilio",
+      "TWILIO_SID=",
+      "TWILIO_TOKEN=",
+      "TWILIO_SMS_FROM=",
+    );
+  }
+  if (config.modules.includes("upstash-redis")) {
+    additions.push("\n# Upstash Redis", "UPSTASH_REDIS_URL=", "UPSTASH_REDIS_TOKEN=");
+  }
+  if (config.modules.includes("s3") || config.modules.includes("cloudflare-r2")) {
+    additions.push(
+      "\n# Object storage (S3-compatible)",
+      "S3_BUCKET=",
+      "S3_REGION=us-east-1",
+      "S3_ACCESS_KEY_ID=",
+      "S3_SECRET_ACCESS_KEY=",
+      "# S3_ENDPOINT=https://<account>.r2.cloudflarestorage.com  # for R2",
+    );
+  }
+  if (
+    config.modules.includes("asaas") ||
+    config.modules.includes("pagarme") ||
+    config.modules.includes("mercadopago") ||
+    config.modules.includes("stripe-br")
+  ) {
+    if (config.modules.includes("asaas")) {
+      additions.push("\n# Asaas", "ASAAS_KEY=", "ASAAS_WEBHOOK_TOKEN=");
+    }
+    if (config.modules.includes("pagarme")) {
+      additions.push(
+        "\n# Pagar.me",
+        "PAGARME_SK=",
+        "PAGARME_WEBHOOK_USER=",
+        "PAGARME_WEBHOOK_PASS=",
+      );
+    }
+    if (config.modules.includes("mercadopago")) {
+      additions.push("\n# Mercado Pago", "MP_TOKEN=", "MP_WEBHOOK_SECRET=");
+    }
+    if (config.modules.includes("stripe-br")) {
+      additions.push(
+        "\n# Stripe",
+        "STRIPE_SECRET=",
+        "STRIPE_WEBHOOK_SECRET=",
+        "STRIPE_PUBLISHABLE_KEY=",
+      );
+    }
+  }
 
   if (additions.length === 0) return;
 

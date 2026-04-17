@@ -122,7 +122,9 @@ describe("generate()", () => {
     expect(files).toContain("tsconfig.json");
     expect(files).toContain("CLAUDE.md");
     expect(files.some((p) => p.startsWith("apps/"))).toBe(false);
-    expect(files.some((p) => p.startsWith("packages/"))).toBe(false);
+    // Claude module ships its own @proj/claude SDK package; nothing else.
+    expect(files.some((p) => p.startsWith("packages/"))).toBe(true);
+    expect(files).toContain("packages/claude/src/index.ts");
   });
 });
 
