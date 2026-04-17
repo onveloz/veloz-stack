@@ -14,4 +14,7 @@ export function processAddons(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.addons.includes("biome")) {
     processTemplatesFromPrefix(vfs, "addons/biome/", "", config);
   }
+  if (config.addons.includes("husky")) {
+    processTemplatesFromPrefix(vfs, "addons/husky/", "", config);
+  }
 }

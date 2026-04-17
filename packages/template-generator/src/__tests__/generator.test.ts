@@ -54,6 +54,15 @@ describe("generate()", () => {
     expect(files).not.toContain("apps/web/src/router.tsx");
   });
 
+  it("--frontend astro produces an Astro project with SSR adapter", () => {
+    const files = paths(cfg({ frontend: "astro" }));
+    expect(files).toContain("apps/web/astro.config.mjs");
+    expect(files).toContain("apps/web/src/pages/index.astro");
+    expect(files).toContain("apps/web/src/layouts/Layout.astro");
+    expect(files).not.toContain("apps/web/vite.config.ts");
+    expect(files).not.toContain("apps/web/next.config.mjs");
+  });
+
   it("--frontend none drops the web app entirely", () => {
     const files = paths(cfg({ frontend: "none" }));
 
@@ -197,6 +206,18 @@ describe("addons", () => {
     const pkg = JSON.parse(vfs.read("package.json")!);
     expect(pkg.scripts.dev).toBe("pnpm -r --parallel dev");
     expect(pkg.devDependencies.turbo).toBeUndefined();
+  });
+
+  it("husky addon adds pre-commit hook + prepare script + lint-staged", () => {
+    const vfs = generate(cfg({ addons: ["husky", "biome"] }));
+    expect(vfs.read(".husky/pre-commit")).toContain("lint-staged");
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts.prepare).toBe("husky");
+    expect(pkg.devDependencies.husky).toBeDefined();
+    expect(pkg.devDependencies["lint-staged"]).toBeDefined();
+    expect(pkg["lint-staged"]).toEqual({
+      "*.{js,jsx,ts,tsx,json,md}": ["biome check --write --no-errors-on-unmatched"],
+    });
   });
 
   it("both addons: turbo scripts + biome commands coexist", () => {

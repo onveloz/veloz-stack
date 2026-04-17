@@ -70,6 +70,7 @@ function emitWorkspaceFile(vfs: VirtualFs, config: ProjectConfig): void {
 function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
   const hasTurbo = config.addons.includes("turborepo");
   const hasBiome = config.addons.includes("biome");
+  const hasHusky = config.addons.includes("husky");
   const pm = config.pm;
 
   vfs.updateJson<Record<string, any>>("package.json", (pkg) => {
@@ -99,13 +100,22 @@ function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
             check: "biome check --write .",
           }
         : {}),
+      ...(hasHusky ? { prepare: "husky" } : {}),
     };
 
     pkg.devDependencies = {
       ...(pkg.devDependencies ?? {}),
       ...(hasTurbo ? { turbo: "^2.6.3" } : {}),
       ...(hasBiome ? { "@biomejs/biome": "^1.9.4" } : {}),
+      ...(hasHusky ? { husky: "^9.1.7", "lint-staged": "^16.3.2" } : {}),
     };
+
+    if (hasHusky) {
+      pkg["lint-staged"] = hasBiome
+        ? { "*.{js,jsx,ts,tsx,json,md}": ["biome check --write --no-errors-on-unmatched"] }
+        : { "*.{js,jsx,ts,tsx,json,md}": [] };
+    }
+
     return pkg;
   });
 }

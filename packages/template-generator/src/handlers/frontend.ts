@@ -9,7 +9,9 @@ export function processFrontend(vfs: VirtualFs, config: ProjectConfig): void {
       ? "frontend/tanstack-start/"
       : config.frontend === "next"
       ? "frontend/next/"
+      : config.frontend === "astro"
+      ? "frontend/astro/"
       : null;
-  if (!prefix) return; // nuxt / svelte-kit / astro / native-expo: Wave 2d
+  if (!prefix) return; // nuxt / svelte-kit / native-expo: Wave 2d
   processTemplatesFromPrefix(vfs, prefix, "", config);
 }
