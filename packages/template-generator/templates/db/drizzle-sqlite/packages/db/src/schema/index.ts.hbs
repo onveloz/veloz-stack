@@ -1,0 +1,7 @@
+{{#if (eq auth "better-auth")}}
+export * from "./auth";
+{{/if}}
+{{#if (and (includes examples "todo") (eq orm "drizzle"))}}
+export * from "./todo";
+{{/if}}
+export {};

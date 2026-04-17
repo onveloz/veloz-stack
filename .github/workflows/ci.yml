@@ -67,7 +67,9 @@ jobs:
           - { name: auth-better, args: "--auth better-auth" }
           - { name: auth-none, args: "--auth none" }
 
-          # ─────── DB axis (requires auth-off because Drizzle+auth needs db)
+          # ─────── DB axis
+          - { name: db-postgres, args: "--db postgres --db-hosting veloz" }
+          - { name: db-sqlite, args: "--db sqlite --db-hosting turso" }
           - { name: db-none, args: "--db none --orm none --db-hosting none --auth none" }
 
           # ─────── Deploy axis
