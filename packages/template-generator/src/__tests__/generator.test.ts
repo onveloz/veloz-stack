@@ -174,6 +174,36 @@ describe("modules", () => {
   });
 });
 
+describe("examples: todo", () => {
+  it("picking todo emits router + schema + wires into index", () => {
+    const vfs = generate(cfg({ examples: ["todo"] }));
+    expect(vfs.read("packages/api/src/routers/todo.ts")).toContain("todoRouter");
+    expect(vfs.read("packages/db/src/schema/todo.ts")).toContain("pgTable");
+    expect(vfs.read("packages/api/src/routers/index.ts")).toContain("todoRouter");
+    expect(vfs.read("packages/api/src/routers/index.ts")).toContain("todo: todoRouter");
+    expect(vfs.read("packages/db/src/schema/index.ts")).toContain('export * from "./todo"');
+  });
+
+  it("no todo example → router + schema don't include it", () => {
+    const vfs = generate(cfg({ examples: [] }));
+    expect(vfs.read("packages/api/src/routers/todo.ts")).toBeUndefined();
+    expect(vfs.read("packages/api/src/routers/index.ts")).not.toContain("todoRouter");
+    expect(vfs.read("packages/db/src/schema/index.ts")).not.toContain("./todo");
+  });
+
+  it("todo with better-auth uses protectedProcedure", () => {
+    const vfs = generate(cfg({ examples: ["todo"] }));
+    expect(vfs.read("packages/api/src/routers/todo.ts")).toContain("protectedProcedure");
+  });
+
+  it("todo with no auth falls back to publicProcedure", () => {
+    const vfs = generate(cfg({ examples: ["todo"], auth: "none" }));
+    const src = vfs.read("packages/api/src/routers/todo.ts")!;
+    expect(src).toContain("publicProcedure");
+    expect(src).not.toContain("protectedProcedure");
+  });
+});
+
 describe("Prisma", () => {
   it("--orm prisma emits schema.prisma + PrismaClient export instead of Drizzle files", () => {
     const vfs = generate(cfg({ orm: "prisma" }));

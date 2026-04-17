@@ -5,6 +5,7 @@ import { processBackend } from "./handlers/backend.js";
 import { processBase } from "./handlers/base.js";
 import { processDb } from "./handlers/db.js";
 import { processDeploy } from "./handlers/deploy.js";
+import { processExamples } from "./handlers/examples.js";
 import { processFrontend } from "./handlers/frontend.js";
 import { processModules } from "./handlers/modules.js";
 import { postProcess } from "./handlers/post-process.js";
@@ -28,6 +29,7 @@ export function generate(config: ProjectConfig): VirtualFs {
   processApi(vfs, config);
   processAuth(vfs, config);
   processDeploy(vfs, config);
+  processExamples(vfs, config);
   processModules(vfs, config);
   postProcess(vfs, config);
   return vfs;

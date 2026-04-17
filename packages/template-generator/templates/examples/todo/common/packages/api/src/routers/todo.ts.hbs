@@ -1,0 +1,39 @@
+import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { db, schema } from "@{{projectName}}/db";
+import { {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedure{{/if}} } from "../index";
+
+const procedure = {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedure{{/if}};
+
+export const todoRouter = {
+  list: procedure.handler(async () => {
+    return db.select().from(schema.todos).orderBy(schema.todos.createdAt);
+  }),
+
+  create: procedure
+    .input(z.object({ title: z.string().min(1).max(200) }))
+    .handler(async ({ input }) => {
+      const id = crypto.randomUUID();
+      await db.insert(schema.todos).values({ id, title: input.title });
+      return { id };
+    }),
+
+  toggle: procedure
+    .input(z.object({ id: z.string().uuid() }))
+    .handler(async ({ input }) => {
+      const rows = await db.select({ done: schema.todos.done })
+        .from(schema.todos)
+        .where(eq(schema.todos.id, input.id));
+      if (rows.length === 0) throw new Error("Not found");
+      await db
+        .update(schema.todos)
+        .set({ done: !rows[0]!.done })
+        .where(eq(schema.todos.id, input.id));
+    }),
+
+  remove: procedure
+    .input(z.object({ id: z.string().uuid() }))
+    .handler(async ({ input }) => {
+      await db.delete(schema.todos).where(eq(schema.todos.id, input.id));
+    }),
+};

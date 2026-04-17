@@ -11,8 +11,15 @@
   "dependencies": {
     "@orpc/server": "^1.12.2",
     "@orpc/zod": "^1.12.2",
+    {{#if (eq auth "better-auth")}}
     "@{{projectName}}/auth": "workspace:*",
+    {{/if}}
+    {{#if (ne db "none")}}
     "@{{projectName}}/db": "workspace:*",
+    {{/if}}
+    {{#if (and (ne db "none") (eq orm "drizzle"))}}
+    "drizzle-orm": "^0.36.0",
+    {{/if}}
     "hono": "^4.8.2",
     "zod": "^3.23.8"
   },
