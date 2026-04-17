@@ -1,0 +1,18 @@
+import { createORPCClient } from "@orpc/client";
+import { RPCLink } from "@orpc/client/fetch";
+import { createTanstackQueryUtils } from "@orpc/tanstack-query";
+import type { AppRouter } from "@{{projectName}}/api/routers/index";
+import type { RouterClient } from "@orpc/server";
+
+const serverUrl =
+  (import.meta as any).env?.VITE_SERVER_URL ?? "http://localhost:3000";
+
+const link = new RPCLink({
+  url: `${serverUrl}/rpc`,
+  {{#if (eq auth "better-auth")}}
+  fetch: (url, options) => fetch(url, { ...options, credentials: "include" }),
+  {{/if}}
+});
+
+export const client = createORPCClient(link) as RouterClient<AppRouter>;
+export const orpc = createTanstackQueryUtils(client);

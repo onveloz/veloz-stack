@@ -1,0 +1,23 @@
+{
+  "name": "@veloz-stack/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./modules": "./src/modules.ts",
+    "./compatibility": "./src/compatibility.ts",
+    "./defaults": "./src/defaults.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

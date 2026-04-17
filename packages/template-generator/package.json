@@ -1,0 +1,25 @@
+{
+  "name": "@veloz-stack/template-generator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "gen": "node scripts/build-templates.mjs",
+    "prebuild": "pnpm gen",
+    "check-types": "pnpm gen && tsc --noEmit"
+  },
+  "files": ["src", "templates", "scripts"],
+  "dependencies": {
+    "@veloz-stack/types": "workspace:*",
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "typescript": "catalog:"
+  }
+}

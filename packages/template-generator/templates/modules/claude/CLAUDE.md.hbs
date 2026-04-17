@@ -1,0 +1,21 @@
+# Claude guide — {{projectName}}
+
+This project was scaffolded with `create-veloz-stack`. The default stack is
+**Bun · Hono · oRPC · TanStack Start · Better Auth · Drizzle · Postgres**, deployed
+to **{{deploy}}**.
+
+## Ground rules for edits
+- Keep ORM queries typed — no raw SQL unless strictly necessary.
+- Money amounts: watch the unit (centavos vs reais) per vendor. See `.claude/skills/`.
+- Never commit `.env`. Add vars to `.env.example` when you introduce new ones.
+- pt-BR first when user-facing copy is involved.
+
+## Skill index
+Each integrated vendor has a skill file in `.claude/skills/<vendor>/SKILL.md`
+with auth model, base URLs, core endpoints, webhook signing, and a working
+TypeScript snippet. Read those before wiring a new feature — do not guess.
+
+## Modules enabled
+{{#each modules}}
+- {{this}}
+{{/each}}

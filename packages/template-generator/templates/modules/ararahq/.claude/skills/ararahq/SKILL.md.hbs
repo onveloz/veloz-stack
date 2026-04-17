@@ -1,0 +1,42 @@
+---
+name: Ararahq
+description: Brazilian SMS + WhatsApp Business API. Use for SMS OTP auth and customer notifications.
+---
+
+# Ararahq
+
+Brazilian messaging vendor (SMS + WhatsApp). Official TypeScript SDK: `@ararahq/sdk`.
+
+## Auth
+`Authorization: Bearer ara_live_...` (prod) or `Bearer ara_test_...` (sandbox).
+Same base URL — environment is keyed by the prefix.
+
+## Base URL
+`https://new-api.ararahq.com/api/v2/`
+
+## Core endpoints
+- `POST /messages` — send template (Meta-approved) or freeform (within 24h window)
+- Templates management
+- Webhook receiver for delivery + reply events
+
+## Quickstart
+```ts
+import { NodeSDK } from "@ararahq/sdk";
+
+const sdk = new NodeSDK({ apiKey: process.env.ARARA_KEY! });
+
+const res = await sdk.messages.send({
+  receiver: "whatsapp:+5511999998888", // or "sms:+5511..."
+  templateName: "fatura_disponivel",
+  variables: ["João", "Janeiro"],
+});
+```
+
+## ⚠ Gotchas
+- **Template vs freeform:** WhatsApp freeform only works inside the 24-hour customer-service window.
+- **Billing:** `ara_test_` is free; `ara_live_` is billed per message + subscription tier.
+- **Pricing split:** marketing templates ≠ utility templates (Meta rule, not vendor).
+
+## Required env vars
+- `ARARA_KEY` — `ara_live_...` or `ara_test_...`
+- `ARARA_WEBHOOK_SECRET` — (verify signature header details in their `/api-reference/endpoint/webhook`)

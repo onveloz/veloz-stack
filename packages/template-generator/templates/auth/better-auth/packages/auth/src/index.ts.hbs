@@ -1,0 +1,28 @@
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db, schema } from "@{{projectName}}/db";
+
+const secret = process.env.BETTER_AUTH_SECRET;
+if (!secret) {
+  throw new Error("BETTER_AUTH_SECRET is required");
+}
+
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema,
+  }),
+  secret,
+  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  trustedOrigins: [process.env.APP_URL ?? "http://localhost:3001"],
+  emailAndPassword: { enabled: true },
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    },
+  },
+});
+
+export type Session = typeof auth.$Infer.Session;

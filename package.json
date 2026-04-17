@@ -1,0 +1,26 @@
+{
+  "name": "veloz-stack",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "turbo -F @veloz-stack/web dev",
+    "dev:cli": "turbo -F create-veloz-stack dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "lint": "turbo lint",
+    "format": "prettier --write .",
+    "cli:link": "pnpm --filter create-veloz-stack build && pnpm --filter create-veloz-stack link --global"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "prettier": "^3.3.3",
+    "turbo": "^2.6.3",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=10"
+  }
+}

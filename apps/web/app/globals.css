@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+::selection {
+  background: rgba(255, 77, 0, 0.4);
+  color: #ffffff;
+}
+
+:root {
+  --brand: #ff4d00;
+  --brand-hover: #e64500;
+  --brand-subtle: #1f1005;
+  --brand-foreground: #ffffff;
+
+  --background: #0f0f0f;
+  --foreground: #e5e5e5;
+  --card: #161616;
+  --card-foreground: #e5e5e5;
+
+  --primary: #ff4d00;
+  --primary-foreground: #ffffff;
+
+  --secondary: #1a1a1a;
+  --secondary-foreground: #e5e5e5;
+
+  --muted: #1a1a1a;
+  --muted-foreground: #8a8a8a;
+
+  --border: #1f1f1f;
+  --border-strong: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #ff4d00;
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --destructive: #dc2626;
+
+  --text-heading: #ffffff;
+  --text-body: #a0a0a0;
+
+  --border-faint: rgba(255, 255, 255, 0.06);
+}
+
+@theme inline {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-heading: "Syne", system-ui, sans-serif;
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-brand-foreground: var(--brand-foreground);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-faint: var(--border-faint);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6, [data-heading] {
+    font-family: var(--font-heading), system-ui, sans-serif;
+    color: var(--text-heading);
+    letter-spacing: -0.02em;
+  }
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+  code, pre, kbd, [data-tabular] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dotted grid background for hero */
+.dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Brand glow */
+.brand-glow {
+  box-shadow: 0 0 40px -10px rgba(255, 77, 0, 0.35);
+}

@@ -1,0 +1,71 @@
+import type { ProjectConfig } from "./index";
+import { MODULES, type ModuleId } from "./modules";
+
+export const DEFAULT_CONFIG: ProjectConfig = {
+  projectName: "my-veloz-stack",
+  frontend: "tanstack-start",
+  backend: "hono",
+  runtime: "bun",
+  api: "orpc",
+  db: "postgres",
+  orm: "drizzle",
+  dbHosting: "veloz",
+  auth: "better-auth",
+  deploy: "veloz",
+  pm: "bun",
+  examples: [],
+  modules: (Object.values(MODULES)
+    .filter((m) => m.defaultOn)
+    .map((m) => m.id) as ModuleId[]),
+  git: true,
+  install: true,
+  preset: "veloz-br",
+};
+
+export const PRESETS = {
+  "veloz-br": {
+    label: "Veloz BR",
+    description: "Opinionated Brazilian stack — PIX, SMS, LGPD, Claude-ready",
+    config: DEFAULT_CONFIG,
+  },
+  minimal: {
+    label: "Minimal",
+    description: "Just the tech layer — no feature modules",
+    config: {
+      ...DEFAULT_CONFIG,
+      preset: "minimal" as const,
+      modules: [] as ModuleId[],
+      examples: [] as ProjectConfig["examples"],
+    },
+  },
+  mern: {
+    label: "MERN",
+    description: "Mongo · Express · React (TanStack) · Node",
+    config: {
+      ...DEFAULT_CONFIG,
+      preset: "mern" as const,
+      frontend: "tanstack-start" as const,
+      backend: "express" as const,
+      runtime: "node" as const,
+      api: "rest" as const,
+      db: "mongodb" as const,
+      orm: "mongoose" as const,
+      dbHosting: "mongodb-atlas" as const,
+      modules: [] as ModuleId[],
+    },
+  },
+  pern: {
+    label: "PERN",
+    description: "Postgres · Express · React · Node",
+    config: {
+      ...DEFAULT_CONFIG,
+      preset: "pern" as const,
+      backend: "express" as const,
+      runtime: "node" as const,
+      api: "rest" as const,
+      modules: [] as ModuleId[],
+    },
+  },
+} satisfies Record<string, { label: string; description: string; config: ProjectConfig }>;
+
+export type PresetKey = keyof typeof PRESETS;

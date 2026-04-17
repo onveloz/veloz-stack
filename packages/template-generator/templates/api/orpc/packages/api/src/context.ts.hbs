@@ -1,0 +1,22 @@
+import type { Context as HonoContext } from "hono";
+{{#if (eq auth "better-auth")}}
+import { auth } from "@{{projectName}}/auth";
+{{/if}}
+
+export type CreateContextOptions = {
+  context: HonoContext;
+};
+
+export async function createContext({ context }: CreateContextOptions) {
+  {{#if (eq auth "better-auth")}}
+  const session = await auth.api.getSession({
+    headers: context.req.raw.headers,
+  });
+  return { session };
+  {{else}}
+  void context;
+  return { session: null };
+  {{/if}}
+}
+
+export type Context = Awaited<ReturnType<typeof createContext>>;

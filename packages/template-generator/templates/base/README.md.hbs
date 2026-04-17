@@ -1,0 +1,25 @@
+# {{projectName}}
+
+Scaffolded with [`create-veloz-stack`](https://veloz-stack.dev) — opinionated full-stack TypeScript for Brazil.
+
+## Stack
+- **Frontend:** {{frontend}}
+- **Backend:** {{backend}} on {{runtime}}
+- **API:** {{api}}
+- **DB:** {{db}} · {{dbHosting}} · {{orm}}
+- **Auth:** {{auth}}
+- **Deploy:** {{deploy}}
+
+## Develop
+```sh
+{{pm}} install
+{{pm}} dev
+```
+
+{{#if (eq deploy "veloz")}}
+## Deploy
+```sh
+npx onveloz deploy
+```
+Commit `veloz.json` — it's the source of truth for your Veloz service config.
+{{/if}}

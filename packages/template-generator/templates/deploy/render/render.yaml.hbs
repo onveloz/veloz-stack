@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: {{projectName}}
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars: []

@@ -1,0 +1,45 @@
+{
+  "name": "create-veloz-stack",
+  "version": "0.0.1",
+  "description": "Opinionated TypeScript scaffolder for Brazil — PIX, LGPD, SMS, Claude-ready. Deploys to Veloz.",
+  "keywords": [
+    "brasil",
+    "brazilian",
+    "scaffolder",
+    "starter",
+    "typescript",
+    "bun",
+    "hono",
+    "orpc",
+    "pix",
+    "tanstack"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-veloz-stack": "./dist/index.mjs"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.mjs",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "@veloz-stack/template-generator": "workspace:*",
+    "@veloz-stack/types": "workspace:*",
+    "chalk": "^5.4.1",
+    "incur": "^0.4.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "tsdown": "^0.12.0",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
