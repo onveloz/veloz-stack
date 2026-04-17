@@ -17,6 +17,8 @@ const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
   posthog: "analytics",
   sentry: "errors",
   "upstash-redis": "cache",
+  s3: "storage",
+  "cloudflare-r2": "storage",
 };
 
 const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {

@@ -28,6 +28,10 @@ const MODULE_PREFIXES: Partial<Record<ModuleId, string>> = {
   resend: "modules/resend/",
   posthog: "modules/posthog/",
   sentry: "modules/sentry/",
+  twilio: "modules/twilio/",
+  "upstash-redis": "modules/upstash-redis/",
+  s3: "modules/s3/",
+  "cloudflare-r2": "modules/s3/",
 };
 
 export function processModules(vfs: VirtualFs, config: ProjectConfig): void {
