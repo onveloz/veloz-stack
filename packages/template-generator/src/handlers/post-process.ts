@@ -3,6 +3,7 @@ import type { VirtualFs } from "../vfs";
 
 /** Modules that ship a workspace package, and the directory under `packages/` each creates. */
 const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
+  claude: "claude",
   abacatepay: "abacatepay",
   asaas: "asaas",
   pagarme: "pagarme",
