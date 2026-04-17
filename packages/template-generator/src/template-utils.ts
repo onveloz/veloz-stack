@@ -1,7 +1,7 @@
 import type { ProjectConfig } from "@veloz-stack/types";
-import { render } from "./processor.js";
-import { EMBEDDED_TEMPLATES } from "./templates.generated.js";
-import type { VirtualFs } from "./vfs.js";
+import { render } from "./processor";
+import { EMBEDDED_TEMPLATES } from "./templates.generated";
+import type { VirtualFs } from "./vfs";
 
 /**
  * Copy every file matching `sourcePrefix` from the embedded template map

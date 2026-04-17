@@ -1,7 +1,7 @@
 import type { ProjectConfig } from "@veloz-stack/types";
-import { version } from "../deps.js";
-import { processTemplatesFromPrefix } from "../template-utils.js";
-import type { VirtualFs } from "../vfs.js";
+import { version } from "../deps";
+import { processTemplatesFromPrefix } from "../template-utils";
+import type { VirtualFs } from "../vfs";
 
 export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.backend === "none") return;

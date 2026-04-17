@@ -1,5 +1,5 @@
 import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
-import type { VirtualFs } from "../vfs.js";
+import type { VirtualFs } from "../vfs";
 
 /** Modules that ship a workspace package, and the directory under `packages/` each creates. */
 const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {

@@ -1,25 +1,27 @@
 import type { ProjectConfig } from "@veloz-stack/types";
-import { processAddons } from "./handlers/addons.js";
-import { processApi } from "./handlers/api.js";
-import { processAuth } from "./handlers/auth.js";
-import { processBackend } from "./handlers/backend.js";
-import { processBase } from "./handlers/base.js";
-import { processDb } from "./handlers/db.js";
-import { processDeploy } from "./handlers/deploy.js";
-import { processExamples } from "./handlers/examples.js";
-import { processFrontend } from "./handlers/frontend.js";
-import { processModules } from "./handlers/modules.js";
-import { postProcess } from "./handlers/post-process.js";
-import { VirtualFs } from "./vfs.js";
-import { writeTree } from "./writer.js";
+import { processAddons } from "./handlers/addons";
+import { processApi } from "./handlers/api";
+import { processAuth } from "./handlers/auth";
+import { processBackend } from "./handlers/backend";
+import { processBase } from "./handlers/base";
+import { processDb } from "./handlers/db";
+import { processDeploy } from "./handlers/deploy";
+import { processExamples } from "./handlers/examples";
+import { processFrontend } from "./handlers/frontend";
+import { processModules } from "./handlers/modules";
+import { postProcess } from "./handlers/post-process";
+import { VirtualFs } from "./vfs";
 
-export { VirtualFs } from "./vfs.js";
-export { writeTree } from "./writer.js";
+export { VirtualFs } from "./vfs";
 
 /**
  * Order matters — mirrors BTS: base → frontend → backend → db → api → auth
  * → deploy → modules → post-process. Each handler is responsible for its
  * own file tree; post-processors merge shared JSON at the end.
+ *
+ * This entry is browser-safe: it has NO node:fs imports so the web picker
+ * can call it client-side to render a preview tree. Server-only writing
+ * lives in `./scaffold`.
  */
 export function generate(config: ProjectConfig): VirtualFs {
   const vfs = new VirtualFs();
@@ -35,13 +37,4 @@ export function generate(config: ProjectConfig): VirtualFs {
   processAddons(vfs, config);
   postProcess(vfs, config);
   return vfs;
-}
-
-export async function scaffold(
-  config: ProjectConfig,
-  targetDir: string,
-): Promise<{ fileCount: number }> {
-  const vfs = generate(config);
-  const fileCount = await writeTree(vfs, targetDir);
-  return { fileCount };
 }

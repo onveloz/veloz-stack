@@ -1,6 +1,6 @@
 import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
-import { processTemplatesFromPrefix } from "../template-utils.js";
-import type { VirtualFs } from "../vfs.js";
+import { processTemplatesFromPrefix } from "../template-utils";
+import type { VirtualFs } from "../vfs";
 
 /**
  * Each module owns a `templates/modules/<id>/` folder. When the user picks

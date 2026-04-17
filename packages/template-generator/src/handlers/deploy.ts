@@ -1,6 +1,6 @@
 import type { ProjectConfig } from "@veloz-stack/types";
-import { processTemplatesFromPrefix } from "../template-utils.js";
-import type { VirtualFs } from "../vfs.js";
+import { processTemplatesFromPrefix } from "../template-utils";
+import type { VirtualFs } from "../vfs";
 
 export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
   switch (config.deploy) {
