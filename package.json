@@ -9,6 +9,7 @@
     "build": "turbo build",
     "check-types": "turbo check-types",
     "lint": "turbo lint",
+    "test": "turbo test",
     "format": "prettier --write .",
     "cli:link": "pnpm --filter create-veloz-stack build && pnpm --filter create-veloz-stack link --global"
   },

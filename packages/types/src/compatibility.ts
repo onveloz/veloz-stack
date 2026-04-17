@@ -106,6 +106,12 @@ export function validateConfig(cfg: ProjectConfig): string[] {
   pushIf(getOrmDisableReason(cfg, cfg.orm), "orm");
   pushIf(getDbHostingDisableReason(cfg, cfg.dbHosting), "dbHosting");
   pushIf(getDeployDisableReason(cfg, cfg.deploy), "deploy");
+
+  // Cross-field invariants the per-field helpers don't cover
+  if (cfg.auth === "better-auth" && cfg.db === "none") {
+    errors.push("auth: Better Auth needs a database (picks up Drizzle adapter on packages/db)");
+  }
+
   for (const m of cfg.modules) {
     pushIf(getModuleDisableReason(cfg, m), `module ${m}`);
   }

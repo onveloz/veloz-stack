@@ -11,7 +11,9 @@
   "scripts": {
     "gen": "node scripts/build-templates.mjs",
     "prebuild": "pnpm gen",
-    "check-types": "pnpm gen && tsc --noEmit"
+    "check-types": "pnpm gen && tsc --noEmit",
+    "test": "pnpm gen && vitest run",
+    "test:watch": "vitest"
   },
   "files": ["src", "templates", "scripts"],
   "dependencies": {
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.14",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
