@@ -1,0 +1,39 @@
+import { z } from "zod";
+import { createPixCharge, checkPixCharge } from "@{{projectName}}/abacatepay";
+import { {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedure{{/if}} } from "../index";
+
+const procedure = {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedure{{/if}};
+
+export const checkoutRouter = {
+  /** Create a PIX QR for a given cart amount. Amount is reais — we convert. */
+  create: procedure
+    .input(
+      z.object({
+        amountReais: z.number().positive().max(999_999),
+        description: z.string().max(200),
+      }),
+    )
+    .handler(async ({ input }) => {
+      const amountCentavos = Math.round(input.amountReais * 100);
+      const charge = await createPixCharge({
+        amountCentavos,
+        description: input.description,
+      });
+      return {
+        id: (charge as { id?: string }).id,
+        brCode: (charge as { brCode?: string }).brCode,
+        brCodeBase64: (charge as { brCodeBase64?: string }).brCodeBase64,
+      };
+    }),
+
+  /** Poll charge status. In prod prefer the webhook — but polling works for a demo. */
+  status: procedure
+    .input(z.object({ id: z.string() }))
+    .handler(async ({ input }) => {
+      const charge = await checkPixCharge(input.id);
+      return {
+        id: (charge as { id?: string }).id,
+        status: (charge as { status?: string }).status ?? "PENDING",
+      };
+    }),
+};

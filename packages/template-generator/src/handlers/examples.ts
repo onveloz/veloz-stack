@@ -7,13 +7,12 @@ import type { VirtualFs } from "../vfs";
  * stack: server router + DB schema + frontend route. Each example folder
  * is split by ORM / frontend so we only emit the pieces that match the
  * current config.
- *
- * Wave 2c ships the `todo` example for Drizzle only.
  */
 export function processExamples(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.examples.length === 0) return;
 
   if (config.examples.includes("todo")) emitTodo(vfs, config);
+  if (config.examples.includes("pix-checkout")) emitPixCheckout(vfs, config);
 }
 
 function emitTodo(vfs: VirtualFs, config: ProjectConfig): void {
@@ -24,4 +23,12 @@ function emitTodo(vfs: VirtualFs, config: ProjectConfig): void {
 
   processTemplatesFromPrefix(vfs, "examples/todo/common/", "", config);
   processTemplatesFromPrefix(vfs, "examples/todo/drizzle/", "", config);
+}
+
+function emitPixCheckout(vfs: VirtualFs, config: ProjectConfig): void {
+  if (config.api !== "orpc") return;
+  // Silently skip if AbacatePay module isn't picked — the router imports
+  // from @proj/abacatepay which wouldn't exist. The picker UI should warn.
+  if (!config.modules.includes("abacatepay")) return;
+  processTemplatesFromPrefix(vfs, "examples/pix-checkout/common/", "", config);
 }

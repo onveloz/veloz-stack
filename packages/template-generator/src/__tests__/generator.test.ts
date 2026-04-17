@@ -246,6 +246,25 @@ describe("addons", () => {
   });
 });
 
+describe("examples: pix-checkout", () => {
+  it("emits a checkout router when abacatepay module is picked", () => {
+    const vfs = generate(
+      cfg({ examples: ["pix-checkout"], modules: ["abacatepay"] }),
+    );
+    expect(vfs.read("packages/api/src/routers/checkout.ts")).toContain("createPixCharge");
+    expect(vfs.read("packages/api/src/routers/index.ts")).toContain("checkoutRouter");
+    expect(vfs.read("packages/api/src/routers/index.ts")).toContain(
+      "checkout: checkoutRouter",
+    );
+  });
+
+  it("silently skips when abacatepay module is not picked", () => {
+    const vfs = generate(cfg({ examples: ["pix-checkout"], modules: [] }));
+    expect(vfs.read("packages/api/src/routers/checkout.ts")).toBeUndefined();
+    expect(vfs.read("packages/api/src/routers/index.ts")).not.toContain("checkoutRouter");
+  });
+});
+
 describe("examples: todo", () => {
   it("picking todo emits router + schema + wires into index", () => {
     const vfs = generate(cfg({ examples: ["todo"] }));

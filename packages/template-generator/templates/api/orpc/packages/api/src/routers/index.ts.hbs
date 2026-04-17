@@ -3,6 +3,9 @@ import type { RouterClient } from "@orpc/server";
 {{#if (and (includes examples "todo") (eq orm "drizzle"))}}
 import { todoRouter } from "./todo";
 {{/if}}
+{{#if (and (includes examples "pix-checkout") (includes modules "abacatepay"))}}
+import { checkoutRouter } from "./checkout";
+{{/if}}
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => "OK"),
@@ -13,6 +16,9 @@ export const appRouter = {
   {{/if}}
   {{#if (and (includes examples "todo") (eq orm "drizzle"))}}
   todo: todoRouter,
+  {{/if}}
+  {{#if (and (includes examples "pix-checkout") (includes modules "abacatepay"))}}
+  checkout: checkoutRouter,
   {{/if}}
 };
 
