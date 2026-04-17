@@ -76,6 +76,7 @@ jobs:
           - { name: deploy-fly, args: "--deploy fly" }
           - { name: deploy-render, args: "--deploy render" }
           - { name: deploy-docker, args: "--deploy docker" }
+          - { name: deploy-cloudflare, args: "--deploy cloudflare --runtime workers" }
           - { name: deploy-none, args: "--deploy none" }
 
           # ─────── Package manager axis
@@ -87,6 +88,10 @@ jobs:
           - { name: modules-international, args: "--modules claude,stripe-br,posthog,sentry" }
           - { name: modules-empty, args: "--modules ''" }
           - { name: examples-todo, args: "--examples todo" }
+          - { name: examples-pix, args: "--examples pix-checkout --modules claude,abacatepay" }
+
+          # ─────── Payment combos — every BR payment vendor
+          - { name: payments-all-br, args: "--modules claude,abacatepay,asaas,pagarme,mercadopago,stripe-br" }
 
           # ─────── Addons axis
           - { name: addons-turborepo-only, args: "--addons turborepo" }
