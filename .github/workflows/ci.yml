@@ -50,11 +50,8 @@ jobs:
           - { name: frontend-tanstack, args: "--frontend tanstack-start" }
           - { name: frontend-next, args: "--frontend next" }
           - { name: frontend-astro, args: "--frontend astro" }
+          - { name: frontend-nuxt, args: "--frontend nuxt" }
           - { name: frontend-none, args: "--frontend none" }
-          # frontend-nuxt is implemented but not yet in the CI matrix —
-          # Nuxt's vue-tsc scans every linked workspace package and trips
-          # on pre-existing SDK shape mismatches in the abacatepay /
-          # ararahq wrappers. Fix SDK shapes first, then re-enable.
 
           # ─────── Runtime axis
           - { name: runtime-bun, args: "--runtime bun" }
