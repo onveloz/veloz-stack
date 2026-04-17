@@ -143,9 +143,13 @@ describe("deploy targets", () => {
 });
 
 describe("modules", () => {
-  it("abacatepay module emits SKILL.md and env vars", () => {
+  it("abacatepay module emits SKILL.md, typed SDK wrapper, webhook helper, and env vars", () => {
     const vfs = generate(cfg({ modules: ["abacatepay"] }));
     expect(vfs.read(".claude/skills/abacatepay/SKILL.md")).toContain("AbacatePay");
+    expect(vfs.read("packages/abacatepay/src/index.ts")).toContain("createPixCharge");
+    expect(vfs.read("packages/abacatepay/src/webhook.ts")).toContain(
+      "verifyAbacatePayWebhook",
+    );
     expect(vfs.read(".env.example")).toContain("ABACATE_KEY");
   });
 
