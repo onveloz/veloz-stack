@@ -35,51 +35,59 @@ const PackageManagerId = reenum(PackageManagerIdSchema);
 const cli = Cli.create("create-veloz-stack", {
   version: "0.0.1",
   description:
-    "Opinionated TypeScript scaffolder for Brazil — PIX, LGPD, SMS, Claude-ready. Deploys to Veloz.",
+    "Scaffolder TypeScript opinado pro Brasil — PIX, LGPD, SMS, pronto pro Claude. Deploy no Veloz.",
   sync: {
     suggestions: [
-      "create a new veloz-stack project",
-      "scaffold a pix checkout starter",
-      "build a TanStack Start + Hono + oRPC app",
+      "criar um novo projeto veloz-stack",
+      "gerar um starter de checkout PIX",
+      "montar um app TanStack Start + Hono + oRPC",
     ],
   },
   args: z.object({
     projectName: z
       .string()
       .optional()
-      .describe("Directory name for the new project (prompted if omitted)"),
+      .describe("Nome da pasta do novo projeto (perguntado se omitido)"),
   }),
   options: z.object({
-    preset: PresetId.optional().describe("Preset: veloz-br | minimal | mern | pern | custom"),
-    frontend: FrontendId.optional().describe("Frontend framework"),
-    backend: BackendId.optional().describe("Backend framework"),
+    preset: PresetId.optional().describe(
+      "Modelo pronto: veloz-br | minimal | mern | pern | custom",
+    ),
+    frontend: FrontendId.optional().describe("Framework de frontend"),
+    backend: BackendId.optional().describe("Framework de backend"),
     runtime: RuntimeId.optional().describe("Runtime: bun | node | workers"),
-    api: ApiId.optional().describe("API style: orpc | trpc | rest | none"),
-    db: DbId.optional().describe("Database engine"),
+    api: ApiId.optional().describe("Estilo de API: orpc | trpc | rest | none"),
+    db: DbId.optional().describe("Banco de dados"),
     orm: OrmId.optional().describe("ORM"),
-    dbHosting: DbHostingId.optional().describe("Managed DB provider"),
-    auth: AuthId.optional().describe("Auth provider"),
-    deploy: DeployId.optional().describe("Deploy target"),
-    pm: PackageManagerId.optional().describe("Package manager"),
-    modules: z.string().optional().describe("Comma-separated feature modules"),
-    examples: z.string().optional().describe("Comma-separated example apps"),
-    addons: z.string().optional().describe("Comma-separated addons (turborepo, biome, husky)"),
-    yes: z.boolean().optional().describe("Skip prompts, use defaults/flags"),
-    install: z.boolean().optional().describe("Install dependencies after scaffold"),
-    git: z.boolean().optional().describe("Initialize git repo after scaffold"),
-    dryRun: z.boolean().optional().describe("Resolve config and print, but do not write files"),
+    dbHosting: DbHostingId.optional().describe("Provedor de hospedagem do banco"),
+    auth: AuthId.optional().describe("Autenticação"),
+    deploy: DeployId.optional().describe("Alvo de deploy"),
+    pm: PackageManagerId.optional().describe("Gerenciador de pacotes"),
+    modules: z.string().optional().describe("Módulos, separados por vírgula"),
+    examples: z.string().optional().describe("Exemplos prontos, separados por vírgula"),
+    addons: z
+      .string()
+      .optional()
+      .describe("Ferramentas extras, separadas por vírgula (turborepo, biome, husky)"),
+    yes: z.boolean().optional().describe("Pula as perguntas, usa defaults/flags"),
+    install: z.boolean().optional().describe("Instala dependências depois do scaffold"),
+    git: z.boolean().optional().describe("Inicializa repositório git depois do scaffold"),
+    dryRun: z
+      .boolean()
+      .optional()
+      .describe("Resolve a configuração e mostra, sem escrever arquivos"),
   }),
   alias: { yes: "y" },
   examples: [
     {
-      args: { projectName: "my-app" },
+      args: { projectName: "meu-app" },
       options: { yes: true },
-      description: "Scaffold with the Veloz BR defaults",
+      description: "Scaffold com os defaults do preset Veloz BR",
     },
     {
-      args: { projectName: "api-only" },
+      args: { projectName: "so-api" },
       options: { frontend: "none", backend: "hono", yes: true },
-      description: "Server-only project",
+      description: "Projeto só com backend (sem frontend)",
     },
   ],
   async run(c) {
