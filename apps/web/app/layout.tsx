@@ -3,20 +3,20 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Veloz Stack — Opinionated TypeScript scaffolder for Brazil",
+  title: "Veloz Stack — Scaffolder TypeScript opinado pro Brasil",
   description:
-    "Bun · Hono · oRPC · TanStack Start · Better Auth · Drizzle. Batteries-included for Brazil: PIX, SMS, LGPD, Claude-ready. Deploys to Veloz.",
+    "Bun · Hono · oRPC · TanStack Start · Better Auth · Drizzle. Baterias incluídas pro Brasil: PIX, SMS, LGPD, pronto pro Claude. Deploy no Veloz.",
   metadataBase: new URL("https://veloz-stack.dev"),
   openGraph: {
     title: "Veloz Stack",
-    description: "Opinionated full-stack TypeScript scaffolder — 100% deployable on Veloz",
+    description: "Scaffolder full-stack TypeScript opinado — 100% deployável no Veloz",
     type: "website",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="pt-BR" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

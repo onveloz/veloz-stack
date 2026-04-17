@@ -18,18 +18,18 @@ const STACK_CHIPS: Array<{ label: string; tone?: "brand" }> = [
 const FEATURES = [
   {
     icon: Zap,
-    title: "Opinionated for Brazil",
-    body: "PIX via AbacatePay, SMS auth via Ararahq, LGPD banner, pt-BR formatters, ViaCEP lookup — all one checkbox away.",
+    title: "Opinado pro Brasil",
+    body: "PIX via AbacatePay, SMS via Ararahq, banner LGPD, formatadores pt-BR, busca CEP — tudo a um clique.",
   },
   {
     icon: Terminal,
-    title: "Claude-ready",
-    body: "Every integrated SaaS ships a Claude Code skill. Agents know your stack the moment you scaffold it.",
+    title: "Pronto pro Claude",
+    body: "Cada SaaS integrado entrega uma skill do Claude Code. O agente já entende seu stack na hora que você roda o scaffold.",
   },
   {
     icon: Sparkles,
-    title: "100% deployable on Veloz",
-    body: "veloz.json, Dockerfile, health check route — all generated. Or pick Vercel, Cloudflare, Fly, Render, Docker.",
+    title: "100% deployável no Veloz",
+    body: "veloz.json, Dockerfile, rota de health — tudo gerado. Ou escolha Vercel, Cloudflare, Fly, Render, Docker.",
   },
 ];
 
@@ -39,7 +39,7 @@ export default function Home() {
       <header className="h-11 border-b border-border flex items-center justify-between px-6">
         <Logo />
         <nav className="flex items-center gap-5 text-xs text-muted-foreground">
-          <a href="https://github.com/veloz/veloz-stack" className="hover:text-foreground">
+          <a href="https://github.com/onveloz/veloz-stack" className="hover:text-foreground">
             GitHub
           </a>
           <a href="/docs" className="hover:text-foreground">
@@ -49,7 +49,7 @@ export default function Home() {
             href="/new"
             className="inline-flex items-center gap-1 text-foreground hover:text-brand"
           >
-            Build your stack <ArrowRight className="w-3 h-3" />
+            Montar stack <ArrowRight className="w-3 h-3" />
           </Link>
         </nav>
       </header>
@@ -59,16 +59,19 @@ export default function Home() {
           <div className="max-w-5xl mx-auto px-6 py-24 text-center">
             <div className="inline-flex items-center gap-1.5 text-[11px] font-medium border border-border-strong px-2 py-1 mb-8">
               <span className="w-1.5 h-1.5 bg-brand rounded-full" />
-              <span className="text-muted-foreground">v0.1 · Brazilian-first TypeScript stack</span>
+              <span className="text-muted-foreground">
+                v0.1 · Stack TypeScript pensado pro Brasil
+              </span>
             </div>
             <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight text-balance mb-6">
-              The stack that ships
+              O stack que sobe
               <br />
               <span className="text-brand">na velocidade do Brasil.</span>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 text-balance">
-              Opinionated full-stack TypeScript scaffolder. Pick your blocks, get a production-ready
-              monorepo with PIX, LGPD, SMS auth, Claude skills, and a one-command deploy to Veloz.
+              Scaffolder full-stack TypeScript opinado. Escolha seus blocos, receba um monorepo
+              pronto pra produção com PIX, LGPD, auth por SMS, skills do Claude, e deploy no
+              Veloz num comando.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
@@ -76,7 +79,7 @@ export default function Home() {
                 href="/new"
                 className="inline-flex items-center justify-center gap-2 h-10 px-4 bg-brand text-brand-foreground text-sm font-medium hover:bg-brand-hover active:scale-[0.98] transition-[colors,transform] brand-glow"
               >
-                Build your stack <ArrowRight className="w-4 h-4" />
+                Montar meu stack <ArrowRight className="w-4 h-4" />
               </Link>
               <div className="flex items-center gap-0 border border-border-strong bg-secondary pl-3 pr-1 h-10">
                 <code className="font-mono text-sm text-foreground">{INSTALL_CMD}</code>
@@ -121,17 +124,17 @@ export default function Home() {
         <section>
           <div className="max-w-5xl mx-auto px-6 py-20 text-center">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-              Pick your blocks. Skip the boilerplate.
+              Monte seus blocos. Pule o boilerplate.
             </h2>
             <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
-              Every module ships with code, env vars, webhook handlers, and a Claude skill — so your
-              agent knows the integration the moment you scaffold it.
+              Cada módulo chega com código, env vars, handlers de webhook e uma skill do Claude —
+              o agente já sabe a integração no instante do scaffold.
             </p>
             <Link
               href="/new"
               className="inline-flex items-center justify-center gap-2 h-10 px-4 bg-brand text-brand-foreground text-sm font-medium hover:bg-brand-hover active:scale-[0.98] transition-[colors,transform]"
             >
-              Open the stack builder <ArrowRight className="w-4 h-4" />
+              Abrir o montador de stack <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </section>

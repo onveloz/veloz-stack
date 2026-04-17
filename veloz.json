@@ -1,0 +1,27 @@
+{
+  "$schema": "https://onveloz.com/schemas/veloz-config.schema.json",
+  "version": "1.0",
+  "project": {
+    "id": "prj_yvXTLE9V8r0c",
+    "name": "veloz-stack"
+  },
+  "services": {
+    "apps/web": {
+      "id": "svc_l-2NqE0z0jPg",
+      "name": "web",
+      "type": "web",
+      "root": "apps/web",
+      "branch": "main",
+      "build": {
+        "method": "turborepo",
+        "command": "pnpm --filter @veloz-stack/template-generator run gen && pnpm run build",
+        "appName": "@veloz-stack/web"
+      },
+      "runtime": {
+        "port": 3000,
+        "command": "pnpm --filter @veloz-stack/web exec next start"
+      }
+    }
+  },
+  "created": "2026-04-17T18:13:42.708Z"
+}

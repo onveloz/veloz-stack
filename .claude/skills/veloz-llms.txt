@@ -1,0 +1,515 @@
+# Veloz
+
+> Plataforma brasileira de deploy para vibecoders. Deploy de apps Node.js, Next.js, e outros direto do terminal.
+
+## O que é o Veloz
+
+Veloz é uma plataforma de deploy focada em desenvolvedores brasileiros. Sem configuração de infraestrutura, sem YAML, sem dor de cabeça — só rodar `veloz deploy` na raiz do projeto.
+
+Servidores no Brasil, SSL automático, preço em BRL.
+
+## CLI
+
+### Instalação
+
+```bash
+npm i -g onveloz
+```
+
+### Comandos principais
+
+```bash
+# Autenticar
+veloz login
+
+# Deploy do projeto atual (detecta configurações automaticamente)
+veloz deploy
+
+# Deploy em projeto específico
+veloz deploy --project <slug>
+
+# Listar projetos
+veloz projects
+
+# Listar serviços de um projeto
+veloz services --project <slug>
+
+# Ver logs em tempo real
+veloz logs --project <slug> --service <nome>
+
+# Gerenciar variáveis de ambiente
+veloz env set KEY=valor --project <slug> --service <nome>
+veloz env list --project <slug> --service <nome>
+```
+
+## Como fazer o primeiro deploy
+
+1. Instale o CLI: `npm i -g onveloz`
+2. Autentique: `veloz login` (abre o browser)
+3. Na raiz do seu projeto, rode: `veloz deploy`
+4. O CLI detecta o framework, build command e porta automaticamente
+
+## Configuração (veloz.json)
+
+> **IMPORTANTE: Nunca crie o `veloz.json` manualmente.** Ele é gerado automaticamente pela CLI no primeiro `veloz deploy`. A CLI detecta o framework, cria o projeto na plataforma e escreve o arquivo com os IDs corretos. Criar manualmente gera IDs inválidos e o deploy falha.
+
+Após o primeiro deploy, o `veloz.json` fica na raiz do projeto:
+
+```json
+{
+  "$schema": "https://onveloz.com/schemas/veloz-config.schema.json",
+  "version": "1.0",
+  "project": {
+    "id": "proj_abc123",
+    "name": "meu-app"
+  },
+  "services": {
+    ".": {
+      "id": "svc_xyz789",
+      "name": "meu-app",
+      "type": "web",
+      "branch": "main",
+      "build": {
+        "command": "npm run build"
+      },
+      "runtime": {
+        "command": "npm run start",
+        "preStartCommand": "npx prisma migrate deploy",
+        "port": 3000
+      }
+    }
+  }
+}
+```
+
+Depois de gerado, você pode editar campos como `build.command`, `runtime.port`, `size`, etc. — mas nunca edite os campos `id` manualmente.
+
+## Build: Nixpacks vs Dockerfile
+
+Por padrão, a Veloz usa **nixpacks** para gerar automaticamente um Dockerfile a partir do seu código — sem configuração. Para projetos simples ou quando o nixpacks funciona de primeira, não precisa mexer em nada.
+
+Para projetos com requisitos de build mais complexos, é **preferível escrever seu próprio Dockerfile** para builds mais confiáveis e reproduzíveis. Se o projeto tem complexidade que exige controle fino do build, use sempre um Dockerfile customizado.
+
+### Dockerfile customizado
+
+```json
+{
+  "services": {
+    "api": {
+      "name": "API",
+      "build": {
+        "method": "dockerfile",
+        "dockerfile": "docker/Dockerfile.prod",
+        "context": "."
+      }
+    }
+  }
+}
+```
+
+### Nixpacks (padrão)
+
+```json
+{
+  "services": {
+    "web": {
+      "name": "Web",
+      "build": {
+        "method": "nixpacks",
+        "command": "pnpm run build"
+      }
+    }
+  }
+}
+```
+
+### `root` — diretório raiz do serviço
+
+Define onde o código-fonte do serviço vive no repositório. Padrão: `"."`. Em monorepos, aponta para o subdiretório (ex: `"apps/api"`).
+
+Quando `build.method` é `"dockerfile"`, o campo `build.context` herda o valor de `root` se não for definido. Se o Dockerfile precisa acessar arquivos fora do `root` (ex: pacotes compartilhados), defina `build.context` separadamente (ex: `"."` para a raiz do repo).
+
+### Campos de build
+
+| Campo        | Tipo                                    | Padrão         | Descrição                                                  |
+| ------------ | --------------------------------------- | -------------- | ---------------------------------------------------------- |
+| `method`     | `"nixpacks"` \| `"dockerfile"`         | `"nixpacks"`   | Método de build: auto-detect ou Dockerfile customizado     |
+| `dockerfile` | string                                  | `"Dockerfile"` | Caminho do Dockerfile relativo à raiz do projeto           |
+| `context`    | string                                  | valor de `root` | Diretório de contexto do Docker build. Defina explicitamente quando diferente do `root` |
+| `command`    | string                                  | auto           | Comando de build (apenas para nixpacks)                    |
+
+## Tipos de serviço
+
+- **WEB** — aplicações web com servidor HTTP (Next.js, Express, etc.)
+- **STATIC** — sites estáticos (HTML, Vite, Astro static)
+- **WORKER** — background jobs sem porta HTTP (filas, cron, etc.)
+- **DATABASE** — bancos de dados gerenciados (PostgreSQL, MySQL, Redis)
+
+## Bancos de dados gerenciados
+
+Veloz oferece bancos de dados gerenciados como serviços de primeira classe.
+
+### Engines suportados
+
+- **PostgreSQL** (17, 16, 15, 14) — porta 5432
+- **MySQL** (8.4, 8.0) — porta 3306
+- **Redis** (7, 6) — porta 6379
+
+### Tamanhos disponíveis
+
+#### PostgreSQL e MySQL
+
+| Tamanho        | CPU       | Memória |
+|---------------|-----------|---------|
+| `basico`      | 0.25 vCPU | 256 MB  |
+| `essencial`   | 0.5 vCPU  | 512 MB  |
+| `turbo`       | 1 vCPU    | 1 GB    |
+| `turbo-plus`  | 1.5 vCPU  | 2 GB    |
+| `nitro`       | 2 vCPU    | 4 GB    |
+| `nitro-plus`  | 4 vCPU    | 8 GB    |
+
+#### Redis
+
+| Tamanho        | CPU       | Memória |
+|---------------|-----------|---------|
+| `basico`      | 0.15 vCPU | 128 MB  |
+| `essencial`   | 0.25 vCPU | 256 MB  |
+| `turbo`       | 0.25 vCPU | 512 MB  |
+| `turbo-plus`  | 0.5 vCPU  | 1 GB    |
+| `nitro`       | 0.5 vCPU  | 2 GB    |
+| `nitro-plus`  | 1 vCPU    | 4 GB    |
+
+### Configuração via veloz.json
+
+```json
+{
+  "databases": {
+    "postgres": {
+      "engine": "postgresql",
+      "version": "16",
+      "storage": "20Gi",
+      "size": "essencial",
+      "pooler": {
+        "enabled": true,
+        "poolMode": "transaction",
+        "defaultPoolSize": 20,
+        "maxClientConn": 100
+      }
+    }
+  }
+}
+```
+
+### Deploy atualiza bancos existentes
+
+Ao rodar `veloz deploy`, se a configuração no `veloz.json` mudou em relação ao banco existente no servidor, o CLI aplica as alterações automaticamente:
+
+- **Tamanho (size)** — altera CPU/memória se o tier mudou (ex: `essencial` → `turbo`)
+- **Pooler** — ativa/desativa PgBouncer ou altera o pool mode
+- **Storage** — redimensiona o volume se o novo tamanho é maior (volumes só crescem, nunca diminuem)
+
+O banco precisa estar LIVE para aceitar alterações de tamanho e pooler.
+
+### CLI de bancos de dados
+
+```bash
+veloz db create --name postgres --engine postgresql --storage 20Gi --pooler
+veloz db list
+veloz db credentials postgres
+veloz db restart postgres
+veloz db delete postgres
+```
+
+### Variáveis de ambiente auto-injetadas
+
+Quando um banco está LIVE, connection strings são injetadas automaticamente nos serviços:
+
+- `{NOME}_DATABASE_URL` — URL de conexão direta
+- `{NOME}_HOST`, `{NOME}_PORT`, `{NOME}_USERNAME`, `{NOME}_PASSWORD`, `{NOME}_DATABASE`
+- `{NOME}_POOLER_URL` — URL via PgBouncer (se habilitado, porta 6432)
+- `{NOME}_POOLER_PORT` — porta do pooler
+
+O prefixo é o nome do banco em UPPER_SNAKE_CASE.
+
+### PgBouncer (Connection Pooler)
+
+PgBouncer roda como sidecar no pod do PostgreSQL. Modos disponíveis: `transaction` (recomendado), `session`, `statement`.
+
+Uso com Prisma:
+```prisma
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_POOLER_URL")   // pooled — para queries
+  directUrl = env("POSTGRES_DATABASE_URL")  // direto — para migrations
+}
+```
+
+## Frameworks suportados
+
+- Next.js
+- Node.js (Express, Fastify, Hono, etc.)
+- NestJS
+- Nuxt
+- Remix
+- Astro
+- SvelteKit
+- Vite
+- Sites estáticos
+
+## Variáveis de ambiente
+
+Configure antes do deploy:
+
+```bash
+veloz env set DATABASE_URL=postgres://... --project meu-projeto --service api
+veloz env set NEXT_PUBLIC_API_URL=https://api.meusite.com --project meu-projeto --service web
+```
+
+Ou adicione via dashboard em app.onveloz.com.
+
+### Interpolação de valores
+
+Valores podem referenciar outras env vars do MESMO serviço com `${OUTRA_VAR}` — a Veloz resolve no deploy:
+
+```bash
+# Alias para var auto-injetada (seu app lê POSTGRES_URL; a Veloz injeta DATABASE_URL)
+veloz env set POSTGRES_URL='${DATABASE_URL}'
+
+# Compor uma URL com parâmetros extras
+veloz env set DATABASE_URL='${POSTGRES_POOLER_URL}?sslmode=require'
+
+# Separar a connection string em partes
+veloz env set DB_HOST='${POSTGRES_HOST}' DB_PORT='${POSTGRES_PORT}'
+```
+
+Regras:
+- Ref sem correspondência passa como literal e vira aviso no log do deploy (não quebra).
+- `$${LITERAL}` escapa para `${LITERAL}` sem interpolar.
+- `${{servico.propriedade}}` (duplo-brace) referencia outro serviço (ex: banco gerenciado em outro serviço do projeto).
+
+### Variáveis `VELOZ_*` auto-injetadas
+
+Todo deploy recebe metadados da plataforma que você pode referenciar:
+
+```bash
+# Versão do app baseada no commit
+veloz env set APP_VERSION='${VELOZ_GIT_COMMIT_SHORT}'
+
+# URL pública canônica
+veloz env set NEXT_PUBLIC_SITE_URL='${VELOZ_PUBLIC_URL}'
+
+# Allowlist de CORS baseada nos domínios registrados
+veloz env set ALLOWED_ORIGINS='${VELOZ_DOMAINS}'
+```
+
+Sempre disponíveis: `VELOZ_SERVICE_ID`, `VELOZ_SERVICE_NAME`, `VELOZ_SERVICE_TYPE`, `VELOZ_PROJECT_ID`, `VELOZ_PROJECT_NAME`, `VELOZ_DEPLOYMENT_ID`, `VELOZ_DEPLOYED_AT`.
+
+Quando o build produziu imagem: `VELOZ_IMAGE_TAG`.
+
+Quando o deploy veio do Git: `VELOZ_GIT_COMMIT_SHA`, `VELOZ_GIT_COMMIT_SHORT`, `VELOZ_GIT_COMMIT_MESSAGE`, `VELOZ_GIT_BRANCH`.
+
+Quando o serviço tem domínios: `VELOZ_PRIMARY_DOMAIN`, `VELOZ_PUBLIC_URL`, `VELOZ_DOMAINS` (vírgula-separado).
+
+Vars manuais do usuário (via `veloz env set` ou dashboard) sempre vencem — se você setar `VELOZ_GIT_BRANCH=custom`, o valor manual é usado.
+
+### Templates: `${{secret()}}` e `${{randomInt()}}`
+
+Valores de env vars em templates (catálogo Veloz) podem gerar valores na instalação:
+
+```
+DB_PASSWORD=${{secret(32)}}                          # 32 chars base62
+SESSION_KEY=${{secret(64, "0123456789abcdef")}}     # 64 chars hex
+PROBE_PORT=${{randomInt(8000, 9000)}}                # int aleatório
+```
+
+Resolvidos uma única vez na instalação; o valor gerado é persistido como env var normal. **Hoje só para templates** — em projetos comuns use `openssl rand -hex 32` e `veloz env set`.
+
+## Monorepo
+
+Para monorepos, o Veloz detecta os apps automaticamente no primeiro `veloz deploy`. A CLI pergunta quais apps do monorepo você quer deployar e gera o `veloz.json` com todos os serviços configurados.
+
+Exemplo de `veloz.json` gerado para monorepo:
+
+```json
+{
+  "version": "1.0",
+  "project": {
+    "id": "proj_abc123",
+    "name": "meu-monorepo"
+  },
+  "services": {
+    "apps/api": {
+      "id": "svc_api456",
+      "name": "api",
+      "type": "web",
+      "branch": "main",
+      "build": {
+        "command": "pnpm build"
+      },
+      "runtime": {
+        "command": "pnpm start",
+        "port": 3001
+      }
+    },
+    "apps/web": {
+      "id": "svc_web789",
+      "name": "web",
+      "type": "web",
+      "branch": "main",
+      "build": {
+        "command": "pnpm build"
+      },
+      "runtime": {
+        "command": "pnpm start",
+        "port": 3000
+      }
+    }
+  }
+}
+```
+
+> **Não crie este arquivo manualmente.** Rode `veloz deploy` e a CLI gera tudo automaticamente.
+
+## Melhores Práticas
+
+### Dockerfile customizado para projetos complexos
+
+Para projetos com requisitos de build complexos (multi-stage builds, dependências nativas, monorepos com configuração específica), escreva um Dockerfile e aponte no `veloz.json`:
+
+```json
+{
+  "services": {
+    ".": {
+      "build": {
+        "method": "dockerfile",
+        "dockerfile": "Dockerfile"
+      }
+    }
+  }
+}
+```
+
+O nixpacks funciona bem para a maioria dos casos, mas um Dockerfile customizado garante builds reproduzíveis e controle total sobre o ambiente.
+
+### Next.js — NÃO use output standalone na Veloz
+
+Na Veloz, o mesmo container serve o servidor SSR e os arquivos estáticos. O `output: "standalone"` foi projetado para ambientes que separam assets estáticos (CDN) do servidor — e exige cópia manual de `.next/static` e `public/` no Dockerfile, complicando o setup sem benefício.
+
+Se você migrou de Vercel ou Railway e tinha `output: "standalone"`, remova essa linha do `next.config.ts`.
+
+### Prisma — gerar o client no build + migrations no pre-start
+
+O Prisma Client precisa ser gerado antes do app iniciar. Adicione `prisma generate` ao `postinstall` ou ao script `build`:
+
+```json
+{ "scripts": { "postinstall": "prisma generate" } }
+```
+
+Para migrations automáticas em cada deploy, use `preStartCommand`:
+
+```json
+{
+  "services": {
+    ".": {
+      "runtime": {
+        "preStartCommand": "npx prisma migrate deploy"
+      }
+    }
+  }
+}
+```
+
+O `preStartCommand` roda antes do serviço iniciar, no mesmo ambiente. Se falhar, o deploy é interrompido.
+
+### Variáveis de ambiente
+
+Nunca commite `.env`. Use `veloz env set KEY=valor` ou o dashboard. O `.env` deve estar no `.gitignore`.
+
+### Porta do servidor
+
+Seu app deve ler `process.env.PORT` com fallback para 3000.
+
+### SvelteKit
+
+Use `@sveltejs/adapter-node`. O `adapter-auto` e adapters de outras plataformas (Vercel, Netlify, Cloudflare) não funcionam na Veloz.
+
+### bcrypt
+
+O `bcrypt` compila código nativo. Use `bcryptjs` (pure JS, mesma API) para evitar falhas de build.
+
+---
+
+## Documentação — Plain Text (melhor para IAs)
+
+Cada página tem uma versão .txt que retorna markdown puro:
+
+### Docs (.txt)
+- https://onveloz.com/docs/introducao.txt
+- https://onveloz.com/docs/instalacao.txt
+- https://onveloz.com/docs/primeiro-deploy.txt
+- https://onveloz.com/docs/cli.txt
+- https://onveloz.com/docs/veloz-json.txt
+- https://onveloz.com/docs/config.txt
+- https://onveloz.com/docs/variaveis-ambiente.txt
+- https://onveloz.com/docs/dominios.txt
+- https://onveloz.com/docs/logs.txt
+- https://onveloz.com/docs/monorepo.txt
+- https://onveloz.com/docs/frameworks.txt
+- https://onveloz.com/docs/ci-cd.txt
+- https://onveloz.com/docs/autenticacao.txt
+- https://onveloz.com/docs/infraestrutura.txt
+- https://onveloz.com/docs/seguranca.txt
+- https://onveloz.com/docs/dados.txt
+- https://onveloz.com/docs/pacotes-sistema.txt
+- https://onveloz.com/docs/migracao.txt
+- https://onveloz.com/docs/troubleshooting.txt
+- https://onveloz.com/docs/best-practices.txt
+- https://onveloz.com/docs/bancos-de-dados.txt
+- https://onveloz.com/docs/deploy-com-ia.txt
+- https://onveloz.com/docs/faq.txt
+- https://onveloz.com/docs/termos.txt
+- https://onveloz.com/docs/privacidade.txt
+
+### Guias (.txt)
+- https://onveloz.com/guide/nextjs.txt
+- https://onveloz.com/guide/express.txt
+- https://onveloz.com/guide/hono.txt
+- https://onveloz.com/guide/vite-react.txt
+- https://onveloz.com/guide/static-site.txt
+- https://onveloz.com/guide/fullstack.txt
+- https://onveloz.com/guide/workers.txt
+- https://onveloz.com/guide/supabase.txt
+- https://onveloz.com/guide/neon.txt
+- https://onveloz.com/guide/https-ssl.txt
+- https://onveloz.com/guide/env-seguras.txt
+- https://onveloz.com/guide/auth-segura.txt
+- https://onveloz.com/guide/protecao-api.txt
+- https://onveloz.com/guide/lgpd.txt
+
+### Guias de IAs/Ferramentas (.txt)
+- https://onveloz.com/guide/cursor.txt
+- https://onveloz.com/guide/bolt.txt
+- https://onveloz.com/guide/lovable.txt
+- https://onveloz.com/guide/v0.txt
+- https://onveloz.com/guide/replit.txt
+- https://onveloz.com/guide/windsurf.txt
+- https://onveloz.com/guide/claude-code.txt
+- https://onveloz.com/guide/openclaw.txt
+
+---
+
+## Documentação completa (para IAs)
+
+Para a versão expandida com todo o conteúdo inline (sem precisar buscar cada URL):
+- https://onveloz.com/llms-full.txt
+
+---
+
+## Links principais
+
+- Site: https://onveloz.com
+- Dashboard: https://app.onveloz.com
+- Documentação: https://onveloz.com/docs
+- Guias: https://onveloz.com/guide
+- Discord: https://discord.gg/yRvmaPSh
+- CLI npm: https://www.npmjs.com/package/onveloz

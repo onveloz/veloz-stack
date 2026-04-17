@@ -38,13 +38,13 @@ export async function gatherInteractive(
   // Project name
   if (!input.projectName) {
     const name = await p.text({
-      message: "Project name?",
+      message: "Qual o nome do projeto?",
       placeholder: seeded.projectName,
       defaultValue: seeded.projectName,
       validate: (v) => {
         if (!v) return;
         if (!/^[a-z0-9][a-z0-9-_]*$/.test(v))
-          return "Use lowercase letters, digits, hyphens, underscores.";
+          return "Use letras minúsculas, dígitos, hífens e underscores.";
       },
     });
     cancelIfNeeded(name);
@@ -54,7 +54,7 @@ export async function gatherInteractive(
   // Preset
   if (input.preset === undefined) {
     const preset = await p.select({
-      message: "Preset?",
+      message: "Qual modelo pronto?",
       initialValue: seeded.preset,
       options: (Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((k) => ({
         value: k,
@@ -97,7 +97,7 @@ export async function gatherInteractive(
     (id) => getApiDisableReason({ ...cfg, api: id }, id),
     apiLabels,
   );
-  cfg.db = await pickOne("Database", DbId.options, input.db ?? cfg.db, () => null);
+  cfg.db = await pickOne("Banco de dados", DbId.options, input.db ?? cfg.db, () => null);
   cfg.orm = await pickOne(
     "ORM",
     OrmId.options,
@@ -105,26 +105,26 @@ export async function gatherInteractive(
     (id) => getOrmDisableReason({ ...cfg, orm: id }, id),
   );
   cfg.dbHosting = await pickOne(
-    "DB hosting",
+    "Hospedagem do banco",
     DbHostingId.options,
     input.dbHosting ?? cfg.dbHosting,
     (id) => getDbHostingDisableReason({ ...cfg, dbHosting: id }, id),
   );
   cfg.auth = await pickOne(
-    "Auth",
+    "Autenticação",
     AuthId.options,
     input.auth ?? cfg.auth,
     () => null,
     authLabels,
   );
   cfg.deploy = await pickOne(
-    "Deploy target",
+    "Alvo de deploy",
     DeployId.options,
     input.deploy ?? cfg.deploy,
     (id) => getDeployDisableReason({ ...cfg, deploy: id }, id),
   );
   cfg.pm = await pickOne(
-    "Package manager",
+    "Gerenciador de pacotes",
     PackageManagerId.options,
     input.pm ?? cfg.pm,
     () => null,
@@ -146,7 +146,7 @@ export async function gatherInteractive(
       }
     }
     const picked = await p.multiselect({
-      message: "Feature modules (space to toggle, enter to confirm)",
+      message: "Módulos (espaço pra alternar, enter pra confirmar)",
       initialValues: cfg.modules as string[],
       required: false,
       options,
@@ -160,12 +160,18 @@ export async function gatherInteractive(
 
   // Toggles
   if (input.install === undefined) {
-    const install = await p.confirm({ message: "Install dependencies?", initialValue: cfg.install });
+    const install = await p.confirm({
+      message: "Instalar dependências?",
+      initialValue: cfg.install,
+    });
     cancelIfNeeded(install);
     cfg.install = install as boolean;
   }
   if (input.git === undefined) {
-    const git = await p.confirm({ message: "Initialize a git repo?", initialValue: cfg.git });
+    const git = await p.confirm({
+      message: "Inicializar repositório git?",
+      initialValue: cfg.git,
+    });
     cancelIfNeeded(git);
     cfg.git = git as boolean;
   }
@@ -200,13 +206,13 @@ async function pickOne<T extends string>(
 
 function cancelIfNeeded(v: unknown): void {
   if (p.isCancel(v)) {
-    p.cancel("Aborted.");
+    p.cancel("Abortado.");
     process.exit(0);
   }
 }
 
 function titleCase(s: string): string {
-  if (s === "none") return "None";
+  if (s === "none") return "Nenhum";
   return s
     .split("-")
     .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
@@ -221,7 +227,7 @@ function frontendLabels(id: string): string {
     "svelte-kit": "SvelteKit",
     astro: "Astro",
     "native-expo": "Expo (React Native)",
-    none: "None",
+    none: "Nenhum",
   };
   return map[id] ?? titleCase(id);
 }
@@ -235,5 +241,6 @@ function apiLabels(id: string): string {
 function authLabels(id: string): string {
   if (id === "better-auth") return "Better Auth";
   if (id === "clerk") return "Clerk";
+  if (id === "none") return "Nenhuma";
   return titleCase(id);
 }

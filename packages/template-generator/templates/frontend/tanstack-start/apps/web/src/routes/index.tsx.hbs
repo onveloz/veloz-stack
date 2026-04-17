@@ -17,12 +17,12 @@ function HomeComponent() {
           <h1 className="text-3xl font-bold">{{projectName}}</h1>
         </div>
         <p className="text-white/60">
-          Scaffolded with <code>create-veloz-stack</code>. Edit{" "}
-          <code>apps/web/src/routes/index.tsx</code> to start.
+          Gerado com <code>create-veloz-stack</code>. Edite{" "}
+          <code>apps/web/src/routes/index.tsx</code> pra começar.
         </p>
         <div className="border border-white/10 p-4 bg-white/5">
           <div className="text-xs uppercase tracking-wider text-white/50 mb-2">
-            API status
+            Status da API
           </div>
           <div className="flex items-center gap-2">
             <div
@@ -37,10 +37,10 @@ function HomeComponent() {
             />
             <span className="text-sm">
               {health.isLoading
-                ? "Checking…"
+                ? "Verificando…"
                 : health.data === "OK"
-                ? "Connected"
-                : "Disconnected"}
+                ? "Conectado"
+                : "Desconectado"}
             </span>
           </div>
         </div>

@@ -66,7 +66,7 @@ export function resolveConfig(
     key: pending.key,
     from: String((cfg as any)[pending.key]),
     to: String(pending.value),
-    reason: originReason ?? "Change requested",
+    reason: originReason ?? "Mudança solicitada",
   });
 
   // Iteratively repair until stable
@@ -105,7 +105,7 @@ export function resolveConfig(
       key: "modules",
       from: m,
       to: null,
-      reason: getModuleDisableReason(cfg, m) ?? "Incompatible",
+      reason: getModuleDisableReason(cfg, m) ?? "Incompatível",
     });
   }
   proposed.modules = keptModules;
@@ -129,13 +129,13 @@ export function formatKey(key: ConfigChange["key"]): string {
     backend: "Backend",
     runtime: "Runtime",
     api: "API",
-    db: "Database",
+    db: "Banco",
     orm: "ORM",
-    dbHosting: "DB hosting",
+    dbHosting: "Hospedagem",
     auth: "Auth",
     deploy: "Deploy",
     pm: "Package manager",
-    modules: "Module",
+    modules: "Módulo",
   };
   return map[key] ?? key;
 }

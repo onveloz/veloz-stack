@@ -185,7 +185,7 @@ export function StackBuilder() {
     },
     {
       key: "db",
-      label: "Database",
+      label: "Banco de dados",
       tiles: tiles(DbId.options, titleCase),
       getDisabled: () => null,
     },
@@ -197,27 +197,27 @@ export function StackBuilder() {
     },
     {
       key: "dbHosting",
-      label: "DB hosting",
+      label: "Hospedagem do banco",
       tiles: tiles(DbHostingId.options, labelsDbHost, "veloz"),
       getDisabled: (id) => getDbHostingDisableReason(config, id as any),
     },
     {
       key: "auth",
-      label: "Auth",
+      label: "Autenticação",
       tiles: tiles(AuthId.options, (s) =>
-        s === "better-auth" ? "Better Auth" : s === "clerk" ? "Clerk" : "None",
+        s === "better-auth" ? "Better Auth" : s === "clerk" ? "Clerk" : "Nenhuma",
       ),
       getDisabled: () => null,
     },
     {
       key: "deploy",
-      label: "Deploy target",
+      label: "Alvo de deploy",
       tiles: tiles(DeployId.options, labelsDeploy, "veloz"),
       getDisabled: (id) => getDeployDisableReason(config, id as any),
     },
     {
       key: "pm",
-      label: "Package manager",
+      label: "Gerenciador de pacotes",
       tiles: tiles(PackageManagerId.options, titleCase),
       getDisabled: () => null,
     },
@@ -238,7 +238,7 @@ export function StackBuilder() {
             className="inline-flex items-center gap-1.5 text-xs h-8 px-3 border border-border-strong bg-secondary hover:bg-border-strong"
           >
             {shareCopied ? <Check className="w-3.5 h-3.5 text-success" /> : <Share2 className="w-3.5 h-3.5" />}
-            {shareCopied ? "Link copied" : "Share"}
+            {shareCopied ? "Link copiado" : "Compartilhar"}
           </button>
         </div>
       </header>
@@ -248,7 +248,7 @@ export function StackBuilder() {
         <aside className="border-r border-border bg-secondary/30 p-5 lg:sticky lg:top-11 lg:self-start lg:h-[calc(100vh-44px)] lg:overflow-y-auto">
           <div className="mb-5">
             <label className="text-[11px] uppercase tracking-wider text-muted-foreground block mb-1.5">
-              Project name
+              Nome do projeto
             </label>
             <input
               type="text"
@@ -260,7 +260,7 @@ export function StackBuilder() {
 
           <div className="mb-5">
             <label className="text-[11px] uppercase tracking-wider text-muted-foreground block mb-1.5">
-              Preset
+              Modelo pronto
             </label>
             <div className="flex flex-col gap-1">
               {Object.entries(PRESETS).map(([id, p]) => (
@@ -283,7 +283,7 @@ export function StackBuilder() {
 
           <div className="mb-5">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">
-              Selected stack
+              Stack escolhido
             </div>
             <ul className="text-xs space-y-1 font-mono">
               <StackLine k="frontend" v={config.frontend} />
@@ -294,7 +294,7 @@ export function StackBuilder() {
               <StackLine k="orm" v={config.orm} />
               <StackLine k="auth" v={config.auth} />
               <StackLine k="deploy" v={config.deploy} />
-              <StackLine k="modules" v={`${config.modules.length} selected`} />
+              <StackLine k="módulos" v={`${config.modules.length} ativos`} />
             </ul>
           </div>
 
@@ -306,7 +306,7 @@ export function StackBuilder() {
                 onChange={(e) => void setState({ install: e.target.checked })}
                 className="accent-brand"
               />
-              install deps
+              instalar deps
             </label>
             <label className="inline-flex items-center gap-2 text-xs cursor-pointer">
               <input
@@ -321,7 +321,7 @@ export function StackBuilder() {
 
           {errors.length > 0 && (
             <div className="border border-destructive/50 bg-destructive/10 p-2 text-[11px] text-destructive">
-              <div className="font-semibold mb-1">Incompatible:</div>
+              <div className="font-semibold mb-1">Combinação inválida:</div>
               <ul className="list-disc list-inside space-y-0.5">
                 {errors.map((e) => (
                   <li key={e}>{e}</li>
@@ -347,9 +347,9 @@ export function StackBuilder() {
           {/* Modules grouped by category */}
           <section className="mb-10">
             <div className="flex items-baseline justify-between mb-3">
-              <h2 className="font-heading text-lg font-semibold">Feature modules</h2>
+              <h2 className="font-heading text-lg font-semibold">Módulos de funcionalidade</h2>
               <span className="text-xs text-muted-foreground">
-                {config.modules.length} selected · toggle any
+                {config.modules.length} ativos · clique pra ligar/desligar
               </span>
             </div>
             {MODULE_CATEGORIES.map((cat) => {
@@ -416,9 +416,9 @@ export function StackBuilder() {
           {/* Addons */}
           <section className="mb-10">
             <div className="flex items-baseline justify-between mb-3">
-              <h2 className="font-heading text-lg font-semibold">Addons</h2>
+              <h2 className="font-heading text-lg font-semibold">Ferramentas</h2>
               <span className="text-xs text-muted-foreground">
-                {config.addons.length} of {AddonId.options.length} on
+                {config.addons.length} de {AddonId.options.length} ativas
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -462,9 +462,9 @@ export function StackBuilder() {
           {/* Examples */}
           <section className="mb-10">
             <div className="flex items-baseline justify-between mb-3">
-              <h2 className="font-heading text-lg font-semibold">Starter examples</h2>
+              <h2 className="font-heading text-lg font-semibold">Exemplos prontos</h2>
               <span className="text-xs text-muted-foreground">
-                {config.examples.length} selected
+                {config.examples.length} selecionado{config.examples.length === 1 ? "" : "s"}
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -529,12 +529,12 @@ export function StackBuilder() {
       <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur z-30">
         <div className="max-w-[1200px] mx-auto px-6 py-3 flex items-center gap-3">
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground hidden sm:block">
-            Run this
+            Rode este comando
           </span>
           <code className="flex-1 font-mono text-xs md:text-sm text-foreground bg-secondary border border-border-strong px-3 py-2 overflow-x-auto whitespace-nowrap">
             <span className="text-brand">$</span> {command}
           </code>
-          <CopyButton value={command} label="Copy command" />
+          <CopyButton value={command} label="Copiar comando" />
         </div>
       </div>
     </div>
@@ -553,15 +553,15 @@ function StackLine({ k, v }: { k: string; v: string }) {
 const ADDON_META: Record<(typeof AddonId.options)[number], { label: string; tagline: string }> = {
   turborepo: {
     label: "Turborepo",
-    tagline: "Task graph + remote cache — root scripts become `turbo run …`",
+    tagline: "Task graph + cache remoto — scripts da raiz viram `turbo run …`",
   },
   biome: {
     label: "Biome",
-    tagline: "Formatter + linter — adds format / lint / check scripts",
+    tagline: "Formatador + linter — adiciona scripts format / lint / check",
   },
   husky: {
     label: "Husky + lint-staged",
-    tagline: "Pre-commit hook running lint-staged (Biome if enabled)",
+    tagline: "Hook de pre-commit rodando lint-staged (Biome se ativo)",
   },
 };
 
@@ -571,15 +571,15 @@ const EXAMPLE_META: Record<
 > = {
   todo: {
     label: "Todo CRUD",
-    tagline: "oRPC router + Drizzle schema + frontend — classic starter",
+    tagline: "Router oRPC + schema Drizzle + frontend — starter clássico",
   },
   "ai-chat": {
-    label: "AI chat (soon)",
-    tagline: "Streaming chat with Claude — lands in Wave 2d",
+    label: "Chat IA (em breve)",
+    tagline: "Chat com streaming via Claude — chega na próxima wave",
   },
   "pix-checkout": {
-    label: "PIX checkout (soon)",
-    tagline: "AbacatePay QR + webhook verifier — lands in Wave 2d",
+    label: "Checkout PIX",
+    tagline: "QR AbacatePay + verifier de webhook + rota /checkout",
   },
 };
 

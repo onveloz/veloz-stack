@@ -40,14 +40,14 @@ export async function runCreate(input: CreateInput): Promise<void> {
 
   const errors = validateConfig(config);
   if (errors.length > 0) {
-    console.error(chalk.red("\n✗ Incompatible configuration:"));
+    console.error(chalk.red("\n✗ Configuração incompatível:"));
     for (const e of errors) console.error("  • " + e);
     process.exit(1);
   }
 
   if (existsSync(target)) {
     console.error(
-      chalk.red(`\n✗ Directory "${config.projectName}" already exists at ${target}`),
+      chalk.red(`\n✗ A pasta "${config.projectName}" já existe em ${target}`),
     );
     process.exit(1);
   }
@@ -55,12 +55,12 @@ export async function runCreate(input: CreateInput): Promise<void> {
   printSummary(config, target);
 
   if (input.dryRun) {
-    console.log(chalk.yellow("\n--dry-run set — no files written."));
+    console.log(chalk.yellow("\n--dry-run ativo — nenhum arquivo foi escrito."));
     return;
   }
 
   const { fileCount } = await scaffold(config, target);
-  console.log(chalk.green(`\n✓ Wrote ${fileCount} files.`));
+  console.log(chalk.green(`\n✓ ${fileCount} arquivos criados.`));
   console.log(chalk.dim(`  cd ${config.projectName}`));
   console.log(chalk.dim(`  ${config.pm} install`));
   console.log(chalk.dim(`  ${config.pm} dev`));
@@ -71,7 +71,7 @@ export async function runCreate(input: CreateInput): Promise<void> {
         chalk.hex("#FF4D00")("→") +
         " Deploy: " +
         chalk.bold("npx onveloz deploy") +
-        chalk.dim("  (veloz.json committed at project root)"),
+        chalk.dim("  (o veloz.json já tá commitado na raiz)"),
     );
   }
 }
@@ -132,7 +132,7 @@ function parseModules(csv: string): ModuleId[] {
     const id = raw.trim();
     if (!id) continue;
     if (!known.has(id)) {
-      console.warn(chalk.yellow(`⚠ Unknown module "${id}" — skipping`));
+      console.warn(chalk.yellow(`⚠ Módulo desconhecido "${id}" — ignorando`));
       continue;
     }
     out.push(id as ModuleId);
@@ -158,9 +158,9 @@ function printSummary(cfg: ProjectConfig, target: string): void {
   console.log(line("deploy", cfg.deploy));
   console.log(line("pm", cfg.pm));
   if (cfg.modules.length > 0) {
-    console.log(line("modules", cfg.modules.join(", ")));
+    console.log(line("módulos", cfg.modules.join(", ")));
   }
   if (cfg.examples.length > 0) {
-    console.log(line("examples", cfg.examples.join(", ")));
+    console.log(line("exemplos", cfg.examples.join(", ")));
   }
 }

@@ -189,8 +189,8 @@ describe("modules", () => {
 
   it("claude module emits CLAUDE.md + AGENTS.md", () => {
     const vfs = generate(cfg({ modules: ["claude"] }));
-    expect(vfs.read("CLAUDE.md")).toContain("Claude guide");
-    expect(vfs.read("AGENTS.md")).toContain("Agent guide");
+    expect(vfs.read("CLAUDE.md")).toContain("Guia do Claude");
+    expect(vfs.read("AGENTS.md")).toContain("Guia pra agentes");
   });
 
   it("cpf-cnpj module emits typed SDK wrapper", () => {
@@ -349,7 +349,7 @@ describe("Prisma", () => {
 describe("validateConfig", () => {
   it("rejects better-auth + db:none", () => {
     const errs = validateConfig(cfg({ db: "none", orm: "none", dbHosting: "none" }));
-    expect(errs.some((e) => e.includes("Better Auth needs a database"))).toBe(true);
+    expect(errs.some((e) => e.includes("Better Auth precisa de um banco"))).toBe(true);
   });
 
   it("rejects workers runtime + non-hono backend", () => {

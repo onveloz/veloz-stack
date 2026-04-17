@@ -1,3 +1,3 @@
-# Agent guide
+# Guia pra agentes
 
-See [CLAUDE.md](./CLAUDE.md). Skill files in `.claude/skills/` apply to any agent — they are plain Markdown.
+Veja [CLAUDE.md](./CLAUDE.md). Os arquivos em `.claude/skills/` servem pra qualquer agente — é Markdown puro.

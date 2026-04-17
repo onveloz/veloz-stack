@@ -1,21 +1,21 @@
-# Claude guide — {{projectName}}
+# Guia do Claude — {{projectName}}
 
-This project was scaffolded with `create-veloz-stack`. The default stack is
-**Bun · Hono · oRPC · TanStack Start · Better Auth · Drizzle · Postgres**, deployed
-to **{{deploy}}**.
+Este projeto foi gerado com `create-veloz-stack`. O stack padrão é
+**Bun · Hono · oRPC · TanStack Start · Better Auth · Drizzle · Postgres**, com
+deploy em **{{deploy}}**.
 
-## Ground rules for edits
-- Keep ORM queries typed — no raw SQL unless strictly necessary.
-- Money amounts: watch the unit (centavos vs reais) per vendor. See `.claude/skills/`.
-- Never commit `.env`. Add vars to `.env.example` when you introduce new ones.
-- pt-BR first when user-facing copy is involved.
+## Regras pra editar
+- Mantenha as queries do ORM tipadas — evite SQL cru a não ser que seja estritamente necessário.
+- Dinheiro: cuidado com a unidade (centavos vs reais) por fornecedor. Veja `.claude/skills/`.
+- Nunca commite o `.env`. Adicione vars no `.env.example` quando criar novas.
+- Copy voltado pro usuário final sempre em pt-BR primeiro.
 
-## Skill index
-Each integrated vendor has a skill file in `.claude/skills/<vendor>/SKILL.md`
-with auth model, base URLs, core endpoints, webhook signing, and a working
-TypeScript snippet. Read those before wiring a new feature — do not guess.
+## Índice de skills
+Cada fornecedor integrado tem um arquivo em `.claude/skills/<fornecedor>/SKILL.md`
+com modelo de auth, URLs base, endpoints principais, verificação de webhook e
+um snippet TypeScript funcional. Leia antes de implementar — não chute.
 
-## Modules enabled
+## Módulos ativos
 {{#each modules}}
 - {{this}}
 {{/each}}

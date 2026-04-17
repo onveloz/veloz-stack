@@ -26,12 +26,12 @@ export const DEFAULT_CONFIG: ProjectConfig = {
 export const PRESETS = {
   "veloz-br": {
     label: "Veloz BR",
-    description: "Opinionated Brazilian stack — PIX, SMS, LGPD, Claude-ready",
+    description: "Stack opinado pro Brasil — PIX, SMS, LGPD, pronto pro Claude",
     config: DEFAULT_CONFIG,
   },
   minimal: {
-    label: "Minimal",
-    description: "Just the tech layer — no feature modules",
+    label: "Mínimo",
+    description: "Só a camada técnica — nenhum módulo de funcionalidade",
     config: {
       ...DEFAULT_CONFIG,
       preset: "minimal" as const,

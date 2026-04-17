@@ -60,7 +60,7 @@ export function ConfirmCascadeDialog({
             type="button"
             onClick={onCancel}
             className="text-muted-foreground hover:text-foreground p-1 -m-1"
-            aria-label="Close"
+            aria-label="Fechar"
           >
             <X className="w-4 h-4" />
           </button>
@@ -69,7 +69,7 @@ export function ConfirmCascadeDialog({
         {cascade.length > 0 ? (
           <div className="p-4 border-b border-border">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
-              To make this work, Veloz Stack will also change
+              Pra isso funcionar, o Veloz Stack vai ajustar também
             </div>
             <ul className="space-y-1.5">
               {cascade.map((c, i) => (
@@ -81,7 +81,7 @@ export function ConfirmCascadeDialog({
                     </span>
                     <ArrowRight className="w-3 h-3 text-muted-foreground" />
                     <span className="text-brand font-semibold">
-                      {c.to === null ? "removed" : c.to}
+                      {c.to === null ? "removido" : c.to}
                     </span>
                   </div>
                 </li>
@@ -90,7 +90,7 @@ export function ConfirmCascadeDialog({
           </div>
         ) : (
           <div className="p-4 border-b border-border text-xs text-muted-foreground">
-            No other changes needed.
+            Nenhum outro ajuste necessário.
           </div>
         )}
 
@@ -100,7 +100,7 @@ export function ConfirmCascadeDialog({
             onClick={onCancel}
             className="h-8 px-3 text-xs font-medium text-foreground hover:bg-secondary border border-border-strong"
           >
-            Cancel
+            Cancelar
           </button>
           <button
             type="button"
@@ -108,7 +108,7 @@ export function ConfirmCascadeDialog({
             autoFocus
             className="h-8 px-3 text-xs font-medium bg-brand text-brand-foreground hover:bg-brand-hover active:scale-[0.97] transition-[colors,transform] border border-brand"
           >
-            Apply changes
+            Aplicar ajustes
           </button>
         </div>
       </div>
