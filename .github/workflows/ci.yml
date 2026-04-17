@@ -25,6 +25,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build embedded template map
+        run: pnpm --filter @veloz-stack/template-generator gen
+
       - name: Type-check all workspaces
         run: pnpm -r --parallel check-types
 
