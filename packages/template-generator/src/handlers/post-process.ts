@@ -7,6 +7,7 @@ const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
   asaas: "asaas",
   pagarme: "pagarme",
   mercadopago: "mercadopago",
+  twilio: "twilio",
   "stripe-br": "stripe",
   "ararahq-sms": "ararahq",
   "ararahq-wa": "ararahq",
