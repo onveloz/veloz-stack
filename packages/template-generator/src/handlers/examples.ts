@@ -31,4 +31,13 @@ function emitPixCheckout(vfs: VirtualFs, config: ProjectConfig): void {
   // from @proj/abacatepay which wouldn't exist. The picker UI should warn.
   if (!config.modules.includes("abacatepay")) return;
   processTemplatesFromPrefix(vfs, "examples/pix-checkout/common/", "", config);
+
+  if (config.frontend === "tanstack-start") {
+    processTemplatesFromPrefix(
+      vfs,
+      "examples/pix-checkout/frontend-tanstack/",
+      "",
+      config,
+    );
+  }
 }
