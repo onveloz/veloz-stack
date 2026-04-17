@@ -10,5 +10,7 @@ export default defineConfig({
   dts: false,
   shims: true,
   // Bundle the workspace types package so the published CLI is standalone.
-  noExternal: ["@veloz-stack/types", "@veloz-stack/template-generator"],
+  // Regex so subpath exports like `@veloz-stack/template-generator/scaffold`
+  // are inlined too (string match only catches the root specifier).
+  noExternal: [/^@veloz-stack\//],
 });
