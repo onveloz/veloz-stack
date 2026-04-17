@@ -1,0 +1,26 @@
+{
+  "name": "@{{projectName}}/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 3001",
+    "build": "vite build",
+    "start": "node build",
+    "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "dependencies": {
+    "@{{projectName}}/api": "workspace:*",
+    "@orpc/client": "^1.12.2",
+    "@orpc/server": "^1.12.2"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "^5.5.4",
+    "@sveltejs/kit": "^2.57.1",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "svelte": "^5.55.4",
+    "svelte-check": "^4.1.0",
+    "typescript": "^5.6.3",
+    "vite": "^7.0.2"
+  }
+}

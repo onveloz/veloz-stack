@@ -1,0 +1,50 @@
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { client } from "$lib/orpc";
+
+  let status = $state<"loading" | "ok" | "error">("loading");
+
+  onMount(async () => {
+    try {
+      const res = await client.healthCheck();
+      status = res === "OK" ? "ok" : "error";
+    } catch {
+      status = "error";
+    }
+  });
+</script>
+
+<main>
+  <div class="hero">
+    <div class="brand-dot"></div>
+    <h1>{{projectName}}</h1>
+  </div>
+  <p class="muted">
+    Scaffolded with <code>create-veloz-stack</code>. Edit
+    <code>apps/web/src/routes/+page.svelte</code> to start.
+  </p>
+  <section class="status">
+    <div class="label">API status</div>
+    <div class="row">
+      <span class="dot" class:ok={status === "ok"} class:loading={status === "loading"} class:error={status === "error"}></span>
+      <span>
+        {#if status === "loading"}Checking…{:else if status === "ok"}Connected{:else}Disconnected{/if}
+      </span>
+    </div>
+  </section>
+</main>
+
+<style>
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem; }
+  .hero { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .brand-dot { width: 12px; height: 12px; background: #ff4d00; }
+  h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+  .muted { color: rgba(255,255,255,0.6); }
+  .status { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); padding: 1rem; margin-top: 1rem; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
+  .row { display: flex; align-items: center; gap: 0.5rem; }
+  .dot { width: 8px; height: 8px; display: inline-block; background: #666; }
+  .dot.ok { background: #16a34a; }
+  .dot.loading { background: #d97706; }
+  .dot.error { background: #dc2626; }
+</style>
