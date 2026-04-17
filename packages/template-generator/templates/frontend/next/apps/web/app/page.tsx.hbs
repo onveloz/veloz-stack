@@ -1,0 +1,47 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { orpc } from "@/lib/orpc";
+
+export default function Home() {
+  const health = useQuery(orpc.healthCheck.queryOptions());
+
+  return (
+    <main className="min-h-screen bg-black text-white flex items-center justify-center p-8">
+      <div className="max-w-2xl w-full space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-3 h-3 bg-[#FF4D00]" />
+          <h1 className="text-3xl font-bold">{{projectName}}</h1>
+        </div>
+        <p className="text-white/60">
+          Scaffolded with <code>create-veloz-stack</code>. Edit{" "}
+          <code>apps/web/app/page.tsx</code> to start.
+        </p>
+        <div className="border border-white/10 p-4 bg-white/5">
+          <div className="text-xs uppercase tracking-wider text-white/50 mb-2">
+            API status
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className={
+                "w-2 h-2 " +
+                (health.data === "OK"
+                  ? "bg-green-500"
+                  : health.isLoading
+                  ? "bg-yellow-500"
+                  : "bg-red-500")
+              }
+            />
+            <span className="text-sm">
+              {health.isLoading
+                ? "Checking…"
+                : health.data === "OK"
+                ? "Connected"
+                : "Disconnected"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

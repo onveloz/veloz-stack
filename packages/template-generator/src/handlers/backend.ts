@@ -31,7 +31,7 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
           ...(config.api === "orpc"
             ? { "@orpc/server": version("@orpc/server") }
             : {}),
-          ...(config.api !== "none" && config.backend !== "none"
+          ...(config.api !== "none"
             ? { [`@${config.projectName}/api`]: "workspace:*" }
             : {}),
           ...(config.auth === "better-auth"
