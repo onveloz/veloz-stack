@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
 import {
   AddonId,
   DEFAULT_CONFIG,
@@ -31,6 +31,13 @@ export async function runCreate(input: CreateInput): Promise<void> {
     ? seeded
     : await gatherInteractive(seeded, input);
 
+  // If the user gave us a path (absolute or relative with slashes), treat
+  // the last segment as the package name and the whole thing as the target
+  // directory. Package names can't have slashes.
+  const target = resolve(process.cwd(), config.projectName);
+  const pkgName = basename(target).replace(/[^a-z0-9-_]/gi, "-").toLowerCase();
+  config.projectName = pkgName;
+
   const errors = validateConfig(config);
   if (errors.length > 0) {
     console.error(chalk.red("\n✗ Incompatible configuration:"));
@@ -38,7 +45,6 @@ export async function runCreate(input: CreateInput): Promise<void> {
     process.exit(1);
   }
 
-  const target = resolve(process.cwd(), config.projectName);
   if (existsSync(target)) {
     console.error(
       chalk.red(`\n✗ Directory "${config.projectName}" already exists at ${target}`),
