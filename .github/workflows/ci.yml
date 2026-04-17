@@ -53,6 +53,7 @@ jobs:
           - { name: frontend-astro, args: "--frontend astro" }
           - { name: frontend-nuxt, args: "--frontend nuxt" }
           - { name: frontend-svelte, args: "--frontend svelte-kit" }
+          - { name: frontend-expo, args: "--frontend native-expo" }
           - { name: frontend-none, args: "--frontend none" }
 
           # ─────── Runtime axis

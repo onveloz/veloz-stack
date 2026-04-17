@@ -1,0 +1,89 @@
+import { useQuery } from "@tanstack/react-query";
+import { View, Text, StyleSheet } from "react-native";
+import { orpc } from "@/lib/orpc";
+
+export default function Home() {
+  const health = useQuery(orpc.healthCheck.queryOptions());
+  const dotColor =
+    health.data === "OK" ? "#16a34a" : health.isLoading ? "#d97706" : "#dc2626";
+  const statusText = health.isLoading
+    ? "Verificando…"
+    : health.data === "OK"
+    ? "Conectado"
+    : "Desconectado";
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.hero}>
+        <View style={styles.brandDot} />
+        <Text style={styles.title}>{{projectName}}</Text>
+      </View>
+      <Text style={styles.subtitle}>
+        Gerado com create-veloz-stack. Edite apps/mobile/app/index.tsx pra começar.
+      </Text>
+      <View style={styles.statusCard}>
+        <Text style={styles.statusLabel}>Status da API</Text>
+        <View style={styles.statusRow}>
+          <View style={[styles.statusDot, { backgroundColor: dotColor }]} />
+          <Text style={styles.statusText}>{statusText}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: "#0f0f0f",
+  },
+  hero: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+    marginTop: 32,
+  },
+  brandDot: {
+    width: 14,
+    height: 14,
+    backgroundColor: "#FF4D00",
+  },
+  title: {
+    color: "#e5e5e5",
+    fontSize: 28,
+    fontWeight: "700",
+  },
+  subtitle: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 14,
+    marginBottom: 24,
+  },
+  statusCard: {
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    padding: 16,
+  },
+  statusLabel: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+  },
+  statusText: {
+    color: "#e5e5e5",
+    fontSize: 14,
+  },
+});

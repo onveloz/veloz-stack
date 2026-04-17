@@ -62,6 +62,15 @@ describe("generate()", () => {
     expect(files).not.toContain("apps/web/next.config.mjs");
   });
 
+  it("--frontend native-expo produces an Expo project under apps/mobile", () => {
+    const files = paths(cfg({ frontend: "native-expo" }));
+    expect(files).toContain("apps/mobile/app.json");
+    expect(files).toContain("apps/mobile/app/_layout.tsx");
+    expect(files).toContain("apps/mobile/app/index.tsx");
+    expect(files).toContain("apps/mobile/src/lib/orpc.ts");
+    expect(files.some((p) => p.startsWith("apps/web/"))).toBe(false);
+  });
+
   it("--frontend svelte-kit produces a SvelteKit project", () => {
     const files = paths(cfg({ frontend: "svelte-kit" }));
     expect(files).toContain("apps/web/svelte.config.js");

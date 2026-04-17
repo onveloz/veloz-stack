@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Check, Share2 } from "lucide-react";
+import { ArrowLeft, Check, Share2, Shuffle } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   AddonId,
@@ -87,6 +87,30 @@ export function StackBuilder() {
       pm: p.pm,
       modules: p.modules,
       examples: p.examples,
+    });
+  }
+
+  function randomize() {
+    const pick = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)]!;
+
+    const db = pick(["postgres", "sqlite"] as const);
+    const dbHosting = db === "sqlite" ? "turso" : "veloz";
+
+    void setState({
+      preset: "custom",
+      frontend: pick(FrontendId.options),
+      backend: pick(BackendId.options.filter((b) => b !== "none")),
+      runtime: pick(RuntimeId.options.filter((r) => r !== "workers")),
+      api: pick(["orpc", "trpc", "rest"] as const),
+      db,
+      orm: "drizzle",
+      dbHosting,
+      auth: pick(AuthId.options),
+      deploy: pick(DeployId.options.filter((d) => d !== "none" && d !== "cloudflare")),
+      pm: pick(PackageManagerId.options),
+      modules: Math.random() > 0.5 ? config.modules : [],
+      examples: [],
+      addons: ["turborepo"],
     });
   }
 
@@ -233,6 +257,14 @@ export function StackBuilder() {
           </Link>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={randomize}
+            className="inline-flex items-center gap-1.5 text-xs h-8 px-3 border border-border-strong bg-secondary hover:bg-border-strong"
+            title="Gerar uma combinação aleatória"
+          >
+            <Shuffle className="w-3.5 h-3.5" />
+            Surpreender
+          </button>
           <button
             onClick={share}
             className="inline-flex items-center gap-1.5 text-xs h-8 px-3 border border-border-strong bg-secondary hover:bg-border-strong"

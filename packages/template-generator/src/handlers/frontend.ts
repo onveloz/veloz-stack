@@ -15,7 +15,9 @@ export function processFrontend(vfs: VirtualFs, config: ProjectConfig): void {
       ? "frontend/nuxt/"
       : config.frontend === "svelte-kit"
       ? "frontend/svelte-kit/"
+      : config.frontend === "native-expo"
+      ? "frontend/native-expo/"
       : null;
-  if (!prefix) return; // native-expo: Wave 2d
+  if (!prefix) return;
   processTemplatesFromPrefix(vfs, prefix, "", config);
 }
