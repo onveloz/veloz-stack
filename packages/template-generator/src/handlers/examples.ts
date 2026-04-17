@@ -18,9 +18,10 @@ export function processExamples(vfs: VirtualFs, config: ProjectConfig): void {
 
 function emitTodo(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.api !== "orpc") return; // router is oRPC-shaped
+  // Wave 2c: Drizzle only. The common router imports `eq` + `schema` from
+  // `@proj/db` — those are Drizzle-specific. Prisma variant lands in 2d.
+  if (config.orm !== "drizzle" || config.db === "none") return;
 
   processTemplatesFromPrefix(vfs, "examples/todo/common/", "", config);
-  if (config.orm === "drizzle" && config.db !== "none") {
-    processTemplatesFromPrefix(vfs, "examples/todo/drizzle/", "", config);
-  }
+  processTemplatesFromPrefix(vfs, "examples/todo/drizzle/", "", config);
 }

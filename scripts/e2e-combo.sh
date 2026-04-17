@@ -28,14 +28,43 @@ rm -rf "$tmp"
 echo "━━━ [$name] scaffold"
 echo "    $@"
 "$ROOT/apps/cli/node_modules/.bin/tsx" "$ROOT/apps/cli/src/index.ts" \
-  "$tmp" --yes --no-install --pm pnpm "$@"
+  "$tmp" --yes --no-install "$@"
 
 echo "━━━ [$name] install"
 cd "$tmp"
-pnpm install --no-frozen-lockfile --ignore-scripts=false 2>&1 | tail -5
+
+# Respect whatever `packageManager` the scaffold emitted — pnpm bails
+# out when trying to install a `packageManager: bun@…` project.
+pm_field=$(node -p "require('./package.json').packageManager || 'pnpm@0'" 2>/dev/null || echo "pnpm@0")
+pm=${pm_field%%@*}
+
+case "$pm" in
+  bun)
+    echo "   using bun install"
+    bun install 2>&1 | tail -5
+    ;;
+  npm)
+    echo "   using npm install"
+    npm install --no-audit --no-fund 2>&1 | tail -5
+    ;;
+  *)
+    echo "   using pnpm install"
+    pnpm install --no-frozen-lockfile --ignore-scripts=false 2>&1 | tail -5
+    ;;
+esac
 
 echo "━━━ [$name] typecheck"
-pnpm -r --parallel check-types
+case "$pm" in
+  bun)
+    bun run --filter='*' check-types
+    ;;
+  npm)
+    npm run --workspaces --if-present check-types
+    ;;
+  *)
+    pnpm -r --parallel check-types
+    ;;
+esac
 
 cd "$ROOT"
 rm -rf "$tmp"
