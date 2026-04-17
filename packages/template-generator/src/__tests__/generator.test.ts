@@ -54,6 +54,14 @@ describe("generate()", () => {
     expect(files).not.toContain("apps/web/src/router.tsx");
   });
 
+  it("--frontend nuxt produces a Nuxt project", () => {
+    const files = paths(cfg({ frontend: "nuxt" }));
+    expect(files).toContain("apps/web/nuxt.config.ts");
+    expect(files).toContain("apps/web/app.vue");
+    expect(files).toContain("apps/web/composables/useOrpc.ts");
+    expect(files).not.toContain("apps/web/next.config.mjs");
+  });
+
   it("--frontend astro produces an Astro project with SSR adapter", () => {
     const files = paths(cfg({ frontend: "astro" }));
     expect(files).toContain("apps/web/astro.config.mjs");
@@ -358,6 +366,13 @@ describe("module workspace wiring", () => {
     expect(vfs.read("packages/analytics/src/index.ts")).toContain("shutdownPosthog");
     const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
     expect(pkg.dependencies["@test-app/analytics"]).toBe("workspace:*");
+  });
+
+  it("sentry module ships @proj/errors with initSentry helper", () => {
+    const vfs = generate(cfg({ modules: ["sentry"] }));
+    expect(vfs.read("packages/errors/src/index.ts")).toContain("initSentry");
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/errors"]).toBe("workspace:*");
   });
 
   it("pt-br-i18n wires @proj/i18n into apps/web, not apps/server", () => {

@@ -11,6 +11,7 @@ const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
   resend: "email",
   brasilapi: "brasilapi",
   posthog: "analytics",
+  sentry: "errors",
 };
 
 const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {

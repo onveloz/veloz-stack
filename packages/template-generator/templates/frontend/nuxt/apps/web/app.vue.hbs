@@ -1,0 +1,63 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { client } from "./composables/useOrpc";
+
+const healthStatus = ref<"loading" | "ok" | "error">("loading");
+
+onMounted(async () => {
+  try {
+    const res = await client.healthCheck();
+    healthStatus.value = res === "OK" ? "ok" : "error";
+  } catch {
+    healthStatus.value = "error";
+  }
+});
+</script>
+
+<template>
+  <main>
+    <div class="hero">
+      <div class="brand-dot" />
+      <h1>{{projectName}}</h1>
+    </div>
+    <p class="muted">
+      Scaffolded with <code>create-veloz-stack</code>. Edit
+      <code>apps/web/app.vue</code> to start.
+    </p>
+    <section class="status">
+      <div class="label">API status</div>
+      <div class="row">
+        <span
+          class="dot"
+          :class="{
+            ok: healthStatus === 'ok',
+            loading: healthStatus === 'loading',
+            error: healthStatus === 'error',
+          }"
+        />
+        <span>
+          \{{ healthStatus === "loading" ? "Checking…" : healthStatus === "ok" ? "Connected" : "Disconnected" }}
+        </span>
+      </div>
+    </section>
+  </main>
+</template>
+
+<style>
+:root { color-scheme: dark; }
+html, body { margin: 0; background: #0f0f0f; color: #e5e5e5; font-family: ui-sans-serif, system-ui, sans-serif; }
+* { box-sizing: border-box; }
+main { max-width: 42rem; margin: 0 auto; padding: 2rem; }
+.hero { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+.brand-dot { width: 12px; height: 12px; background: #ff4d00; }
+h1 { font-size: 1.75rem; font-weight: 700; }
+.muted { color: rgba(255,255,255,0.6); }
+code { background: rgba(255,255,255,0.08); padding: 0 4px; font-family: ui-monospace, monospace; }
+.status { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); padding: 1rem; margin-top: 1rem; }
+.label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
+.row { display: flex; align-items: center; gap: 0.5rem; }
+.dot { width: 8px; height: 8px; display: inline-block; }
+.dot.ok { background: #16a34a; }
+.dot.loading { background: #d97706; }
+.dot.error { background: #dc2626; }
+</style>
