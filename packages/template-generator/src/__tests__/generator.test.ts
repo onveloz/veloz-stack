@@ -158,6 +158,13 @@ describe("deploy targets", () => {
     expect(files).toContain("Dockerfile");
   });
 
+  it("cloudflare emits wrangler.toml + workers hono entry", () => {
+    const vfs = generate(cfg({ deploy: "cloudflare", runtime: "workers" }));
+    expect(vfs.read("wrangler.toml")).toContain("compatibility_date");
+    expect(vfs.read("wrangler.toml")).toContain("nodejs_compat");
+    expect(vfs.read("apps/server/src/index.ts")).toContain("export default app");
+  });
+
   it("none emits no deploy artefacts", () => {
     const files = paths(cfg({ deploy: "none" }));
     expect(files).not.toContain("veloz.json");

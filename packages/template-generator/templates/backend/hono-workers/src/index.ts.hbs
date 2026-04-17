@@ -1,0 +1,53 @@
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+{{#if (eq api "orpc")}}
+import { RPCHandler } from "@orpc/server/fetch";
+import { onError } from "@orpc/server";
+import { appRouter } from "@{{projectName}}/api/routers/index";
+import { createContext } from "@{{projectName}}/api/context";
+{{/if}}
+
+/**
+ * Workers deployment. No process.env — secrets come in via the request
+ * context as `c.env`. Wrangler.toml binds them. Better Auth / Drizzle +
+ * Postgres on Workers require additional wiring (Hyperdrive or neon
+ * HTTP client); this entry deliberately keeps the shape minimal.
+ */
+
+type Bindings = {
+  APP_URL?: string;
+  DATABASE_URL?: string;
+};
+
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.use(
+  "/*",
+  cors({
+    origin: (origin, c) => c.env.APP_URL ?? origin ?? "http://localhost:3001",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+  }),
+);
+
+app.get("/health", (c) => c.json({ ok: true }));
+
+{{#if (eq api "orpc")}}
+const rpcHandler = new RPCHandler(appRouter, {
+  interceptors: [onError((err: unknown) => console.error(err))],
+});
+
+app.use("/rpc/*", async (c, next) => {
+  const result = await rpcHandler.handle(c.req.raw, {
+    prefix: "/rpc",
+    context: await createContext({ context: c }),
+  });
+  if (result.matched) {
+    return c.newResponse(result.response.body, result.response);
+  }
+  await next();
+});
+{{/if}}
+
+app.get("/", (c) => c.json({ message: "Olá do Veloz Stack!" }));
+
+export default app;

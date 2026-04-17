@@ -36,6 +36,8 @@ export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
       );
       break;
     case "cloudflare":
+      processTemplatesFromPrefix(vfs, "deploy/cloudflare/", "", config);
+      break;
     case "none":
     default:
       break;
