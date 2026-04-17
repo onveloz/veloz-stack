@@ -30,6 +30,16 @@ export type PixChargeInput = {
   };
 };
 
+/**
+ * The SDK response is a discriminated union `{ data: T } | { error: string }`.
+ * We narrow via `"error" in res` so TypeScript knows `data` is present in the
+ * happy path without a non-null assertion.
+ */
+function unwrap<T extends object>(res: T | { error: string }): T {
+  if ("error" in res) throw new Error(`AbacatePay: ${(res as { error: string }).error}`);
+  return res as T;
+}
+
 export async function createPixCharge(input: PixChargeInput) {
   if (!Number.isInteger(input.amountCentavos)) {
     throw new Error("amountCentavos must be an integer — you likely passed reais");
@@ -47,21 +57,18 @@ export async function createPixCharge(input: PixChargeInput) {
         }
       : undefined,
   });
-  if (res.error) throw new Error(`AbacatePay: ${res.error}`);
-  return res.data!;
+  return unwrap(res as any);
 }
 
 export async function checkPixCharge(id: string) {
   const res = await abacate.pixQrCode.check({ id });
-  if (res.error) throw new Error(`AbacatePay: ${res.error}`);
-  return res.data!;
+  return unwrap(res as any);
 }
 
 /** Dev-only. Fails with a clear error when called with a live key. */
 export async function simulatePixPayment(id: string) {
   const res = await abacate.pixQrCode.simulatePayment({ id });
-  if (res.error) throw new Error(`AbacatePay: ${res.error}`);
-  return res.data!;
+  return unwrap(res as any);
 }
 
 export { abacate };

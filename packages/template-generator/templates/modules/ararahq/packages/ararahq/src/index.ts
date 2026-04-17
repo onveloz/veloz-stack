@@ -3,7 +3,13 @@
  *
  * Key prefix controls environment: `ara_test_…` → sandbox, `ara_live_…` → prod.
  * Same base URL either way.
+ *
+ * NOTE: The `@ararahq/sdk` package changes its public API shape faster than
+ * our version pin. We cast the SDK to `any` at construction so this wrapper
+ * compiles against 1.x and 2.x. Check their /api-reference when you pull a
+ * new version.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import { NodeSDK } from "@ararahq/sdk";
 
 const apiKey = process.env.ARARA_KEY;
@@ -11,7 +17,8 @@ if (!apiKey) {
   throw new Error("ARARA_KEY is required (ara_live_… or ara_test_…). Get one at app.ararahq.com");
 }
 
-export const ararahq = new NodeSDK({ apiKey });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const ararahq = new (NodeSDK as any)({ apiKey });
 
 /** BR cellphone format: +5511999998888 (country + area + number, digits only). */
 export type BrPhone = `+55${string}`;
