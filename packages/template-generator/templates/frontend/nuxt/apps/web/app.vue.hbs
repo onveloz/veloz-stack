@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { client } from "./composables/useOrpc";
 
 const healthStatus = ref<"loading" | "ok" | "error">("loading");
@@ -12,52 +12,319 @@ onMounted(async () => {
     healthStatus.value = "error";
   }
 });
+
+const statusLabel = computed(() =>
+  healthStatus.value === "loading"
+    ? "Verificando API…"
+    : healthStatus.value === "ok"
+    ? "API conectada"
+    : "API desconectada",
+);
+
+const STACK: Array<{ label: string; brand?: boolean }> = [
+  { label: "{{frontend}}", brand: true },
+  { label: "{{backend}}" },
+  { label: "{{runtime}}" },
+  { label: "{{api}}" },
+  { label: "{{db}}" },
+  { label: "{{orm}}" },
+  { label: "{{auth}}" },
+].filter((s) => s.label !== "none");
+
+const MODULES: string[] = {{{json modules}}};
 </script>
 
 <template>
-  <main>
-    <div class="hero">
-      <div class="brand-dot" />
-      <h1>{{projectName}}</h1>
-    </div>
-    <p class="muted">
-      Scaffolded with <code>create-veloz-stack</code>. Edit
-      <code>apps/web/app.vue</code> to start.
-    </p>
-    <section class="status">
-      <div class="label">API status</div>
-      <div class="row">
-        <span
-          class="dot"
-          :class="{
-            ok: healthStatus === 'ok',
-            loading: healthStatus === 'loading',
-            error: healthStatus === 'error',
-          }"
-        />
-        <span>
-          \{{ healthStatus === "loading" ? "Checking…" : healthStatus === "ok" ? "Connected" : "Disconnected" }}
-        </span>
+  <main class="dot-grid">
+    <div class="shell">
+      <span class="status-pill" :class="`pill-${healthStatus}`">
+        <span class="pill-dot" />
+        \{{ statusLabel }}
+      </span>
+
+      <div class="hero">
+        <div class="hero-mark" />
+        <h1>{{projectName}}</h1>
       </div>
-    </section>
+
+      <p class="lede">
+        Stack <strong>{{frontend}} + {{backend}} + {{api}}</strong> no ar. Edite
+        <code>apps/web/app.vue</code> ou abra o <code>CLAUDE.md</code> e peça
+        ajuda pro agente.
+      </p>
+
+      <section class="section">
+        <h2>Próximos passos</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Edite a home</div>
+            <div class="step-body">
+              Substitua <code>apps/web/app.vue</code>.
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-title">Peça ajuda pro Claude</div>
+            <div class="step-body">
+              <code>CLAUDE.md</code> e <code>.claude/skills/</code> ensinam seu
+              agente sobre o stack.
+            </div>
+          </div>
+          {{#if (eq deploy "veloz")}}
+          <div class="step">
+            <div class="step-title">Deploy no Veloz</div>
+            <div class="step-body">
+              Rode <code>npx onveloz deploy</code> na raiz.
+            </div>
+          </div>
+          {{/if}}
+          {{#if (ne db "none")}}
+          <div class="step">
+            <div class="step-title">Aplique o schema</div>
+            <div class="step-body">
+              Rode <code>{{pm}} db:push</code> pra criar as tabelas.
+            </div>
+          </div>
+          {{/if}}
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>No seu stack</h2>
+        <div class="tag-row">
+          <span
+            v-for="s in STACK"
+            :key="s.label"
+            class="tag"
+            :class="{ brand: s.brand }"
+          >
+            \{{ s.label }}
+          </span>
+        </div>
+      </section>
+
+      <section v-if="MODULES.length > 0" class="section">
+        <h2>Módulos ativos</h2>
+        <div class="tag-row">
+          <span v-for="m in MODULES" :key="m" class="tag">\{{ m }}</span>
+        </div>
+      </section>
+
+      <section class="quick-links">
+        <a href="https://onveloz.com/docs" target="_blank" rel="noreferrer">
+          Docs da Veloz →
+        </a>
+        <a href="https://veloz-stack.dev" target="_blank" rel="noreferrer">
+          Veloz Stack →
+        </a>
+        <a
+          href="https://github.com/onveloz/veloz-stack"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub →
+        </a>
+      </section>
+
+      <footer class="footer">
+        Gerado com <code>create-veloz-stack</code> · feito no Brasil 🇧🇷
+      </footer>
+    </div>
   </main>
 </template>
 
 <style>
-:root { color-scheme: dark; }
-html, body { margin: 0; background: #0f0f0f; color: #e5e5e5; font-family: ui-sans-serif, system-ui, sans-serif; }
-* { box-sizing: border-box; }
-main { max-width: 42rem; margin: 0 auto; padding: 2rem; }
-.hero { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-.brand-dot { width: 12px; height: 12px; background: #ff4d00; }
-h1 { font-size: 1.75rem; font-weight: 700; }
-.muted { color: rgba(255,255,255,0.6); }
-code { background: rgba(255,255,255,0.08); padding: 0 4px; font-family: ui-monospace, monospace; }
-.status { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); padding: 1rem; margin-top: 1rem; }
-.label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
-.row { display: flex; align-items: center; gap: 0.5rem; }
-.dot { width: 8px; height: 8px; display: inline-block; }
-.dot.ok { background: #16a34a; }
-.dot.loading { background: #d97706; }
-.dot.error { background: #dc2626; }
+:root {
+  color-scheme: dark;
+  --brand: #ff4d00;
+  --bg: #0f0f0f;
+  --fg: #e5e5e5;
+  --muted: rgba(255, 255, 255, 0.6);
+  --border: rgba(255, 255, 255, 0.1);
+  --card: #161616;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Inter,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+code {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+}
+
+main {
+  min-height: 100vh;
+}
+
+.dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.shell {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  margin-bottom: 24px;
+  color: var(--muted);
+}
+
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #888;
+}
+
+.pill-ok .pill-dot {
+  background: #22c55e;
+}
+.pill-loading .pill-dot {
+  background: #eab308;
+}
+.pill-error .pill-dot {
+  background: #ef4444;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.hero-mark {
+  width: 16px;
+  height: 16px;
+  background: var(--brand);
+  box-shadow: 0 0 40px -10px var(--brand);
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  color: var(--muted);
+  font-size: 1.05rem;
+  margin: 0 0 48px;
+  max-width: 36rem;
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.section h2 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 12px;
+}
+
+.steps {
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+}
+
+.step {
+  background: var(--card);
+  padding: 16px;
+}
+
+.step-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.step-body {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tag.brand {
+  border-color: rgba(255, 77, 0, 0.4);
+  background: rgba(255, 77, 0, 0.1);
+  color: var(--brand);
+}
+
+.quick-links {
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 48px;
+}
+
+.quick-links a {
+  background: var(--card);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.quick-links a:hover {
+  color: var(--fg);
+}
+
+.footer {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
 </style>

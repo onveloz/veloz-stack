@@ -1,48 +1,242 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import HealthIsland from "../components/HealthIsland";
+
+const STACK: Array<{ label: string; brand?: boolean }> = [
+  { label: "{{frontend}}", brand: true },
+  { label: "{{backend}}" },
+  { label: "{{runtime}}" },
+  { label: "{{api}}" },
+  { label: "{{db}}" },
+  { label: "{{orm}}" },
+  { label: "{{auth}}" },
+].filter((s) => s.label !== "none");
+
+const MODULES: string[] = {{{json modules}}};
 ---
 
 <Layout title="{{projectName}}">
-  <main>
-    <div class="hero">
-      <div class="brand-dot"></div>
-      <h1>{{projectName}}</h1>
+  <main class="dot-grid">
+    <div class="shell">
+      <HealthIsland client:load />
+
+      <div class="hero">
+        <div class="hero-mark"></div>
+        <h1>{{projectName}}</h1>
+      </div>
+
+      <p class="lede">
+        Stack <strong>{{frontend}} + {{backend}} + {{api}}</strong> no ar. Edite
+        <code>apps/web/src/pages/index.astro</code> ou abra o
+        <code>CLAUDE.md</code> e peça ajuda pro agente.
+      </p>
+
+      <section class="section">
+        <h2>Próximos passos</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Edite a home</div>
+            <div class="step-body">
+              Substitua <code>apps/web/src/pages/index.astro</code>.
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-title">Peça ajuda pro Claude</div>
+            <div class="step-body">
+              <code>CLAUDE.md</code> e <code>.claude/skills/</code> ensinam seu
+              agente sobre o stack.
+            </div>
+          </div>
+          {{#if (eq deploy "veloz")}}
+          <div class="step">
+            <div class="step-title">Deploy no Veloz</div>
+            <div class="step-body">
+              Rode <code>npx onveloz deploy</code> na raiz.
+            </div>
+          </div>
+          {{/if}}
+          {{#if (ne db "none")}}
+          <div class="step">
+            <div class="step-title">Aplique o schema</div>
+            <div class="step-body">
+              Rode <code>{{pm}} db:push</code> pra criar as tabelas.
+            </div>
+          </div>
+          {{/if}}
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>No seu stack</h2>
+        <div class="tag-row">
+          {STACK.map((s) => (
+            <span class:list={["tag", s.brand && "brand"]}>{s.label}</span>
+          ))}
+        </div>
+      </section>
+
+      {MODULES.length > 0 && (
+        <section class="section">
+          <h2>Módulos ativos</h2>
+          <div class="tag-row">
+            {MODULES.map((m) => <span class="tag">{m}</span>)}
+          </div>
+        </section>
+      )}
+
+      <section class="quick-links">
+        <a href="https://onveloz.com/docs" target="_blank" rel="noreferrer">
+          Docs da Veloz →
+        </a>
+        <a href="https://veloz-stack.dev" target="_blank" rel="noreferrer">
+          Veloz Stack →
+        </a>
+        <a
+          href="https://github.com/onveloz/veloz-stack"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub →
+        </a>
+      </section>
+
+      <footer class="footer">
+        Gerado com <code>create-veloz-stack</code> · feito no Brasil 🇧🇷
+      </footer>
     </div>
-    <p class="muted">
-      Scaffolded with <code>create-veloz-stack</code>. Edit
-      <code>apps/web/src/pages/index.astro</code> to start.
-    </p>
-    <HealthIsland client:load />
   </main>
 </Layout>
 
 <style>
   main {
-    max-width: 42rem;
-    margin: 0 auto;
-    padding: 2rem;
+    min-height: 100vh;
   }
+
+  .dot-grid {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .shell {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 64px 24px;
+  }
+
   .hero {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: 12px;
+    margin: 24px 0 16px;
   }
-  .brand-dot {
-    width: 12px;
-    height: 12px;
+
+  .hero-mark {
+    width: 16px;
+    height: 16px;
     background: #ff4d00;
+    box-shadow: 0 0 40px -10px #ff4d00;
   }
+
   h1 {
-    font-size: 1.75rem;
+    font-size: 2.5rem;
     font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
   }
-  .muted {
+
+  .lede {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.05rem;
+    margin: 0 0 48px;
+    max-width: 36rem;
+  }
+
+  code {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.9em;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 6px;
+  }
+
+  .section {
+    margin-bottom: 48px;
+  }
+
+  .section h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0 0 12px;
+  }
+
+  .steps {
+    display: grid;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .step {
+    background: #161616;
+    padding: 16px;
+  }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .step-body {
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.6);
   }
-  code {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 0 4px;
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .tag.brand {
+    border-color: rgba(255, 77, 0, 0.4);
+    background: rgba(255, 77, 0, 0.1);
+    color: #ff4d00;
+  }
+
+  .quick-links {
+    display: grid;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 48px;
+  }
+
+  .quick-links a {
+    background: #161616;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+  }
+
+  .quick-links a:hover {
+    color: #ff4d00;
+  }
+
+  .footer {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 </style>

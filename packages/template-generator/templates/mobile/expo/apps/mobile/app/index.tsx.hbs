@@ -1,89 +1,190 @@
 import { useQuery } from "@tanstack/react-query";
-import { View, Text, StyleSheet } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Linking, TouchableOpacity } from "react-native";
 import { orpc } from "@/lib/orpc";
+
+const STACK: Array<{ label: string; brand?: boolean }> = [
+  { label: "{{frontend}}", brand: true },
+  { label: "{{backend}}" },
+  { label: "{{runtime}}" },
+  { label: "{{api}}" },
+  { label: "{{db}}" },
+  { label: "{{orm}}" },
+  { label: "{{auth}}" },
+].filter((s) => s.label !== "none");
+
+const MODULES: string[] = {{{json modules}}};
 
 export default function Home() {
   const health = useQuery(orpc.healthCheck.queryOptions());
-  const dotColor =
-    health.data === "OK" ? "#16a34a" : health.isLoading ? "#d97706" : "#dc2626";
+  const ok = health.data === "OK";
+  const dotColor = ok ? "#22c55e" : health.isLoading ? "#eab308" : "#ef4444";
   const statusText = health.isLoading
-    ? "Verificando…"
-    : health.data === "OK"
-    ? "Conectado"
-    : "Desconectado";
+    ? "Verificando API…"
+    : ok
+    ? "API conectada"
+    : "API desconectada";
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+      <View style={styles.statusPill}>
+        <View style={[styles.pillDot, { backgroundColor: dotColor }]} />
+        <Text style={styles.pillText}>{statusText}</Text>
+      </View>
+
       <View style={styles.hero}>
-        <View style={styles.brandDot} />
+        <View style={styles.heroMark} />
         <Text style={styles.title}>{{projectName}}</Text>
       </View>
-      <Text style={styles.subtitle}>
-        Gerado com create-veloz-stack. Edite apps/mobile/app/index.tsx pra começar.
+
+      <Text style={styles.lede}>
+        Mobile {{api}} no Expo. Edite{" "}
+        <Text style={styles.code}>apps/mobile/app/index.tsx</Text> ou pergunte
+        pro Claude.
       </Text>
-      <View style={styles.statusCard}>
-        <Text style={styles.statusLabel}>Status da API</Text>
-        <View style={styles.statusRow}>
-          <View style={[styles.statusDot, { backgroundColor: dotColor }]} />
-          <Text style={styles.statusText}>{statusText}</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>NO SEU STACK</Text>
+        <View style={styles.tagRow}>
+          {STACK.map((s) => (
+            <View
+              key={s.label}
+              style={[styles.tag, s.brand && styles.tagBrand]}
+            >
+              <Text
+                style={[styles.tagText, s.brand && styles.tagTextBrand]}
+              >
+                {s.label}
+              </Text>
+            </View>
+          ))}
         </View>
       </View>
-    </View>
+
+      {MODULES.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>MÓDULOS ATIVOS</Text>
+          <View style={styles.tagRow}>
+            {MODULES.map((m) => (
+              <View key={m} style={styles.tag}>
+                <Text style={styles.tagText}>{m}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>PRÓXIMOS PASSOS</Text>
+        <View style={styles.steps}>
+          <View style={styles.step}>
+            <Text style={styles.stepTitle}>Edite a home</Text>
+            <Text style={styles.stepBody}>
+              Substitua apps/mobile/app/index.tsx.
+            </Text>
+          </View>
+          <View style={styles.step}>
+            <Text style={styles.stepTitle}>Peça ajuda pro Claude</Text>
+            <Text style={styles.stepBody}>
+              CLAUDE.md e .claude/skills/ ensinam o agente sobre o stack.
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.linkRow}>
+        <Link href="https://onveloz.com/docs" label="Docs Veloz" />
+        <Link href="https://veloz-stack.dev" label="Veloz Stack" />
+        <Link href="https://github.com/onveloz/veloz-stack" label="GitHub" />
+      </View>
+
+      <Text style={styles.footer}>
+        Gerado com create-veloz-stack · feito no Brasil 🇧🇷
+      </Text>
+    </ScrollView>
   );
 }
 
+function Link({ href, label }: { href: string; label: string }) {
+  return (
+    <TouchableOpacity onPress={() => Linking.openURL(href)} style={styles.link}>
+      <Text style={styles.linkText}>{label} →</Text>
+    </TouchableOpacity>
+  );
+}
+
+const BRAND = "#FF4D00";
+const BG = "#0f0f0f";
+const FG = "#e5e5e5";
+const MUTED = "rgba(255,255,255,0.6)";
+const BORDER = "rgba(255,255,255,0.1)";
+const CARD = "#161616";
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: "#0f0f0f",
-  },
-  hero: {
+  scroll: { flex: 1, backgroundColor: BG },
+  container: { padding: 24, paddingTop: 64, paddingBottom: 48 },
+  statusPill: {
+    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 16,
-    marginTop: 32,
-  },
-  brandDot: {
-    width: 14,
-    height: 14,
-    backgroundColor: "#FF4D00",
-  },
-  title: {
-    color: "#e5e5e5",
-    fontSize: 28,
-    fontWeight: "700",
-  },
-  subtitle: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 14,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: BORDER,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     marginBottom: 24,
   },
-  statusCard: {
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    padding: 16,
+  pillDot: { width: 6, height: 6, borderRadius: 3 },
+  pillText: { color: MUTED, fontSize: 11, fontWeight: "500" },
+  hero: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 },
+  heroMark: {
+    width: 16,
+    height: 16,
+    backgroundColor: BRAND,
+    shadowColor: BRAND,
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
   },
-  statusLabel: {
+  title: { color: FG, fontSize: 32, fontWeight: "700", letterSpacing: -0.5 },
+  lede: { color: MUTED, fontSize: 15, lineHeight: 22, marginBottom: 40 },
+  code: {
+    fontFamily: "Menlo",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    paddingHorizontal: 4,
+    fontSize: 13,
+  },
+  section: { marginBottom: 32 },
+  sectionTitle: {
     color: "rgba(255,255,255,0.5)",
     fontSize: 11,
-    textTransform: "uppercase",
     letterSpacing: 1,
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  tag: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: BORDER,
+    backgroundColor: "rgba(255,255,255,0.03)",
   },
-  statusDot: {
-    width: 10,
-    height: 10,
+  tagBrand: {
+    borderColor: "rgba(255,77,0,0.4)",
+    backgroundColor: "rgba(255,77,0,0.1)",
   },
-  statusText: {
-    color: "#e5e5e5",
-    fontSize: 14,
+  tagText: { color: MUTED, fontSize: 12 },
+  tagTextBrand: { color: BRAND },
+  steps: { gap: 1, backgroundColor: BORDER },
+  step: { backgroundColor: CARD, padding: 16 },
+  stepTitle: { color: FG, fontSize: 14, fontWeight: "500", marginBottom: 4 },
+  stepBody: { color: MUTED, fontSize: 12 },
+  linkRow: { flexDirection: "row", gap: 1, backgroundColor: BORDER, marginBottom: 32 },
+  link: { flex: 1, backgroundColor: CARD, padding: 12 },
+  linkText: { color: MUTED, fontSize: 13 },
+  footer: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
   },
 });

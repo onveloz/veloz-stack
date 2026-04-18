@@ -164,6 +164,48 @@ describe("generate()", () => {
   });
 });
 
+describe("enriched homes", () => {
+  it("nuxt home interpolates projectName + STACK + brand colour + módulos pills", () => {
+    const vfs = generate(cfg({ frontend: "nuxt", projectName: "minha-loja" }));
+    const home = vfs.read("apps/web/app.vue")!;
+    expect(home).toContain("minha-loja");
+    expect(home).toContain("#ff4d00");
+    expect(home).toMatch(/Próximos passos/);
+    expect(home).toMatch(/MODULES/);
+    expect(home).toMatch(/quick-links/);
+  });
+
+  it("svelte-kit home renders Veloz showcase blocks (não só o stub antigo)", () => {
+    const vfs = generate(cfg({ frontend: "svelte-kit", projectName: "tchau-mundo" }));
+    const home = vfs.read("apps/web/src/routes/+page.svelte")!;
+    expect(home).toContain("tchau-mundo");
+    expect(home).toContain("#ff4d00");
+    expect(home).toMatch(/Próximos passos/);
+    expect(home).toMatch(/{#each STACK/);
+    expect(home).toMatch(/dot-grid/);
+  });
+
+  it("astro index.astro lists STACK + módulos + Veloz quick links", () => {
+    const vfs = generate(cfg({ frontend: "astro", projectName: "ola" }));
+    const home = vfs.read("apps/web/src/pages/index.astro")!;
+    expect(home).toContain("ola");
+    expect(home).toContain("#ff4d00");
+    expect(home).toMatch(/STACK\.map/);
+    expect(home).toMatch(/Próximos passos/);
+    expect(home).toMatch(/onveloz\.com\/docs/);
+  });
+
+  it("expo mobile home shows projectName + brand + status pill + módulos chips", () => {
+    const vfs = generate(cfg({ mobile: "expo", projectName: "app-nativo" }));
+    const home = vfs.read("apps/mobile/app/index.tsx")!;
+    expect(home).toContain("app-nativo");
+    expect(home).toContain("#FF4D00");
+    expect(home).toMatch(/STACK\.map/);
+    expect(home).toMatch(/MÓDULOS ATIVOS/);
+    expect(home).toMatch(/onveloz\.com\/docs/);
+  });
+});
+
 describe("ui axis", () => {
   it("default ui=shadcn overlays components.json + ui/ folder for tanstack-start", () => {
     const files = paths(cfg({ ui: "shadcn", frontend: "tanstack-start" }));
