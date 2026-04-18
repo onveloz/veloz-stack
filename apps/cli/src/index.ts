@@ -7,7 +7,9 @@ import {
   DbHostingId as DbHostingIdSchema,
   DbId as DbIdSchema,
   DeployId as DeployIdSchema,
+  DesktopId as DesktopIdSchema,
   FrontendId as FrontendIdSchema,
+  MobileId as MobileIdSchema,
   OrmId as OrmIdSchema,
   PackageManagerId as PackageManagerIdSchema,
   PresetId as PresetIdSchema,
@@ -22,6 +24,8 @@ const reenum = <T extends { options: readonly string[] }>(s: T) =>
 
 const PresetId = reenum(PresetIdSchema);
 const FrontendId = reenum(FrontendIdSchema);
+const MobileId = reenum(MobileIdSchema);
+const DesktopId = reenum(DesktopIdSchema);
 const BackendId = reenum(BackendIdSchema);
 const RuntimeId = reenum(RuntimeIdSchema);
 const ApiId = reenum(ApiIdSchema);
@@ -53,7 +57,9 @@ const cli = Cli.create("create-veloz-stack", {
     preset: PresetId.optional().describe(
       "Modelo pronto: veloz-br | minimal | mern | pern | custom",
     ),
-    frontend: FrontendId.optional().describe("Framework de frontend"),
+    frontend: FrontendId.optional().describe("Frontend web (single-select)"),
+    mobile: MobileId.optional().describe("App mobile (expo | none) — pode coexistir com frontend"),
+    desktop: DesktopId.optional().describe("App desktop (tauri | none) — embrulha o frontend web"),
     backend: BackendId.optional().describe("Framework de backend"),
     runtime: RuntimeId.optional().describe("Runtime: bun | node | workers"),
     api: ApiId.optional().describe("Estilo de API: orpc | trpc | rest | none"),

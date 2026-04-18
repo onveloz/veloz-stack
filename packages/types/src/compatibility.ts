@@ -113,6 +113,11 @@ export function validateConfig(cfg: ProjectConfig): string[] {
       "auth: Better Auth precisa de um banco (usa o adapter Drizzle no packages/db)",
     );
   }
+  if (cfg.desktop === "tauri" && cfg.frontend === "none") {
+    errors.push(
+      "desktop: Tauri precisa de um frontend web — ele empacota a UI numa janela nativa",
+    );
+  }
 
   for (const m of cfg.modules) {
     pushIf(getModuleDisableReason(cfg, m), `módulo ${m}`);

@@ -4,6 +4,8 @@ import { MODULES, type ModuleId } from "./modules";
 export const DEFAULT_CONFIG: ProjectConfig = {
   projectName: "my-veloz-stack",
   frontend: "tanstack-start",
+  mobile: "none",
+  desktop: "none",
   backend: "hono",
   runtime: "bun",
   api: "orpc",

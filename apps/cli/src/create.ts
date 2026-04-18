@@ -87,6 +87,8 @@ function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectCo
   if (input.projectName) out.projectName = input.projectName;
   for (const k of [
     "frontend",
+    "mobile",
+    "desktop",
     "backend",
     "runtime",
     "api",

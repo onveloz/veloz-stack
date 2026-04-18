@@ -226,7 +226,6 @@ function frontendLabels(id: string): string {
     nuxt: "Nuxt",
     "svelte-kit": "SvelteKit",
     astro: "Astro",
-    "native-expo": "Expo (React Native)",
     none: "Nenhum",
   };
   return map[id] ?? titleCase(id);

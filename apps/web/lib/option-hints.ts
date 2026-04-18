@@ -5,8 +5,13 @@ export const OPTION_HINTS: Record<string, string> = {
   nuxt: "Vue · SSR · Nitro",
   "svelte-kit": "Svelte 5 · SSR",
   astro: "Islands · focado em conteúdo",
-  "native-expo": "React Native · updates OTA",
   none: "Sem UI — só API",
+
+  // Mobile
+  expo: "React Native · expo-router · OTA updates",
+
+  // Desktop
+  tauri: "Rust + WebView nativo · empacota o frontend web",
 
   // Backend
   hono: "Ultra-rápido · padrões web · roda em edge",

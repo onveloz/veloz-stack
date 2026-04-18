@@ -115,7 +115,7 @@ function runtimeCommand(config: ProjectConfig): string {
 function webServiceShape(
   config: ProjectConfig,
 ): Record<string, unknown> | null {
-  if (config.frontend === "none" || config.frontend === "native-expo") return null;
+  if (config.frontend === "none") return null;
 
   const hasTurborepo = config.addons.includes("turborepo");
   const build = hasTurborepo

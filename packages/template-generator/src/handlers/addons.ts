@@ -4,8 +4,8 @@ import type { VirtualFs } from "../vfs";
 
 /**
  * Addons are tooling modifications: turborepo task graph, biome
- * formatter, husky git hooks. They write config files here; the
- * post-processor rewrites root scripts to reflect the chosen tooling.
+ * formatter, husky git hooks, tauri desktop shell. They write config
+ * files here; the post-processor rewrites root scripts when needed.
  */
 export function processAddons(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.addons.includes("turborepo")) {
@@ -17,4 +17,6 @@ export function processAddons(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.addons.includes("husky")) {
     processTemplatesFromPrefix(vfs, "addons/husky/", "", config);
   }
+  // Tauri moved out of addons — it's now a top-level `desktop` target.
+  // See handlers/desktop.ts.
 }

@@ -11,11 +11,13 @@ import {
   DbHostingId,
   DbId,
   DeployId,
+  DesktopId,
   ExampleId,
   FrontendId,
   MODULES,
   MODULE_CATEGORIES,
   MODULE_CATEGORY_LABELS,
+  MobileId,
   OrmId,
   PRESETS,
   PackageManagerId,
@@ -185,9 +187,21 @@ export function StackBuilder() {
   }> = [
     {
       key: "frontend",
-      label: "Frontend",
+      label: "Frontend (web)",
       tiles: tiles(FrontendId.options, labelsFrontend),
       getDisabled: (id) => getFrontendDisableReason(config, id as any),
+    },
+    {
+      key: "mobile",
+      label: "Mobile",
+      tiles: tiles(MobileId.options, (id) => (id === "expo" ? "Expo" : "Nenhum")),
+      getDisabled: () => null,
+    },
+    {
+      key: "desktop",
+      label: "Desktop",
+      tiles: tiles(DesktopId.options, (id) => (id === "tauri" ? "Tauri" : "Nenhum")),
+      getDisabled: () => null,
     },
     {
       key: "backend",
@@ -708,8 +722,7 @@ function labelsFrontend(id: string): string {
     nuxt: "Nuxt",
     "svelte-kit": "SvelteKit",
     astro: "Astro",
-    "native-expo": "Expo (React Native)",
-    none: "None",
+    none: "Nenhum",
   };
   return map[id] ?? titleCase(id);
 }

@@ -1,0 +1,130 @@
+import { useEffect, useState } from "react";
+
+// Cast porque o Vite plugin do TanStack Router só conhece '/' até a primeira
+// regeneração de routeTree.gen — o stub que o scaffold ship cobre apenas '/'.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const Route = (createFileRoute as any)("/desktop")({ component: DesktopDemo });
+
+import { createFileRoute } from "@tanstack/react-router";
+
+type SysInfo = { os: string; arch: string; family: string };
+
+function DesktopDemo() {
+  const [insideTauri, setInsideTauri] = useState(false);
+  const [name, setName] = useState("Pierre");
+  const [greeting, setGreeting] = useState<string>("");
+  const [info, setInfo] = useState<SysInfo | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const inside =
+      typeof window !== "undefined" &&
+      // Tauri 2 expõe __TAURI_INTERNALS__; o api/core também detecta isso.
+      ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
+    setInsideTauri(inside);
+
+    if (!inside) return;
+    void (async () => {
+      try {
+        const { invoke } = await import("@tauri-apps/api/core");
+        setInfo(await invoke<SysInfo>("system_info"));
+      } catch (e) {
+        setErr(String(e));
+      }
+    })();
+  }, []);
+
+  async function handleGreet() {
+    setErr(null);
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const msg = await invoke<string>("greet", { name });
+      setGreeting(msg);
+    } catch (e) {
+      setErr(String(e));
+    }
+  }
+
+  return (
+    <main className="min-h-screen dot-grid">
+      <div className="max-w-3xl mx-auto px-6 py-16 space-y-8">
+        <header>
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-medium border border-white/10 px-2 py-1 mb-4">
+            <span
+              className={
+                "w-1.5 h-1.5 rounded-full " +
+                (insideTauri ? "bg-green-500" : "bg-yellow-500")
+              }
+            />
+            <span className="text-white/60">
+              {insideTauri ? "Rodando dentro do Tauri" : "Modo browser — `tauri dev` pra testar IPC"}
+            </span>
+          </div>
+          <h1 className="text-4xl font-bold">IPC Rust ↔ Web</h1>
+          <p className="text-white/60 mt-2 max-w-xl">
+            Esta página chama três comandos definidos em{" "}
+            <code>apps/desktop/src-tauri/src/main.rs</code> via{" "}
+            <code>@tauri-apps/api/core</code>.
+          </p>
+        </header>
+
+        <section className="border border-white/10 p-5 bg-white/5">
+          <h2 className="text-sm font-semibold mb-3">greet(name)</h2>
+          <div className="flex gap-2 mb-3">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex-1 bg-black/40 border border-white/10 px-3 h-9 text-sm font-mono"
+              placeholder="seu nome"
+            />
+            <button
+              onClick={handleGreet}
+              disabled={!insideTauri}
+              className="h-9 px-4 bg-[#FF4D00] text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#E64500] transition-colors"
+            >
+              Invocar Rust
+            </button>
+          </div>
+          {greeting && (
+            <div className="text-sm font-mono text-green-400">{greeting}</div>
+          )}
+        </section>
+
+        <section className="border border-white/10 p-5 bg-white/5">
+          <h2 className="text-sm font-semibold mb-3">system_info()</h2>
+          {info ? (
+            <dl className="grid grid-cols-3 gap-3 text-sm font-mono">
+              <Field k="os" v={info.os} />
+              <Field k="arch" v={info.arch} />
+              <Field k="family" v={info.family} />
+            </dl>
+          ) : (
+            <div className="text-sm text-white/40">
+              {insideTauri ? "Carregando…" : "Disponível só dentro do Tauri."}
+            </div>
+          )}
+        </section>
+
+        {err && (
+          <div className="border border-red-500/40 bg-red-500/10 p-3 text-xs font-mono text-red-300">
+            {err}
+          </div>
+        )}
+
+        <footer className="text-xs text-white/40 pt-6 border-t border-white/10">
+          Defina mais comandos em <code>main.rs</code> e registre-os no{" "}
+          <code>invoke_handler</code>.
+        </footer>
+      </div>
+    </main>
+  );
+}
+
+function Field({ k, v }: { k: string; v: string }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wider text-white/40">{k}</div>
+      <div className="text-white/90">{v}</div>
+    </div>
+  );
+}

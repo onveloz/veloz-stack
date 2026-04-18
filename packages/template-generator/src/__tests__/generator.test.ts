@@ -62,13 +62,40 @@ describe("generate()", () => {
     expect(files).not.toContain("apps/web/next.config.mjs");
   });
 
-  it("--frontend native-expo produces an Expo project under apps/mobile", () => {
-    const files = paths(cfg({ frontend: "native-expo" }));
+  it("--mobile expo produces an Expo project under apps/mobile (independent of web frontend)", () => {
+    const files = paths(cfg({ frontend: "tanstack-start", mobile: "expo" }));
     expect(files).toContain("apps/mobile/app.json");
     expect(files).toContain("apps/mobile/app/_layout.tsx");
     expect(files).toContain("apps/mobile/app/index.tsx");
     expect(files).toContain("apps/mobile/src/lib/orpc.ts");
+    // web frontend still emits — web + mobile coexist
+    expect(files.some((p) => p.startsWith("apps/web/"))).toBe(true);
+  });
+
+  it("--mobile expo --frontend none emits only mobile (no web)", () => {
+    const files = paths(cfg({ frontend: "none", mobile: "expo" }));
+    expect(files).toContain("apps/mobile/app.json");
     expect(files.some((p) => p.startsWith("apps/web/"))).toBe(false);
+  });
+
+  it("--desktop tauri emits the Tauri shell + Cargo.toml", () => {
+    const files = paths(cfg({ desktop: "tauri" }));
+    expect(files).toContain("apps/desktop/src-tauri/Cargo.toml");
+    expect(files).toContain("apps/desktop/src-tauri/src/main.rs");
+    expect(files).toContain("apps/desktop/src-tauri/tauri.conf.json");
+    expect(files).toContain("apps/desktop/package.json");
+  });
+
+  it("--desktop tauri + tanstack-start emits the /desktop IPC route", () => {
+    const vfs = generate(cfg({ desktop: "tauri", frontend: "tanstack-start" }));
+    expect(vfs.read("apps/web/src/routes/desktop.tsx")).toContain("invoke");
+    const pkg = JSON.parse(vfs.read("apps/web/package.json")!);
+    expect(pkg.dependencies["@tauri-apps/api"]).toBeDefined();
+  });
+
+  it("validateConfig rejects --desktop tauri --frontend none (Tauri wraps web)", () => {
+    const errors = validateConfig(cfg({ desktop: "tauri", frontend: "none" }));
+    expect(errors.some((e) => e.includes("Tauri precisa de um frontend web"))).toBe(true);
   });
 
   it("--frontend svelte-kit produces a SvelteKit project", () => {

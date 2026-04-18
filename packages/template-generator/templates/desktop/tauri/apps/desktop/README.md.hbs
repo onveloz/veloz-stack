@@ -1,0 +1,51 @@
+# `{{projectName}}` desktop
+
+Shell desktop em [Tauri 2](https://v2.tauri.app) (Rust + WebView nativo).
+
+## Pré-requisitos
+
+- [Rust](https://www.rust-lang.org/tools/install) (rustup recomendado)
+- Dependências de plataforma: <https://v2.tauri.app/start/prerequisites/>
+- macOS: Xcode Command Line Tools (`xcode-select --install`)
+- Linux: pacotes do sistema (webkit2gtk, libssl, etc — ver doc)
+
+## Rodar em dev
+
+```sh
+{{pm}} --filter @{{projectName}}/desktop dev
+```
+
+O Tauri sobe automaticamente o frontend (`{{pm}} --filter @{{projectName}}/web dev`)
+em `http://localhost:3001` e abre uma janela nativa apontando pra ele.
+
+## Build pra produção
+
+```sh
+{{pm}} --filter @{{projectName}}/desktop build
+```
+
+Gera binários em `apps/desktop/src-tauri/target/release/bundle/`.
+
+## IPC entre Rust e Web
+
+Os comandos definidos em `src-tauri/src/main.rs`:
+
+- `greet(name: string) → string`
+- `system_info() → { os, arch, family }`
+- `env_var(key: string) → string | null` — útil pra ler segredos sem expor no frontend
+
+Chamada do frontend (TanStack Start, route `/desktop`):
+
+```ts
+import { invoke } from "@tauri-apps/api/core";
+
+const message = await invoke<string>("greet", { name: "Pierre" });
+```
+
+## Ícones
+
+Substitua `src-tauri/icons/*` pelos seus. O `tauri-cli` tem um helper:
+
+```sh
+{{pm}} --filter @{{projectName}}/desktop tauri icon path/to/source.png
+```

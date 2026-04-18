@@ -7,10 +7,15 @@ export const FrontendId = z.enum([
   "nuxt",
   "svelte-kit",
   "astro",
-  "native-expo",
   "none",
 ]);
 export type FrontendId = z.infer<typeof FrontendId>;
+
+export const MobileId = z.enum(["expo", "none"]);
+export type MobileId = z.infer<typeof MobileId>;
+
+export const DesktopId = z.enum(["tauri", "none"]);
+export type DesktopId = z.infer<typeof DesktopId>;
 
 export const BackendId = z.enum(["hono", "express", "fastify", "elysia", "none"]);
 export type BackendId = z.infer<typeof BackendId>;
@@ -79,6 +84,8 @@ export const ProjectConfig = z.object({
     message: "lowercase letters, digits, hyphen, underscore",
   }),
   frontend: FrontendId,
+  mobile: MobileId.default("none"),
+  desktop: DesktopId.default("none"),
   backend: BackendId,
   runtime: RuntimeId,
   api: ApiId,
