@@ -53,8 +53,27 @@ jobs:
           - { name: frontend-astro, args: "--frontend astro" }
           - { name: frontend-nuxt, args: "--frontend nuxt" }
           - { name: frontend-svelte, args: "--frontend svelte-kit" }
-          - { name: frontend-expo, args: "--frontend native-expo" }
           - { name: frontend-none, args: "--frontend none" }
+
+          # ─────── Mobile axis (independent — coexists with web frontend)
+          - { name: mobile-expo, args: "--mobile expo" }
+          - { name: mobile-only, args: "--frontend none --mobile expo" }
+
+          # ─────── Desktop axis (Tauri wraps the web frontend)
+          - { name: desktop-tauri, args: "--desktop tauri" }
+          - { name: desktop-tauri-next, args: "--frontend next --desktop tauri" }
+
+          # ─────── UI axis
+          - { name: ui-shadcn-tanstack, args: "--frontend tanstack-start --ui shadcn" }
+          - { name: ui-shadcn-next, args: "--frontend next --ui shadcn" }
+          - { name: ui-tailwind, args: "--ui tailwind" }
+          - { name: ui-none-tanstack, args: "--frontend tanstack-start --ui none" }
+          - { name: ui-none-next, args: "--frontend next --ui none" }
+
+          # Auto-fallback: nuxt with default ui=shadcn must succeed
+          # (CLI silently falls back to tailwind for non-React)
+          - { name: ui-fallback-nuxt, args: "--frontend nuxt" }
+          - { name: ui-fallback-svelte, args: "--frontend svelte-kit" }
 
           # ─────── Runtime axis
           - { name: runtime-bun, args: "--runtime bun" }
@@ -107,6 +126,8 @@ jobs:
           - { name: prisma-todo, args: "--orm prisma --examples todo" }
           - { name: astro-pnpm-drizzle, args: "--frontend astro --pm pnpm --orm drizzle" }
           - { name: node-vercel-next, args: "--runtime node --deploy vercel --frontend next" }
+          - { name: triple-platform, args: "--frontend tanstack-start --mobile expo --desktop tauri" }
+          - { name: shadcn-tauri-next, args: "--frontend next --ui shadcn --desktop tauri" }
 
           # ─────── Known-invalid guard (the CLI should exit non-zero)
           # Handled separately in the invalid-combos job below.
@@ -168,6 +189,32 @@ jobs:
           code=$?
           if [ "$code" -eq 0 ]; then
             echo "::error::Scaffolder accepted auth=better-auth + db=none"
+            exit 1
+          fi
+          echo "✓ Rejected with exit code $code"
+
+      - name: shadcn UI + non-React frontend must be rejected
+        run: |
+          set +e
+          ./apps/cli/node_modules/.bin/tsx apps/cli/src/index.ts \
+            /tmp/veloz-invalid3 --yes --no-install --pm pnpm \
+            --frontend nuxt --ui shadcn
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::Scaffolder accepted ui=shadcn + frontend=nuxt"
+            exit 1
+          fi
+          echo "✓ Rejected with exit code $code"
+
+      - name: Tauri desktop + frontend=none must be rejected
+        run: |
+          set +e
+          ./apps/cli/node_modules/.bin/tsx apps/cli/src/index.ts \
+            /tmp/veloz-invalid4 --yes --no-install --pm pnpm \
+            --frontend none --desktop tauri
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::Scaffolder accepted desktop=tauri + frontend=none"
             exit 1
           fi
           echo "✓ Rejected with exit code $code"
