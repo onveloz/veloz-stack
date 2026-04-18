@@ -15,6 +15,7 @@ import {
   PRESETS,
   PackageManagerId,
   RuntimeId,
+  UiId,
   type ProjectConfig,
   getApiDisableReason,
   getBackendDisableReason,
@@ -23,6 +24,7 @@ import {
   getModuleDisableReason,
   getOrmDisableReason,
   getRuntimeDisableReason,
+  getUiDisableReason,
 } from "@veloz-stack/types";
 
 type CreateInput = Partial<ProjectConfig> & { projectName?: string };
@@ -128,6 +130,13 @@ export async function gatherInteractive(
     PackageManagerId.options,
     input.pm ?? cfg.pm,
     () => null,
+  );
+  cfg.ui = await pickOne(
+    "UI",
+    UiId.options,
+    input.ui ?? cfg.ui,
+    (id) => getUiDisableReason({ ...cfg, ui: id }, id),
+    uiLabels,
   );
 
   // Modules — grouped multi-select
@@ -241,5 +250,12 @@ function authLabels(id: string): string {
   if (id === "better-auth") return "Better Auth";
   if (id === "clerk") return "Clerk";
   if (id === "none") return "Nenhuma";
+  return titleCase(id);
+}
+
+function uiLabels(id: string): string {
+  if (id === "shadcn") return "shadcn/ui (Tailwind 4)";
+  if (id === "tailwind") return "Tailwind 4 (sem componentes)";
+  if (id === "none") return "Nenhum (CSS puro)";
   return titleCase(id);
 }

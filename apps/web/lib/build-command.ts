@@ -12,6 +12,7 @@ const STACK_KEYS = [
   "auth",
   "deploy",
   "pm",
+  "ui",
 ] as const satisfies readonly (keyof ProjectConfig)[];
 
 export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | "npm" }): string {

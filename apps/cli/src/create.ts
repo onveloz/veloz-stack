@@ -8,6 +8,7 @@ import {
   PRESETS,
   type ProjectConfig,
   type ModuleId,
+  getUiDisableReason,
   validateConfig,
 } from "@veloz-stack/types";
 import { scaffold } from "@veloz-stack/template-generator/scaffold";
@@ -30,6 +31,14 @@ export async function runCreate(input: CreateInput): Promise<void> {
   const config = input.yes
     ? seeded
     : await gatherInteractive(seeded, input);
+
+  // If the user didn't explicitly pick a UI but the resolved frontend
+  // doesn't support the seeded one (e.g. shadcn + nuxt), fall back
+  // silently to tailwind. We only override implicit choices — an
+  // explicit `--ui shadcn` still fails validation below.
+  if (input.ui === undefined && getUiDisableReason(config, config.ui)) {
+    config.ui = "tailwind";
+  }
 
   // If the user gave us a path (absolute or relative with slashes), treat
   // the last segment as the package name and the whole thing as the target
@@ -98,6 +107,7 @@ function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectCo
     "auth",
     "deploy",
     "pm",
+    "ui",
     "preset",
   ] as const) {
     const v = (input as any)[k];
@@ -157,6 +167,7 @@ function printSummary(cfg: ProjectConfig, target: string): void {
   );
   console.log(line("orm", cfg.orm));
   console.log(line("auth", cfg.auth));
+  console.log(line("ui", cfg.ui));
   console.log(line("deploy", cfg.deploy));
   console.log(line("pm", cfg.pm));
   if (cfg.modules.length > 0) {

@@ -1,0 +1,283 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  ArrowUpRight,
+  BookOpen,
+  Database,
+  FileCode2,
+  Layers,
+  Rocket,
+  Sparkles,
+  Terminal,
+} from "lucide-react";
+
+import { orpc } from "@/lib/orpc";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+const STACK: Array<{ label: string; brand?: boolean }> = [
+  { label: "{{frontend}}", brand: true },
+  { label: "{{backend}}" },
+  { label: "{{runtime}}" },
+  { label: "{{api}}" },
+  { label: "{{db}}" },
+  { label: "{{orm}}" },
+  { label: "{{auth}}" },
+];
+
+const MODULES: string[] = {{{json modules}}};
+
+export default function Home() {
+  const health = useQuery(orpc.healthCheck.queryOptions());
+  const connected = health.data === "OK";
+  const [name, setName] = useState("");
+
+  return (
+    <main className="min-h-screen dot-grid">
+      <div className="max-w-4xl mx-auto px-6 py-16 space-y-12">
+        <div>
+          <Badge
+            variant={connected ? "brand" : "outline"}
+            className="mb-6"
+          >
+            <span
+              className={
+                "size-1.5 rounded-full " +
+                (connected
+                  ? "bg-green-500"
+                  : health.isLoading
+                  ? "bg-yellow-500"
+                  : "bg-red-500")
+              }
+            />
+            {health.isLoading
+              ? "Verificando API…"
+              : connected
+              ? "API conectada"
+              : "API desconectada"}
+          </Badge>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="size-4 bg-brand shadow-[0_0_40px_-10px_var(--color-brand)]" />
+            <h1 className="text-5xl font-bold tracking-tight">{{projectName}}</h1>
+          </div>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            Seu stack {{frontend}} + {{backend}} + {{api}} tá no ar, com{" "}
+            <strong className="text-foreground">shadcn/ui</strong> (Tailwind 4 +
+            tokens em oklch). Edite <code>apps/web/app/page.tsx</code> ou peça
+            pro Claude.
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>shadcn/ui — componentes prontos</CardTitle>
+            <CardDescription>
+              Os arquivos vivem em <code>components/ui/</code>. Adicione mais
+              com <code>npx shadcn@latest add &lt;name&gt;</code>.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Button>Default</Button>
+              <Button variant="secondary">Secondary</Button>
+              <Button variant="outline">Outline</Button>
+              <Button variant="ghost">Ghost</Button>
+              <Button variant="link">Link</Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="brand">brand</Badge>
+              <Badge>default</Badge>
+              <Badge variant="outline">outline</Badge>
+            </div>
+            <div className="flex gap-2 max-w-md">
+              <Input
+                placeholder="Seu nome"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>Abrir</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      Olá{name ? `, ${name}` : ""}!
+                    </DialogTitle>
+                    <DialogDescription>
+                      Esse Dialog é Radix puro com classes shadcn. Editável em{" "}
+                      <code>components/ui/dialog.tsx</code>.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
+
+        <section>
+          <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-3">
+            Próximos passos
+          </h2>
+          <div className="grid gap-px bg-border">
+            <Step
+              icon={<FileCode2 className="size-4" />}
+              title="Edite a home"
+              body={
+                <>
+                  Substitua esta página em <code>apps/web/app/page.tsx</code>.
+                </>
+              }
+            />
+            <Step
+              icon={<BookOpen className="size-4" />}
+              title="Peça ajuda pro Claude"
+              body={
+                <>
+                  O <code>CLAUDE.md</code> e os arquivos em{" "}
+                  <code>.claude/skills/</code> ensinam seu agente tudo sobre o
+                  stack.
+                </>
+              }
+            />
+            {{#if (eq deploy "veloz")}}
+            <Step
+              icon={<Rocket className="size-4" />}
+              title="Deploy no Veloz"
+              body={
+                <>
+                  Rode <code>npx onveloz deploy</code> na raiz.
+                </>
+              }
+            />
+            {{/if}}
+            {{#if (ne db "none")}}
+            <Step
+              icon={<Database className="size-4" />}
+              title="Aplique o schema"
+              body={
+                <>
+                  Rode <code>{{pm}} db:push</code> pra criar as tabelas no banco.
+                </>
+              }
+            />
+            {{/if}}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-3">
+            No seu stack
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {STACK.filter((s) => s.label !== "none").map((s) => (
+              <Badge key={s.label} variant={s.brand ? "brand" : "default"}>
+                {s.label}
+              </Badge>
+            ))}
+          </div>
+        </section>
+
+        {MODULES.length > 0 && (
+          <section>
+            <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-3">
+              Módulos ativos
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {MODULES.map((m) => (
+                <Badge key={m}>{m}</Badge>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="grid gap-px bg-border sm:grid-cols-3">
+          <QuickLink
+            icon={<Terminal className="size-3.5" />}
+            label="Docs da Veloz"
+            href="https://onveloz.com/docs"
+          />
+          <QuickLink
+            icon={<Layers className="size-3.5" />}
+            label="Veloz Stack"
+            href="https://veloz-stack.dev"
+          />
+          <QuickLink
+            icon={<Sparkles className="size-3.5" />}
+            label="GitHub"
+            href="https://github.com/onveloz/veloz-stack"
+          />
+        </section>
+
+        <footer className="text-xs text-muted-foreground pt-6 border-t border-border">
+          Gerado com <code>create-veloz-stack</code> · feito no Brasil 🇧🇷
+        </footer>
+      </div>
+    </main>
+  );
+}
+
+function Step({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: React.ReactNode;
+}) {
+  return (
+    <div className="bg-card p-4 flex items-start gap-3">
+      <div className="size-8 bg-secondary border border-border flex items-center justify-center shrink-0 text-brand">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium mb-1">{title}</div>
+        <div className="text-xs text-muted-foreground">{body}</div>
+      </div>
+    </div>
+  );
+}
+
+function QuickLink({
+  icon,
+  label,
+  href,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="bg-card p-3 flex items-center justify-between gap-2 group hover:bg-secondary transition-colors"
+    >
+      <span className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground">
+        {icon}
+        {label}
+      </span>
+      <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-brand" />
+    </a>
+  );
+}

@@ -76,6 +76,9 @@ export type PresetId = z.infer<typeof PresetId>;
 export const AddonId = z.enum(["turborepo", "biome", "husky"]);
 export type AddonId = z.infer<typeof AddonId>;
 
+export const UiId = z.enum(["tailwind", "shadcn", "none"]);
+export type UiId = z.infer<typeof UiId>;
+
 export const ModuleId = z.enum(MODULE_IDS);
 export type ModuleId = z.infer<typeof ModuleId>;
 
@@ -95,6 +98,7 @@ export const ProjectConfig = z.object({
   auth: AuthId,
   deploy: DeployId,
   pm: PackageManagerId,
+  ui: UiId.default("shadcn"),
   examples: z.array(ExampleId).default([]),
   modules: z.array(ModuleId).default([]),
   addons: z.array(AddonId).default([]),

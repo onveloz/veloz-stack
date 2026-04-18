@@ -10,6 +10,7 @@ import {
   OrmId,
   PackageManagerId,
   RuntimeId,
+  UiId,
   getApiDisableReason,
   getBackendDisableReason,
   getDbHostingDisableReason,
@@ -18,6 +19,7 @@ import {
   getModuleDisableReason,
   getOrmDisableReason,
   getRuntimeDisableReason,
+  getUiDisableReason,
 } from "@veloz-stack/types";
 import type { ProjectConfig } from "@veloz-stack/types";
 
@@ -30,7 +32,7 @@ export type ConfigChange = {
 
 type StackKey = Extract<
   keyof ProjectConfig,
-  "frontend" | "backend" | "runtime" | "api" | "orm" | "dbHosting" | "deploy"
+  "frontend" | "backend" | "runtime" | "api" | "orm" | "dbHosting" | "deploy" | "ui"
 >;
 
 const RESOLVERS: Array<{
@@ -45,6 +47,7 @@ const RESOLVERS: Array<{
   { key: "orm", options: OrmId.options, check: getOrmDisableReason },
   { key: "dbHosting", options: DbHostingId.options, check: getDbHostingDisableReason },
   { key: "deploy", options: DeployId.options, check: getDeployDisableReason },
+  { key: "ui", options: UiId.options, check: getUiDisableReason },
 ];
 
 /**
@@ -135,6 +138,7 @@ export function formatKey(key: ConfigChange["key"]): string {
     auth: "Auth",
     deploy: "Deploy",
     pm: "Package manager",
+    ui: "UI",
     modules: "Módulo",
   };
   return map[key] ?? key;

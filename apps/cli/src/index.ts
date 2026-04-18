@@ -14,6 +14,7 @@ import {
   PackageManagerId as PackageManagerIdSchema,
   PresetId as PresetIdSchema,
   RuntimeId as RuntimeIdSchema,
+  UiId as UiIdSchema,
 } from "@veloz-stack/types";
 import { runCreate } from "./create.js";
 
@@ -35,6 +36,7 @@ const DbHostingId = reenum(DbHostingIdSchema);
 const AuthId = reenum(AuthIdSchema);
 const DeployId = reenum(DeployIdSchema);
 const PackageManagerId = reenum(PackageManagerIdSchema);
+const UiId = reenum(UiIdSchema);
 
 const cli = Cli.create("create-veloz-stack", {
   version: "0.0.1",
@@ -69,6 +71,9 @@ const cli = Cli.create("create-veloz-stack", {
     auth: AuthId.optional().describe("Autenticação"),
     deploy: DeployId.optional().describe("Alvo de deploy"),
     pm: PackageManagerId.optional().describe("Gerenciador de pacotes"),
+    ui: UiId.optional().describe(
+      "UI: shadcn (Tailwind 4 + componentes prontos) | tailwind | none",
+    ),
     modules: z.string().optional().describe("Módulos, separados por vírgula"),
     examples: z.string().optional().describe("Exemplos prontos, separados por vírgula"),
     addons: z

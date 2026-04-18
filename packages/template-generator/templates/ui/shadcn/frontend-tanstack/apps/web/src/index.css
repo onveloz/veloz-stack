@@ -1,0 +1,69 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: oklch(0.14 0 0);
+  --color-foreground: oklch(0.95 0 0);
+
+  --color-card: oklch(0.16 0 0);
+  --color-card-foreground: oklch(0.95 0 0);
+
+  --color-popover: oklch(0.16 0 0);
+  --color-popover-foreground: oklch(0.95 0 0);
+
+  --color-primary: oklch(0.95 0 0);
+  --color-primary-foreground: oklch(0.14 0 0);
+
+  --color-secondary: oklch(0.22 0 0);
+  --color-secondary-foreground: oklch(0.95 0 0);
+
+  --color-muted: oklch(0.22 0 0);
+  --color-muted-foreground: oklch(0.7 0 0);
+
+  --color-accent: oklch(0.22 0 0);
+  --color-accent-foreground: oklch(0.95 0 0);
+
+  --color-destructive: oklch(0.6 0.21 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+
+  --color-border: oklch(1 0 0 / 0.1);
+  --color-input: oklch(1 0 0 / 0.15);
+  --color-ring: oklch(0.7 0.18 35);
+
+  --color-brand: oklch(0.66 0.22 35);
+  --color-brand-foreground: oklch(0.14 0 0);
+  --color-brand-subtle: oklch(0.22 0.05 35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Inter,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.9em;
+  background: var(--color-secondary);
+  padding: 1px 6px;
+}
+
+.dot-grid {
+  background-image: radial-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}

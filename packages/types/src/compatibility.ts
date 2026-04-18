@@ -75,6 +75,23 @@ export function getDeployDisableReason(
   return null;
 }
 
+export function getUiDisableReason(
+  cfg: ProjectConfig,
+  id: ProjectConfig["ui"],
+): DisableReason {
+  if (id === "shadcn" && cfg.frontend === "none") {
+    return "shadcn precisa de um frontend React (tanstack-start ou next)";
+  }
+  if (
+    id === "shadcn" &&
+    cfg.frontend !== "tanstack-start" &&
+    cfg.frontend !== "next"
+  ) {
+    return `shadcn é React-only — use tailwind ou none com ${cfg.frontend}`;
+  }
+  return null;
+}
+
 export function getApiDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["api"],
@@ -106,6 +123,7 @@ export function validateConfig(cfg: ProjectConfig): string[] {
   pushIf(getOrmDisableReason(cfg, cfg.orm), "orm");
   pushIf(getDbHostingDisableReason(cfg, cfg.dbHosting), "dbHosting");
   pushIf(getDeployDisableReason(cfg, cfg.deploy), "deploy");
+  pushIf(getUiDisableReason(cfg, cfg.ui), "ui");
 
   // Cross-field invariants the per-field helpers don't cover
   if (cfg.auth === "better-auth" && cfg.db === "none") {

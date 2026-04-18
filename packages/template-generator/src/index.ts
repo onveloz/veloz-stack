@@ -12,6 +12,7 @@ import { processFrontend } from "./handlers/frontend";
 import { processMobile } from "./handlers/mobile";
 import { processModules } from "./handlers/modules";
 import { postProcess } from "./handlers/post-process";
+import { processUi } from "./handlers/ui";
 import { VirtualFs } from "./vfs";
 
 export { VirtualFs } from "./vfs";
@@ -29,6 +30,7 @@ export function generate(config: ProjectConfig): VirtualFs {
   const vfs = new VirtualFs();
   processBase(vfs, config);
   processFrontend(vfs, config);
+  processUi(vfs, config);
   processMobile(vfs, config);
   processDesktop(vfs, config);
   processBackend(vfs, config);

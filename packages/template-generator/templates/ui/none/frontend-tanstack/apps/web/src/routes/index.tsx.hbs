@@ -1,0 +1,105 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+
+import { orpc } from "@/utils/orpc";
+
+export const Route = createFileRoute("/")({ component: HomeComponent });
+
+const STACK: Array<{ label: string; brand?: boolean }> = [
+  { label: "{{frontend}}", brand: true },
+  { label: "{{backend}}" },
+  { label: "{{runtime}}" },
+  { label: "{{api}}" },
+  { label: "{{db}}" },
+  { label: "{{orm}}" },
+  { label: "{{auth}}" },
+];
+
+const MODULES: string[] = {{{json modules}}};
+
+function HomeComponent() {
+  const health = useQuery(orpc.healthCheck.queryOptions());
+  const connected = health.data === "OK";
+
+  return (
+    <main>
+      <div className="shell">
+        <div className="hero">
+          <div className="hero-mark" />
+          <h1>{{projectName}}</h1>
+        </div>
+        <p className="lede">
+          Stack {{frontend}} + {{backend}} + {{api}} no ar — sem framework de
+          UI, só CSS puro com a paleta Veloz. Edite{" "}
+          <code>apps/web/src/index.css</code> e{" "}
+          <code>apps/web/src/routes/index.tsx</code>.
+        </p>
+
+        <div className="tag-row tag-row-status">
+          <span className="tag brand">
+            {health.isLoading
+              ? "Verificando API…"
+              : connected
+              ? "API conectada"
+              : "API desconectada"}
+          </span>
+        </div>
+
+        <section className="section">
+          <h2>No seu stack</h2>
+          <div className="tag-row">
+            {STACK.filter((s) => s.label !== "none").map((s) => (
+              <span key={s.label} className={"tag" + (s.brand ? " brand" : "")}>
+                {s.label}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {MODULES.length > 0 && (
+          <section className="section">
+            <h2>Módulos ativos</h2>
+            <div className="tag-row">
+              {MODULES.map((m) => (
+                <span key={m} className="tag">
+                  {m}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="section">
+          <h2>Próximos passos</h2>
+          <div className="steps">
+            <div className="step">
+              <div className="step-title">Edite a home</div>
+              <div className="step-body">
+                Substitua <code>apps/web/src/routes/index.tsx</code>.
+              </div>
+            </div>
+            <div className="step">
+              <div className="step-title">Peça ajuda pro Claude</div>
+              <div className="step-body">
+                <code>CLAUDE.md</code> e <code>.claude/skills/</code> ensinam
+                seu agente sobre o stack.
+              </div>
+            </div>
+            {{#if (eq deploy "veloz")}}
+            <div className="step">
+              <div className="step-title">Deploy no Veloz</div>
+              <div className="step-body">
+                Rode <code>npx onveloz deploy</code> na raiz.
+              </div>
+            </div>
+            {{/if}}
+          </div>
+        </section>
+
+        <footer className="footer">
+          Gerado com <code>create-veloz-stack</code> · feito no Brasil 🇧🇷
+        </footer>
+      </div>
+    </main>
+  );
+}

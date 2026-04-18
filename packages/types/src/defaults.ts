@@ -15,6 +15,7 @@ export const DEFAULT_CONFIG: ProjectConfig = {
   auth: "better-auth",
   deploy: "veloz",
   pm: "bun",
+  ui: "shadcn",
   examples: [],
   modules: (Object.values(MODULES)
     .filter((m) => m.defaultOn)

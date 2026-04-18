@@ -22,6 +22,7 @@ import {
   PRESETS,
   PackageManagerId,
   RuntimeId,
+  UiId,
   getApiDisableReason,
   getBackendDisableReason,
   getDbHostingDisableReason,
@@ -30,6 +31,7 @@ import {
   getModuleDisableReason,
   getOrmDisableReason,
   getRuntimeDisableReason,
+  getUiDisableReason,
   type ModuleId,
   validateConfig,
 } from "@veloz-stack/types";
@@ -110,6 +112,7 @@ export function StackBuilder() {
       auth: pick(AuthId.options),
       deploy: pick(DeployId.options.filter((d) => d !== "none" && d !== "cloudflare")),
       pm: pick(PackageManagerId.options),
+      ui: pick(UiId.options),
       modules: Math.random() > 0.5 ? config.modules : [],
       examples: [],
       addons: ["turborepo"],
@@ -171,6 +174,7 @@ export function StackBuilder() {
           auth: newCfg.auth,
           deploy: newCfg.deploy,
           pm: newCfg.pm,
+          ui: newCfg.ui,
           modules: newCfg.modules,
           preset: "custom",
         });
@@ -258,6 +262,12 @@ export function StackBuilder() {
       label: "Gerenciador de pacotes",
       tiles: tiles(PackageManagerId.options, titleCase),
       getDisabled: () => null,
+    },
+    {
+      key: "ui",
+      label: "UI",
+      tiles: tiles(UiId.options, labelsUi),
+      getDisabled: (id) => getUiDisableReason(config, id as any),
     },
   ];
 
@@ -713,6 +723,15 @@ function titleCase(s: string): string {
     .split("-")
     .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
     .join(" ");
+}
+
+function labelsUi(id: string): string {
+  const map: Record<string, string> = {
+    shadcn: "shadcn/ui",
+    tailwind: "Tailwind 4",
+    none: "Nenhum",
+  };
+  return map[id] ?? titleCase(id);
 }
 
 function labelsFrontend(id: string): string {

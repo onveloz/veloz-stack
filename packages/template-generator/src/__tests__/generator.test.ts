@@ -164,6 +164,58 @@ describe("generate()", () => {
   });
 });
 
+describe("ui axis", () => {
+  it("default ui=shadcn overlays components.json + ui/ folder for tanstack-start", () => {
+    const files = paths(cfg({ ui: "shadcn", frontend: "tanstack-start" }));
+    expect(files).toContain("apps/web/components.json");
+    expect(files).toContain("apps/web/src/components/ui/button.tsx");
+    expect(files).toContain("apps/web/src/components/ui/card.tsx");
+    expect(files).toContain("apps/web/src/components/ui/dialog.tsx");
+    expect(files).toContain("apps/web/src/lib/utils.ts");
+  });
+
+  it("ui=shadcn adds Radix + tw-animate-css deps to apps/web/package.json", () => {
+    const vfs = generate(cfg({ ui: "shadcn", frontend: "tanstack-start" }));
+    const pkg = JSON.parse(vfs.read("apps/web/package.json")!);
+    expect(pkg.dependencies["@radix-ui/react-dialog"]).toBeTruthy();
+    expect(pkg.dependencies["@radix-ui/react-slot"]).toBeTruthy();
+    expect(pkg.dependencies["class-variance-authority"]).toBeTruthy();
+    expect(pkg.dependencies["tw-animate-css"]).toBeTruthy();
+  });
+
+  it("ui=shadcn with frontend=next places components under app/ layout", () => {
+    const files = paths(cfg({ ui: "shadcn", frontend: "next" }));
+    expect(files).toContain("apps/web/components.json");
+    expect(files).toContain("apps/web/components/ui/button.tsx");
+    expect(files).toContain("apps/web/lib/utils.ts");
+  });
+
+  it("ui=tailwind keeps the stock home — no shadcn overlay", () => {
+    const files = paths(cfg({ ui: "tailwind", frontend: "tanstack-start" }));
+    expect(files).not.toContain("apps/web/components.json");
+    expect(files).not.toContain("apps/web/src/components/ui/button.tsx");
+  });
+
+  it("ui=none strips Tailwind from apps/web/package.json + vite.config", () => {
+    const vfs = generate(cfg({ ui: "none", frontend: "tanstack-start" }));
+    const pkg = JSON.parse(vfs.read("apps/web/package.json")!);
+    expect(pkg.dependencies?.tailwindcss).toBeUndefined();
+    expect(pkg.dependencies?.["@tailwindcss/vite"]).toBeUndefined();
+    const vite = vfs.read("apps/web/vite.config.ts")!;
+    expect(vite).not.toContain("@tailwindcss/vite");
+  });
+
+  it("validateConfig rejects ui=shadcn with non-React frontend (nuxt)", () => {
+    const errors = validateConfig(cfg({ ui: "shadcn", frontend: "nuxt" }));
+    expect(errors.some((e) => e.includes("shadcn é React-only"))).toBe(true);
+  });
+
+  it("validateConfig rejects ui=shadcn with frontend=none", () => {
+    const errors = validateConfig(cfg({ ui: "shadcn", frontend: "none" }));
+    expect(errors.some((e) => e.includes("shadcn precisa de um frontend React"))).toBe(true);
+  });
+});
+
 describe("deploy targets", () => {
   it("veloz emits veloz.json + Dockerfile", () => {
     const files = paths(cfg({ deploy: "veloz" }));

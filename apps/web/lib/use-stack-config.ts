@@ -25,6 +25,7 @@ import {
   PackageManagerId,
   PresetId,
   RuntimeId,
+  UiId,
   ExampleId,
 } from "@veloz-stack/types";
 
@@ -48,6 +49,7 @@ export function useStackConfig() {
       auth: parseAsStringEnum(enumVals(AuthId)).withDefault(DEFAULT_CONFIG.auth),
       deploy: parseAsStringEnum(enumVals(DeployId)).withDefault(DEFAULT_CONFIG.deploy),
       pm: parseAsStringEnum(enumVals(PackageManagerId)).withDefault(DEFAULT_CONFIG.pm),
+      ui: parseAsStringEnum(enumVals(UiId)).withDefault(DEFAULT_CONFIG.ui),
       modules: parseAsArrayOf(parseAsStringEnum([...MODULE_IDS])).withDefault(
         DEFAULT_CONFIG.modules,
       ),
@@ -78,6 +80,7 @@ export function useStackConfig() {
     auth: state.auth,
     deploy: state.deploy,
     pm: state.pm,
+    ui: state.ui,
     modules: state.modules,
     examples: state.examples,
     addons: state.addons,

@@ -62,6 +62,10 @@ export const OPTION_HINTS: Record<string, string> = {
   // PM
   pnpm: "Workspaces nativos · eficiente",
   npm: "Universal · não precisa instalar nada",
+
+  // UI
+  shadcn: "shadcn/ui · Tailwind 4 · oklch · componentes prontos",
+  tailwind: "Tailwind 4 puro · sem componentes",
 };
 
 export function getHint(id: string): string | undefined {
