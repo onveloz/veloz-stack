@@ -9,17 +9,14 @@
     "apps/web": {
       "id": "svc_l-2NqE0z0jPg",
       "name": "web",
-      "type": "web",
+      "type": "static",
       "root": "apps/web",
       "branch": "main",
       "build": {
         "method": "turborepo",
         "command": "pnpm --filter @veloz-stack/template-generator run gen && pnpm run build",
-        "appName": "@veloz-stack/web"
-      },
-      "runtime": {
-        "port": 3000,
-        "command": "pnpm --filter @veloz-stack/web exec next start"
+        "appName": "@veloz-stack/web",
+        "outputDir": "apps/web/out"
       }
     }
   },
