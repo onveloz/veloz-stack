@@ -59,6 +59,7 @@ export function useStackConfig() {
       addons: parseAsArrayOf(parseAsStringEnum(enumVals(AddonId))).withDefault(
         DEFAULT_CONFIG.addons,
       ),
+      oxlintStrict: parseAsBoolean.withDefault(DEFAULT_CONFIG.oxlintStrict),
       git: parseAsBoolean.withDefault(DEFAULT_CONFIG.git),
       install: parseAsBoolean.withDefault(DEFAULT_CONFIG.install),
     },
@@ -84,6 +85,7 @@ export function useStackConfig() {
     modules: state.modules,
     examples: state.examples,
     addons: state.addons,
+    oxlintStrict: state.oxlintStrict,
     git: state.git,
     install: state.install,
   };

@@ -1,0 +1,9 @@
+{{#if (includes modules "pino")}}
+{{#unless (eq runtime "workers")}}
+app.use("*", pinoMiddleware);
+{{/unless}}
+{{else}}
+{{#unless (eq runtime "workers")}}
+app.use("*", logger());
+{{/unless}}
+{{/if}}

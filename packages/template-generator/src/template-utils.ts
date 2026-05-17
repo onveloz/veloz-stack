@@ -20,6 +20,7 @@ export function processTemplatesFromPrefix(
   for (const [srcPath, content] of EMBEDDED_TEMPLATES) {
     if (!srcPath.startsWith(sourcePrefix)) continue;
     const rel = srcPath.slice(sourcePrefix.length);
+    if (rel.endsWith(".partial.hbs")) continue;
     const isTemplate = rel.endsWith(".hbs");
     const outPath = destPrefix + (isTemplate ? rel.slice(0, -4) : rel);
     const body = isTemplate ? render(content, config) : content;

@@ -1,0 +1,43 @@
+{
+  "Home": {
+    "footer": "Generated with create-veloz-stack · made in Brazil 🇧🇷",
+    "api": {
+      "checking": "Checking API…",
+      "connected": "API connected",
+      "disconnected": "API disconnected"
+    },
+    "intro": "Your {frontend} + {backend} + {api} stack is live. Next step: edit this page at apps/web/app/[locale]/page.tsx or open CLAUDE.md and ask your agent for help.",
+    "sections": {
+      "nextSteps": "Next steps",
+      "yourStack": "In your stack",
+      "activeModules": "Active modules"
+    },
+    "steps": {
+      "editHome": {
+        "title": "Edit the home page",
+        "bodyBefore": "Replace this page at"
+      },
+      "claudeHelp": {
+        "title": "Ask Claude for help",
+        "bodyBefore": "The",
+        "bodyMiddle": "and files in",
+        "bodyAfter": "teach your agent everything about the stack."
+      },
+      "deployVeloz": {
+        "title": "Deploy on Veloz",
+        "bodyBefore": "Run",
+        "bodyAfter": "from the repo root."
+      },
+      "dbSchema": {
+        "title": "Apply the schema",
+        "bodyBefore": "Run",
+        "bodyAfter": "to create the database tables."
+      }
+    },
+    "links": {
+      "velozDocs": "Veloz docs",
+      "velozStack": "Veloz Stack",
+      "github": "GitHub"
+    }
+  }
+}

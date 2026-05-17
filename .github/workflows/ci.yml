@@ -120,6 +120,14 @@ jobs:
           - { name: addons-biome-only, args: "--addons biome" }
           - { name: addons-husky, args: "--addons husky,biome" }
           - { name: addons-all, args: "--addons turborepo,biome,husky" }
+          - { name: addons-oxlint, args: "--addons turborepo,oxlint" }
+          - { name: addons-oxlint-strict, args: "--addons turborepo,oxlint --oxlint-strict" }
+          - { name: module-pino, args: "--preset minimal --runtime node --modules pino" }
+          - {
+              name: module-opentelemetry,
+              args: "--preset minimal --runtime node --modules opentelemetry",
+            }
+          - { name: module-next-intl, args: "--frontend next --modules next-intl" }
 
           # ─────── Cross-cutting combos
           - { name: prisma-next, args: "--orm prisma --frontend next" }
@@ -202,6 +210,19 @@ jobs:
           code=$?
           if [ "$code" -eq 0 ]; then
             echo "::error::Scaffolder accepted ui=shadcn + frontend=nuxt"
+            exit 1
+          fi
+          echo "✓ Rejected with exit code $code"
+
+      - name: Biome + oxlint addons together must be rejected
+        run: |
+          set +e
+          ./apps/cli/node_modules/.bin/tsx apps/cli/src/index.ts \
+            /tmp/veloz-invalid-biome-oxlint --yes --no-install --pm pnpm \
+            --addons turborepo,biome,oxlint
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::Scaffolder accepted biome + oxlint together"
             exit 1
           fi
           echo "✓ Rejected with exit code $code"

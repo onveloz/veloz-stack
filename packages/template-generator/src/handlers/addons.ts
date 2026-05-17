@@ -17,6 +17,9 @@ export function processAddons(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.addons.includes("husky")) {
     processTemplatesFromPrefix(vfs, "addons/husky/", "", config);
   }
+  if (config.addons.includes("oxlint")) {
+    processTemplatesFromPrefix(vfs, "addons/oxlint/", "", config);
+  }
   // Tauri moved out of addons — it's now a top-level `desktop` target.
   // See handlers/desktop.ts.
 }

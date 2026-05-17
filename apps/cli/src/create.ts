@@ -21,6 +21,7 @@ export type CreateInput = Partial<ProjectConfig> & {
   addons?: string;
   yes?: boolean;
   dryRun?: boolean;
+  oxlintStrict?: boolean;
 };
 
 export async function runCreate(input: CreateInput): Promise<void> {
@@ -131,6 +132,7 @@ function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectCo
       .map((s) => s.trim())
       .filter((a) => a && valid.has(a as any)) as ProjectConfig["addons"];
   }
+  if (input.oxlintStrict !== undefined) out.oxlintStrict = input.oxlintStrict;
   // If no modules flag passed and we're on a non-veloz preset, base already
   // has the right modules array.
   void base;

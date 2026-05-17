@@ -87,6 +87,10 @@ const cli = Cli.create("create-veloz-stack", {
       .boolean()
       .optional()
       .describe("Resolve a configuração e mostra, sem escrever arquivos"),
+    oxlintStrict: z
+      .boolean()
+      .optional()
+      .describe("Com addon oxlint: gera .oxlintrc.json com perfil mais estrito"),
   }),
   alias: { yes: "y" },
   examples: [

@@ -21,6 +21,7 @@ export const DEFAULT_CONFIG: ProjectConfig = {
     .filter((m) => m.defaultOn)
     .map((m) => m.id) as ModuleId[]),
   addons: ["turborepo", "biome"],
+  oxlintStrict: false,
   git: true,
   install: true,
   preset: "veloz-br",

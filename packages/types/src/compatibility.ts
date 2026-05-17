@@ -108,6 +108,15 @@ export function getModuleDisableReason(
   if (meta.requires?.auth && cfg.auth === "none") return "Precisa do Better Auth";
   if (meta.requires?.backend && cfg.backend === "none") return "Precisa de um backend";
   if (meta.requires?.db && cfg.db === "none") return "Precisa de um banco";
+  if (id === "next-intl" && cfg.frontend !== "next") {
+    return "next-intl funciona só com frontend Next.js";
+  }
+  if (id === "opentelemetry" && cfg.runtime === "workers") {
+    return "@opentelemetry/sdk-node não roda em Cloudflare Workers (use Bun/Node)";
+  }
+  if (id === "pino" && cfg.runtime === "workers") {
+    return "O template Pino usa transportes de Node (pino-pretty); em Workers exige setup diferente (use Bun/Node)";
+  }
   return null;
 }
 
@@ -139,6 +148,13 @@ export function validateConfig(cfg: ProjectConfig): string[] {
 
   for (const m of cfg.modules) {
     pushIf(getModuleDisableReason(cfg, m), `módulo ${m}`);
+  }
+
+  if (cfg.addons.includes("biome") && cfg.addons.includes("oxlint")) {
+    errors.push("addons: Biome e oxlint não podem ser usados juntos no mesmo projeto");
+  }
+  if (cfg.oxlintStrict && !cfg.addons.includes("oxlint")) {
+    errors.push("addons: oxlint strict requer o addon oxlint");
   }
   return errors;
 }

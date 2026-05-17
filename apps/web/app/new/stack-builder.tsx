@@ -33,6 +33,7 @@ import {
   getRuntimeDisableReason,
   getUiDisableReason,
   type ModuleId,
+  type ProjectConfig,
   validateConfig,
 } from "@veloz-stack/types";
 import { buildCommand } from "@/lib/build-command";
@@ -129,10 +130,24 @@ export function StackBuilder() {
 
   function toggleAddon(id: (typeof AddonId.options)[number]) {
     const has = config.addons.includes(id);
-    void setState({
-      addons: has ? config.addons.filter((a) => a !== id) : [...config.addons, id],
-      preset: "custom",
-    });
+    let addons: ProjectConfig["addons"];
+    let oxlintStrict = config.oxlintStrict;
+
+    if (!has) {
+      if (id === "biome") {
+        addons = [...config.addons.filter((a) => a !== "oxlint"), "biome"];
+        oxlintStrict = false;
+      } else if (id === "oxlint") {
+        addons = [...config.addons.filter((a) => a !== "biome"), "oxlint"];
+      } else {
+        addons = [...config.addons, id];
+      }
+    } else {
+      addons = config.addons.filter((a) => a !== id);
+      if (id === "oxlint") oxlintStrict = false;
+    }
+
+    void setState({ addons, oxlintStrict, preset: "custom" });
   }
 
   function toggleExample(id: (typeof ExampleId.options)[number]) {
@@ -513,6 +528,19 @@ export function StackBuilder() {
                 );
               })}
             </div>
+            {config.addons.includes("oxlint") && (
+              <label className="mt-3 flex items-center gap-2 text-sm text-foreground cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="rounded border-border-strong"
+                  checked={config.oxlintStrict}
+                  onChange={(e) =>
+                    void setState({ oxlintStrict: e.target.checked, preset: "custom" })
+                  }
+                />
+                <span>Oxlint strict (regras mais pesadas no .oxlintrc.json)</span>
+              </label>
+            )}
           </section>
 
           {/* Examples */}
@@ -617,7 +645,11 @@ const ADDON_META: Record<(typeof AddonId.options)[number], { label: string; tagl
   },
   husky: {
     label: "Husky + lint-staged",
-    tagline: "Hook de pre-commit rodando lint-staged (Biome se ativo)",
+    tagline: "Hook de pre-commit com lint-staged (Biome ou oxlint, conforme o stack)",
+  },
+  oxlint: {
+    label: "oxlint + oxfmt",
+    tagline: "Linter Oxc + formatador — alternativa ao Biome (não misture os dois)",
   },
 };
 
