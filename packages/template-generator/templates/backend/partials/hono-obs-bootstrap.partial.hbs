@@ -1,0 +1,6 @@
+{{#if (includes modules "opentelemetry")}}
+{{#unless (eq runtime "workers")}}
+initTelemetry();
+registerTelemetryShutdownHandlers();
+{{/unless}}
+{{/if}}

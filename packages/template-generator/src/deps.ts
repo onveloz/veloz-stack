@@ -11,7 +11,7 @@ export const DEPENDENCY_VERSIONS = {
   "@types/node": "^22.13.14",
 
   // Backend
-  hono: "^4.8.2",
+  hono: "^4.12.19",
   "@hono/node-server": "^1.14.0",
 
   // API layer
@@ -51,6 +51,19 @@ export const DEPENDENCY_VERSIONS = {
   resend: "^6.12.0",
   "posthog-node": "^4.3.0",
   "@sentry/node": "^8.47.0",
+
+  // i18n (Next.js)
+  "next-intl": "^4.12.0",
+
+  // Lint / format (oxlint addon)
+  oxlint: "^1.65.0",
+  oxfmt: "^0.50.0",
+
+  // Observability modules
+  pino: "^10.3.1",
+  "pino-pretty": "^13.1.3",
+  "@opentelemetry/exporter-trace-otlp-http": "^0.218.0",
+  "@opentelemetry/sdk-node": "^0.218.0",
 } as const satisfies Record<string, string>;
 
 export type DependencyName = keyof typeof DEPENDENCY_VERSIONS;

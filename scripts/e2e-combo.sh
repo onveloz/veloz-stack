@@ -33,6 +33,11 @@ echo "    $@"
 echo "━━━ [$name] install"
 cd "$tmp"
 
+# Lefthook's prepare script installs hooks and requires a git repo (config.git defaults on).
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+  git init -q
+fi
+
 # Respect whatever `packageManager` the scaffold emitted — pnpm bails
 # out when trying to install a `packageManager: bun@…` project.
 pm_field=$(node -p "require('./package.json').packageManager || 'pnpm@0'" 2>/dev/null || echo "pnpm@0")

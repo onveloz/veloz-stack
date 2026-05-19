@@ -1,0 +1,29 @@
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { Providers } from "./providers";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "{{projectName}}",
+  description: "Scaffolded with create-veloz-stack",
+};
+
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
+  return (
+    <html lang={locale} className="dark" suppressHydrationWarning>
+      <body>
+        <Providers>
+          <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        </Providers>
+      </body>
+    </html>
+  );
+}

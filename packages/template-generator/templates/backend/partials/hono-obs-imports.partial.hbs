@@ -1,0 +1,15 @@
+{{#if (or (eq runtime "bun") (eq runtime "node"))}}
+{{#unless (includes modules "pino")}}
+import { logger } from "hono/logger";
+{{/unless}}
+{{/if}}
+{{#if (includes modules "pino")}}
+{{#unless (eq runtime "workers")}}
+import { pinoMiddleware } from "@{{projectName}}/logging";
+{{/unless}}
+{{/if}}
+{{#if (includes modules "opentelemetry")}}
+{{#unless (eq runtime "workers")}}
+import { initTelemetry, registerTelemetryShutdownHandlers } from "@{{projectName}}/observability";
+{{/unless}}
+{{/if}}

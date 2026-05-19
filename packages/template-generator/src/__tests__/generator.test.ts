@@ -403,6 +403,22 @@ describe("addons", () => {
     });
   });
 
+  it("tanstack home omits conditional lucide imports when steps are disabled", () => {
+    const flyHome = generate(cfg({ deploy: "fly" })).read("apps/web/src/routes/index.tsx")!;
+    expect(flyHome).not.toMatch(/^\s*Rocket,/m);
+    expect(flyHome).not.toContain("Deploy no Veloz");
+
+    const noDbHome = generate(
+      cfg({ db: "none", orm: "none", dbHosting: "none", auth: "none" }),
+    ).read("apps/web/src/routes/index.tsx")!;
+    expect(noDbHome).not.toMatch(/^\s*Database,/m);
+    expect(noDbHome).not.toContain("Aplique o schema");
+
+    const velozHome = generate(cfg({ deploy: "veloz" })).read("apps/web/src/routes/index.tsx")!;
+    expect(velozHome).toMatch(/^\s*Rocket,/m);
+    expect(velozHome).toMatch(/^\s*Database,/m);
+  });
+
   it("both addons: turbo scripts + biome commands coexist", () => {
     const vfs = generate(cfg({ addons: ["turborepo", "biome"] }));
     const pkg = JSON.parse(vfs.read("package.json")!);
@@ -410,6 +426,31 @@ describe("addons", () => {
     expect(pkg.scripts.format).toBe("biome format --write .");
     expect(pkg.devDependencies.turbo).toBeDefined();
     expect(pkg.devDependencies["@biomejs/biome"]).toBeDefined();
+  });
+
+  it("oxlint addon emits .oxlintrc.json + oxlint/oxfmt scripts (mutually exclusive with biome)", () => {
+    const vfs = generate(cfg({ addons: ["turborepo", "oxlint"] }));
+    expect(vfs.read(".oxlintrc.json")).toContain("no-debugger");
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts.lint).toBe("oxlint .");
+    expect(pkg.scripts.format).toBe("oxfmt .");
+    expect(pkg.devDependencies.oxlint).toBeDefined();
+    expect(pkg.devDependencies["@biomejs/biome"]).toBeUndefined();
+  });
+
+  it("oxlintStrict surfaces error severity in .oxlintrc.json", () => {
+    const strict = generate(cfg({ addons: ["oxlint"], oxlintStrict: true }));
+    const loose = generate(cfg({ addons: ["oxlint"], oxlintStrict: false }));
+    expect(strict.read(".oxlintrc.json")).toContain("error");
+    expect(loose.read(".oxlintrc.json")).toContain("warn");
+  });
+
+  it("husky + oxlint uses oxlint and oxfmt in lint-staged", () => {
+    const vfs = generate(cfg({ addons: ["husky", "oxlint"] }));
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg["lint-staged"]).toMatchObject({
+      "*.{js,jsx,ts,tsx}": ["oxlint --fix"],
+    });
   });
 });
 
@@ -518,6 +559,16 @@ describe("validateConfig", () => {
   it("accepts the default config", () => {
     expect(validateConfig(cfg({}))).toEqual([]);
   });
+
+  it("rejects biome + oxlint addons together", () => {
+    const errs = validateConfig(cfg({ addons: ["turborepo", "biome", "oxlint"] }));
+    expect(errs.some((e) => e.includes("Biome e oxlint"))).toBe(true);
+  });
+
+  it("rejects oxlintStrict without oxlint addon", () => {
+    const errs = validateConfig(cfg({ addons: ["turborepo", "biome"], oxlintStrict: true }));
+    expect(errs.some((e) => e.includes("oxlint strict"))).toBe(true);
+  });
 });
 
 describe("module workspace wiring", () => {
@@ -593,6 +644,34 @@ describe("module workspace wiring", () => {
     const server = JSON.parse(vfs.read("apps/server/package.json")!);
     expect(web.dependencies["@test-app/i18n"]).toBe("workspace:*");
     expect(server.dependencies["@test-app/i18n"]).toBeUndefined();
+  });
+
+  it("pino module emits packages/logging and wires workspace dep into apps/server", () => {
+    const vfs = generate(cfg({ modules: ["pino"] }));
+    expect(vfs.read("packages/logging/src/index.ts")).toContain("pinoMiddleware");
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/logging"]).toBe("workspace:*");
+  });
+
+  it("opentelemetry module emits packages/observability + initTelemetry", () => {
+    const vfs = generate(cfg({ modules: ["opentelemetry"] }));
+    const obs = vfs.read("packages/observability/src/index.ts")!;
+    expect(obs).toContain("initTelemetry");
+    expect(obs).toContain("shutdownTelemetry");
+    expect(obs).toContain("registerTelemetryShutdownHandlers");
+    const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
+    expect(pkg.dependencies["@test-app/observability"]).toBe("workspace:*");
+  });
+
+  it("next-intl module uses [locale] routes + middleware and drops root app/page.tsx", () => {
+    const vfs = generate(cfg({ frontend: "next", modules: ["next-intl"] }));
+    expect(vfs.read("apps/web/app/page.tsx")).toBeUndefined();
+    expect(vfs.read("apps/web/app/[locale]/page.tsx")).toContain("useTranslations");
+    expect(vfs.read("apps/web/middleware.ts")).toContain("next-intl/middleware");
+    expect(vfs.read("apps/web/i18n/request.ts")).toContain("getRequestConfig");
+    expect(vfs.read("apps/web/i18n/routing.ts")).toContain("defineRouting");
+    const pkg = JSON.parse(vfs.read("apps/web/package.json")!);
+    expect(pkg.dependencies["next-intl"]).toBeDefined();
   });
 
   it("no modules → no added workspace deps on apps/server beyond api + auth", () => {

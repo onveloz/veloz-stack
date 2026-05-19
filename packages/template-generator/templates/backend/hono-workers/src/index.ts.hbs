@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+{{> hono-obs-imports}}
 {{#if (eq api "orpc")}}
 import { RPCHandler } from "@orpc/server/fetch";
 import { onError } from "@orpc/server";
@@ -19,8 +20,10 @@ type Bindings = {
   DATABASE_URL?: string;
 };
 
+{{> hono-obs-bootstrap}}
 const app = new Hono<{ Bindings: Bindings }>();
 
+{{> hono-obs-middleware}}
 app.use(
   "/*",
   cors({

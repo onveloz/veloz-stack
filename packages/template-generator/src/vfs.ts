@@ -13,6 +13,11 @@ export class VirtualFs {
     return this.files.has(normalise(path));
   }
 
+  /** Remove a path from the VFS (e.g. superseded by a module merge). */
+  remove(path: string): void {
+    this.files.delete(normalise(path));
+  }
+
   read(path: string): string | undefined {
     return this.files.get(normalise(path));
   }

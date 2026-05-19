@@ -23,6 +23,9 @@ export const MODULE_IDS = [
   "upstash-redis",
   "s3",
   "cloudflare-r2",
+  "pino",
+  "opentelemetry",
+  "next-intl",
 ] as const;
 
 export type ModuleId = (typeof MODULE_IDS)[number];
@@ -40,6 +43,7 @@ export type ModuleCategory =
   | "email"
   | "auth"
   | "cache"
+  | "observability"
   | "storage";
 
 export interface ModuleMeta {
@@ -250,6 +254,29 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
     tagline: "Compatível com S3, sem custo de egress",
     requires: { backend: true },
   },
+  pino: {
+    id: "pino",
+    name: "Pino",
+    category: "observability",
+    tagline: "Logs estruturados — substitui hono/logger no servidor",
+    requires: { backend: true },
+    website: "https://getpino.io",
+  },
+  opentelemetry: {
+    id: "opentelemetry",
+    name: "OpenTelemetry",
+    category: "observability",
+    tagline: "Traces OTLP no Node/Bun — complementa observabilidade",
+    requires: { backend: true },
+    website: "https://opentelemetry.io",
+  },
+  "next-intl": {
+    id: "next-intl",
+    name: "next-intl",
+    category: "i18n",
+    tagline: "i18n App Router (Next.js) — mensagens e provider",
+    website: "https://next-intl.dev",
+  },
 };
 
 export const MODULE_CATEGORIES: ModuleCategory[] = [
@@ -264,6 +291,7 @@ export const MODULE_CATEGORIES: ModuleCategory[] = [
   "analytics",
   "errors",
   "security",
+  "observability",
   "cache",
   "storage",
 ];
@@ -280,6 +308,7 @@ export const MODULE_CATEGORY_LABELS: Record<ModuleCategory, string> = {
   analytics: "Analytics",
   errors: "Erros",
   security: "Segurança",
+  observability: "Observabilidade",
   cache: "Cache",
   storage: "Storage",
 };

@@ -1,4 +1,6 @@
 import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
+import { version } from "../deps";
+import { applyRootScriptsToPkg } from "./post-process-lint";
 import type { VirtualFs } from "../vfs";
 
 /** Modules that ship a workspace package, and the directory under `packages/` each creates. */
@@ -19,6 +21,8 @@ const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
   "upstash-redis": "cache",
   s3: "storage",
   "cloudflare-r2": "storage",
+  pino: "logging",
+  opentelemetry: "observability",
 };
 
 const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
@@ -38,7 +42,31 @@ export function postProcess(vfs: VirtualFs, config: ProjectConfig): void {
   setRootScripts(vfs, config);
   emitWorkspaceFile(vfs, config);
   wireModuleDependencies(vfs, config);
+  wireNextIntlDependency(vfs, config);
+  stripNextRootPageForNextIntl(vfs, config);
   appendModuleEnvVars(vfs, config);
+}
+
+function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
+  vfs.updateJson<Record<string, any>>("package.json", (pkg) => {
+    applyRootScriptsToPkg(pkg, config);
+    return pkg;
+  });
+}
+
+function wireNextIntlDependency(vfs: VirtualFs, config: ProjectConfig): void {
+  if (!config.modules.includes("next-intl")) return;
+  if (!vfs.exists("apps/web/package.json")) return;
+  vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {
+    pkg.dependencies = { ...pkg.dependencies, "next-intl": version("next-intl") };
+    return pkg;
+  });
+}
+
+/** Avoid duplicate routes: the module emits `app/[locale]/page.tsx`. */
+function stripNextRootPageForNextIntl(vfs: VirtualFs, config: ProjectConfig): void {
+  if (!config.modules.includes("next-intl")) return;
+  if (vfs.exists("apps/web/app/page.tsx")) vfs.remove("apps/web/app/page.tsx");
 }
 
 function wireModuleDependencies(vfs: VirtualFs, config: ProjectConfig): void {
@@ -76,59 +104,6 @@ function emitWorkspaceFile(vfs: VirtualFs, config: ProjectConfig): void {
   }
 }
 
-function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
-  const hasTurbo = config.addons.includes("turborepo");
-  const hasBiome = config.addons.includes("biome");
-  const hasHusky = config.addons.includes("husky");
-  const pm = config.pm;
-
-  vfs.updateJson<Record<string, any>>("package.json", (pkg) => {
-    const run = hasTurbo
-      ? "turbo run"
-      : pm === "pnpm"
-      ? "pnpm -r --parallel"
-      : pm === "bun"
-      ? "bun run --filter '*'"
-      : "npm run -ws";
-
-    pkg.scripts = {
-      ...pkg.scripts,
-      dev: `${run} dev`,
-      build: `${run} build`,
-      "check-types": `${run} check-types`,
-      ...(config.db !== "none"
-        ? {
-            "db:push": pm === "pnpm" ? "pnpm -F @*/db db:push" : `${pm} --cwd packages/db run db:push`,
-            "db:studio": pm === "pnpm" ? "pnpm -F @*/db db:studio" : `${pm} --cwd packages/db run db:studio`,
-          }
-        : {}),
-      ...(hasBiome
-        ? {
-            format: "biome format --write .",
-            lint: "biome lint .",
-            check: "biome check --write .",
-          }
-        : {}),
-      ...(hasHusky ? { prepare: "husky" } : {}),
-    };
-
-    pkg.devDependencies = {
-      ...(pkg.devDependencies ?? {}),
-      ...(hasTurbo ? { turbo: "^2.6.3" } : {}),
-      ...(hasBiome ? { "@biomejs/biome": "^1.9.4" } : {}),
-      ...(hasHusky ? { husky: "^9.1.7", "lint-staged": "^16.3.2" } : {}),
-    };
-
-    if (hasHusky) {
-      pkg["lint-staged"] = hasBiome
-        ? { "*.{js,jsx,ts,tsx,json,md}": ["biome check --write --no-errors-on-unmatched"] }
-        : { "*.{js,jsx,ts,tsx,json,md}": [] };
-    }
-
-    return pkg;
-  });
-}
-
 function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
   const additions: string[] = [];
 
@@ -163,6 +138,13 @@ function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
   }
   if (config.modules.includes("sentry")) {
     additions.push("\n# Sentry", "SENTRY_DSN=");
+  }
+  if (config.modules.includes("opentelemetry")) {
+    additions.push(
+      "\n# OpenTelemetry (OTLP)",
+      "OTEL_SERVICE_NAME=",
+      "OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318",
+    );
   }
   if (config.modules.includes("twilio")) {
     additions.push(

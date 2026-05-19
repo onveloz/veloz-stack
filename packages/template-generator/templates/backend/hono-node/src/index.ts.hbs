@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
+{{> hono-obs-imports}}
 import { serve } from "@hono/node-server";
 {{#if (eq api "orpc")}}
 import { RPCHandler } from "@orpc/server/fetch";
@@ -12,9 +12,10 @@ import { createContext } from "@{{projectName}}/api/context";
 import { auth } from "@{{projectName}}/auth";
 {{/if}}
 
+{{> hono-obs-bootstrap}}
 const app = new Hono();
 
-app.use("*", logger());
+{{> hono-obs-middleware}}
 app.use(
   "/*",
   cors({

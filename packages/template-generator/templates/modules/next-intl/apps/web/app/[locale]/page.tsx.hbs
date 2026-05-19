@@ -1,0 +1,231 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowUpRight,
+  BookOpen,
+  Database,
+  FileCode2,
+  Layers,
+  Rocket,
+  Sparkles,
+  Terminal,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { orpc } from "@/lib/orpc";
+
+const STACK: Array<{ label: string; accent?: boolean }> = [
+  { label: "{{frontend}}", accent: true },
+  { label: "{{backend}}" },
+  { label: "{{runtime}}" },
+  { label: "{{api}}" },
+  { label: "{{db}}" },
+  { label: "{{orm}}" },
+  { label: "{{auth}}" },
+];
+
+const MODULES: string[] = {{{json modules}}};
+
+export default function Home() {
+  const t = useTranslations("Home");
+  const health = useQuery(orpc.healthCheck.queryOptions());
+  const connected = health.data === "OK";
+
+  return (
+    <main className="min-h-screen dot-grid">
+      <div className="max-w-4xl mx-auto px-6 py-16">
+        <div className="mb-12">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-medium border border-white/10 px-2 py-1 mb-6">
+            <span
+              className={
+                "w-1.5 h-1.5 rounded-full " +
+                (connected
+                  ? "bg-green-500"
+                  : health.isLoading
+                  ? "bg-yellow-500"
+                  : "bg-red-500")
+              }
+            />
+            <span className="text-white/60">
+              {health.isLoading
+                ? t("api.checking")
+                : connected
+                ? t("api.connected")
+                : t("api.disconnected")}
+            </span>
+          </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-4 h-4 bg-[#FF4D00] brand-glow" />
+            <h1 className="text-5xl font-bold tracking-tight">{{projectName}}</h1>
+          </div>
+          <p className="text-lg text-white/60 max-w-2xl">
+            {t("intro", {
+              frontend: "{{frontend}}",
+              backend: "{{backend}}",
+              api: "{{api}}",
+            })}
+          </p>
+        </div>
+
+        <section className="mb-12">
+          <h2 className="text-[11px] uppercase tracking-wider text-white/50 mb-3">
+            {t("sections.nextSteps")}
+          </h2>
+          <div className="grid gap-px bg-white/10">
+            <Step
+              icon={<FileCode2 className="w-4 h-4" />}
+              title={t("steps.editHome.title")}
+              body={
+                <>
+                  {t("steps.editHome.bodyBefore")}{" "}
+                  <code>apps/web/app/[locale]/page.tsx</code>.
+                </>
+              }
+            />
+            <Step
+              icon={<BookOpen className="w-4 h-4" />}
+              title={t("steps.claudeHelp.title")}
+              body={
+                <>
+                  {t("steps.claudeHelp.bodyBefore")} <code>CLAUDE.md</code>{" "}
+                  {t("steps.claudeHelp.bodyMiddle")}{" "}
+                  <code>.claude/skills/</code> {t("steps.claudeHelp.bodyAfter")}
+                </>
+              }
+            />
+            {{#if (eq deploy "veloz")}}
+            <Step
+              icon={<Rocket className="w-4 h-4" />}
+              title={t("steps.deployVeloz.title")}
+              body={
+                <>
+                  {t("steps.deployVeloz.bodyBefore")} <code>npx onveloz deploy</code>{" "}
+                  {t("steps.deployVeloz.bodyAfter")}
+                </>
+              }
+            />
+            {{/if}}
+            {{#if (ne db "none")}}
+            <Step
+              icon={<Database className="w-4 h-4" />}
+              title={t("steps.dbSchema.title")}
+              body={
+                <>
+                  {t("steps.dbSchema.bodyBefore")} <code>{{pm}} db:push</code>{" "}
+                  {t("steps.dbSchema.bodyAfter")}
+                </>
+              }
+            />
+            {{/if}}
+          </div>
+        </section>
+
+        <section className="mb-12">
+          <h2 className="text-[11px] uppercase tracking-wider text-white/50 mb-3">
+            {t("sections.yourStack")}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {STACK.filter((s) => s.label !== "none").map((s) => (
+              <span
+                key={s.label}
+                className={
+                  "text-xs font-medium px-2.5 py-1 border " +
+                  (s.accent
+                    ? "border-[#FF4D00]/40 bg-[#FF4D00]/10 text-[#FF4D00]"
+                    : "border-white/10 bg-white/5 text-white/70")
+                }
+              >
+                {s.label}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {MODULES.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-[11px] uppercase tracking-wider text-white/50 mb-3">
+              {t("sections.activeModules")}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {MODULES.map((m) => (
+                <span
+                  key={m}
+                  className="text-xs font-medium px-2.5 py-1 border border-white/10 bg-white/5 text-white/70"
+                >
+                  {m}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="mb-12 grid gap-px bg-white/10 sm:grid-cols-3">
+          <QuickLink
+            icon={<Terminal className="w-3.5 h-3.5" />}
+            label={t("links.velozDocs")}
+            href="https://onveloz.com/docs"
+          />
+          <QuickLink
+            icon={<Layers className="w-3.5 h-3.5" />}
+            label={t("links.velozStack")}
+            href="https://veloz-stack.runveloz.com"
+          />
+          <QuickLink
+            icon={<Sparkles className="w-3.5 h-3.5" />}
+            label={t("links.github")}
+            href="https://github.com/onveloz/veloz-stack"
+          />
+        </section>
+
+        <footer className="text-xs text-white/40 pt-6 border-t border-white/10">{t("footer")}</footer>
+      </div>
+    </main>
+  );
+}
+
+function Step({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: React.ReactNode;
+}) {
+  return (
+    <div className="bg-[#0f0f0f] p-4 flex items-start gap-3">
+      <div className="w-8 h-8 bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[#FF4D00]">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium mb-1">{title}</div>
+        <div className="text-xs text-white/60">{body}</div>
+      </div>
+    </div>
+  );
+}
+
+function QuickLink({
+  icon,
+  label,
+  href,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="bg-[#0f0f0f] p-3 flex items-center justify-between gap-2 group hover:bg-white/5 transition-colors"
+    >
+      <span className="flex items-center gap-2 text-sm text-white/70 group-hover:text-white">
+        {icon}
+        {label}
+      </span>
+      <ArrowUpRight className="w-3.5 h-3.5 text-white/40 group-hover:text-[#FF4D00]" />
+    </a>
+  );
+}

@@ -31,7 +31,9 @@ const MODULE_PREFIXES: Partial<Record<ModuleId, string>> = {
   twilio: "modules/twilio/",
   "upstash-redis": "modules/upstash-redis/",
   s3: "modules/s3/",
-  "cloudflare-r2": "modules/s3/",
+  pino: "modules/pino/",
+  opentelemetry: "modules/opentelemetry/",
+  "next-intl": "modules/next-intl/",
 };
 
 export function processModules(vfs: VirtualFs, config: ProjectConfig): void {

@@ -15,6 +15,10 @@ const STACK_KEYS = [
   "ui",
 ] as const satisfies readonly (keyof ProjectConfig)[];
 
+function sortedKeyList(xs: readonly string[]): string {
+  return [...xs].sort().join(",");
+}
+
 export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | "npm" }): string {
   const runner = opts?.pm ?? cfg.pm;
   const head =
@@ -38,6 +42,10 @@ export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | 
   }
   if (!cfg.install) flags.push("--no-install");
   if (!cfg.git) flags.push("--no-git");
+  if (sortedKeyList(cfg.addons) !== sortedKeyList(DEFAULT_CONFIG.addons)) {
+    flags.push(`--addons ${cfg.addons.length ? cfg.addons.join(",") : "''"}`);
+  }
+  if (cfg.oxlintStrict) flags.push("--oxlint-strict");
   flags.push("--yes");
 
   return `${head} ${cfg.projectName} ${flags.join(" ")}`.replace(/\s+/g, " ").trim();

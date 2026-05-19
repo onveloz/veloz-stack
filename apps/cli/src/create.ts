@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import {
@@ -21,6 +22,7 @@ export type CreateInput = Partial<ProjectConfig> & {
   addons?: string;
   yes?: boolean;
   dryRun?: boolean;
+  oxlintStrict?: boolean;
 };
 
 export async function runCreate(input: CreateInput): Promise<void> {
@@ -69,6 +71,9 @@ export async function runCreate(input: CreateInput): Promise<void> {
   }
 
   const { fileCount } = await scaffold(config, target);
+  if (config.git) {
+    execSync("git init", { cwd: target, stdio: "ignore" });
+  }
   console.log(chalk.green(`\n✓ ${fileCount} arquivos criados.`));
   console.log(chalk.dim(`  cd ${config.projectName}`));
   console.log(chalk.dim(`  ${config.pm} install`));
@@ -131,6 +136,7 @@ function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectCo
       .map((s) => s.trim())
       .filter((a) => a && valid.has(a as any)) as ProjectConfig["addons"];
   }
+  if (input.oxlintStrict !== undefined) out.oxlintStrict = input.oxlintStrict;
   // If no modules flag passed and we're on a non-veloz preset, base already
   // has the right modules array.
   void base;
