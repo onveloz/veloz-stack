@@ -79,7 +79,19 @@ const cli = Cli.create("create-veloz-stack", {
     addons: z
       .string()
       .optional()
-      .describe("Ferramentas extras, separadas por vírgula (turborepo, biome, husky)"),
+      .describe("Ferramentas extras, separadas por vírgula (turborepo, biome, husky, lefthook)"),
+    lefthookCi: z
+      .boolean()
+      .optional()
+      .describe(
+        "Com Lefthook: pre-push (typecheck, lint se Biome, build) + .github/workflows/ci.yml",
+      ),
+    lefthookAdvanced: z
+      .boolean()
+      .optional()
+      .describe(
+        "Com Lefthook: hooks rigorosos TS (biome ci, commitlint, pre-push pipeline) + CI avançado",
+      ),
     yes: z.boolean().optional().describe("Pula as perguntas, usa defaults/flags"),
     install: z.boolean().optional().describe("Instala dependências depois do scaffold"),
     git: z.boolean().optional().describe("Inicializa repositório git depois do scaffold"),

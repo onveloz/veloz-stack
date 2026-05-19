@@ -60,6 +60,8 @@ export function useStackConfig() {
         DEFAULT_CONFIG.addons,
       ),
       oxlintStrict: parseAsBoolean.withDefault(DEFAULT_CONFIG.oxlintStrict),
+      lefthookCi: parseAsBoolean.withDefault(DEFAULT_CONFIG.lefthookCi),
+      lefthookAdvanced: parseAsBoolean.withDefault(DEFAULT_CONFIG.lefthookAdvanced),
       git: parseAsBoolean.withDefault(DEFAULT_CONFIG.git),
       install: parseAsBoolean.withDefault(DEFAULT_CONFIG.install),
     },
@@ -86,6 +88,8 @@ export function useStackConfig() {
     examples: state.examples,
     addons: state.addons,
     oxlintStrict: state.oxlintStrict,
+    lefthookCi: state.lefthookCi,
+    lefthookAdvanced: state.lefthookAdvanced,
     git: state.git,
     install: state.install,
   };

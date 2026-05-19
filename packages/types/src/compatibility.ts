@@ -1,4 +1,4 @@
-import type { ProjectConfig } from "./index";
+import type { AddonId, ProjectConfig } from "./index";
 import { MODULES, type ModuleId } from "./modules";
 
 export type DisableReason = string | null;
@@ -120,6 +120,19 @@ export function getModuleDisableReason(
   return null;
 }
 
+export function getAddonDisableReason(
+  cfg: ProjectConfig,
+  id: AddonId,
+): DisableReason {
+  if (id === "husky" && cfg.addons.includes("lefthook")) {
+    return "Incompatível com Lefthook — escolha um gerenciador de hooks";
+  }
+  if (id === "lefthook" && cfg.addons.includes("husky")) {
+    return "Incompatível com Husky — escolha um gerenciador de hooks";
+  }
+  return null;
+}
+
 export function validateConfig(cfg: ProjectConfig): string[] {
   const errors: string[] = [];
   const pushIf = (reason: DisableReason, prefix: string) => {
@@ -155,6 +168,22 @@ export function validateConfig(cfg: ProjectConfig): string[] {
   }
   if (cfg.oxlintStrict && !cfg.addons.includes("oxlint")) {
     errors.push("addons: oxlint strict requer o addon oxlint");
+  }
+  if (cfg.addons.includes("husky") && cfg.addons.includes("lefthook")) {
+    errors.push(
+      "addons: Husky e Lefthook não podem ser usados juntos — escolha um gerenciador de hooks",
+    );
+  }
+  if (cfg.lefthookCi && !cfg.addons.includes("lefthook")) {
+    errors.push("lefthookCi: CI local/GitHub exige o addon Lefthook");
+  }
+  if (cfg.lefthookAdvanced && !cfg.addons.includes("lefthook")) {
+    errors.push("lefthookAdvanced: modo avançado exige o addon Lefthook");
+  }
+  if (cfg.lefthookCi && cfg.lefthookAdvanced) {
+    errors.push(
+      "lefthook: escolha CI básico ou avançado — não use lefthookCi e lefthookAdvanced juntos",
+    );
   }
   return errors;
 }

@@ -20,8 +20,11 @@ function runCommand(config: ProjectConfig): string {
 
 /** Mutates `pkg.scripts` with format/lint/check when Biome or oxlint is active. */
 export function setLintScripts(pkg: Record<string, any>, config: ProjectConfig): void {
+  const hasTurbo = config.addons.includes("turborepo");
   const hasBiome = config.addons.includes("biome");
   const hasOxlint = config.addons.includes("oxlint");
+  const hasLefthook = config.addons.includes("lefthook");
+  const lefthookAdvanced = hasLefthook && config.lefthookAdvanced;
   const run = runCommand(config);
   const pm = config.pm;
 
@@ -43,6 +46,7 @@ export function setLintScripts(pkg: Record<string, any>, config: ProjectConfig):
           format: "biome format --write .",
           lint: "biome lint .",
           check: "biome check --write .",
+          ...(lefthookAdvanced ? { "lint:ci": "biome ci ." } : {}),
         }
       : hasOxlint
         ? {
@@ -51,6 +55,7 @@ export function setLintScripts(pkg: Record<string, any>, config: ProjectConfig):
             check: "oxlint . && oxfmt --check .",
           }
         : {}),
+    ...(lefthookAdvanced && hasTurbo ? { test: `${run} test` } : {}),
   };
 }
 
@@ -60,6 +65,8 @@ export function setLintStaged(pkg: Record<string, any>, config: ProjectConfig): 
   const hasBiome = config.addons.includes("biome");
   const hasOxlint = config.addons.includes("oxlint");
   const hasHusky = config.addons.includes("husky");
+  const hasLefthook = config.addons.includes("lefthook");
+  const lefthookAdvanced = hasLefthook && config.lefthookAdvanced;
 
   pkg.devDependencies = {
     ...(pkg.devDependencies ?? {}),
@@ -72,6 +79,13 @@ export function setLintStaged(pkg: Record<string, any>, config: ProjectConfig): 
         }
       : {}),
     ...(hasHusky ? { husky: "^9.1.7", "lint-staged": "^16.3.2" } : {}),
+    ...(hasLefthook ? { lefthook: "^2.1.6" } : {}),
+    ...(lefthookAdvanced
+      ? {
+          "@commitlint/cli": "^19.8.0",
+          "@commitlint/config-conventional": "^19.8.0",
+        }
+      : {}),
   };
 
   if (hasHusky) {
@@ -84,6 +98,9 @@ export function setLintStaged(pkg: Record<string, any>, config: ProjectConfig): 
             "*.{js,jsx,ts,tsx,json,md,css}": ["oxfmt --write"],
           }
         : { "*.{js,jsx,ts,tsx,json,md}": [] };
+  }
+  if (hasLefthook) {
+    pkg.scripts = { ...pkg.scripts, prepare: "lefthook install" };
   }
 }
 

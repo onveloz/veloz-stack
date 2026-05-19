@@ -119,6 +119,9 @@ jobs:
           - { name: addons-turborepo-only, args: "--addons turborepo" }
           - { name: addons-biome-only, args: "--addons biome" }
           - { name: addons-husky, args: "--addons husky,biome" }
+          - { name: addons-lefthook, args: "--addons lefthook,biome" }
+          - { name: addons-lefthook-ci, args: "--addons lefthook,biome --lefthook-ci" }
+          - { name: addons-lefthook-advanced, args: "--addons lefthook,biome,turborepo --lefthook-advanced" }
           - { name: addons-all, args: "--addons turborepo,biome,husky" }
           - { name: addons-oxlint, args: "--addons turborepo,oxlint" }
           - { name: addons-oxlint-strict, args: "--addons turborepo,oxlint --oxlint-strict" }
