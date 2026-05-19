@@ -486,6 +486,22 @@ describe("addons", () => {
     expect(errs.some((e) => e.includes("básico ou avançado"))).toBe(true);
   });
 
+  it("tanstack home omits conditional lucide imports when steps are disabled", () => {
+    const flyHome = generate(cfg({ deploy: "fly" })).read("apps/web/src/routes/index.tsx")!;
+    expect(flyHome).not.toMatch(/^\s*Rocket,/m);
+    expect(flyHome).not.toContain("Deploy no Veloz");
+
+    const noDbHome = generate(
+      cfg({ db: "none", orm: "none", dbHosting: "none", auth: "none" }),
+    ).read("apps/web/src/routes/index.tsx")!;
+    expect(noDbHome).not.toMatch(/^\s*Database,/m);
+    expect(noDbHome).not.toContain("Aplique o schema");
+
+    const velozHome = generate(cfg({ deploy: "veloz" })).read("apps/web/src/routes/index.tsx")!;
+    expect(velozHome).toMatch(/^\s*Rocket,/m);
+    expect(velozHome).toMatch(/^\s*Database,/m);
+  });
+
   it("both addons: turbo scripts + biome commands coexist", () => {
     const vfs = generate(cfg({ addons: ["turborepo", "biome"] }));
     const pkg = JSON.parse(vfs.read("package.json")!);
