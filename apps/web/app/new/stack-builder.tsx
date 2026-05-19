@@ -28,6 +28,7 @@ import {
   getDbHostingDisableReason,
   getDeployDisableReason,
   getFrontendDisableReason,
+  getAddonDisableReason,
   getModuleDisableReason,
   getOrmDisableReason,
   getRuntimeDisableReason,
@@ -147,7 +148,10 @@ export function StackBuilder() {
       if (id === "oxlint") oxlintStrict = false;
     }
 
-    void setState({ addons, oxlintStrict, preset: "custom" });
+    const lefthookReset =
+      id === "lefthook" && has ? { lefthookCi: false, lefthookAdvanced: false } : {};
+
+    void setState({ addons, oxlintStrict, preset: "custom", ...lefthookReset });
   }
 
   function toggleExample(id: (typeof ExampleId.options)[number]) {
@@ -496,15 +500,21 @@ export function StackBuilder() {
               {AddonId.options.map((id) => {
                 const active = config.addons.includes(id);
                 const meta = ADDON_META[id];
+                const reason = getAddonDisableReason(config, id);
+                const disabled = !active && reason !== null;
                 return (
                   <button
                     key={id}
-                    onClick={() => toggleAddon(id)}
+                    onClick={() => !disabled && toggleAddon(id)}
+                    title={reason ?? undefined}
+                    aria-disabled={disabled || undefined}
                     className={
                       "group text-left p-3 border transition-colors relative flex items-center gap-3 min-h-[64px] " +
                       (active
                         ? "border-brand bg-brand-subtle"
-                        : "border-border hover:border-border-strong hover:bg-secondary")
+                        : disabled
+                          ? "border-destructive/30 bg-destructive/5 cursor-not-allowed"
+                          : "border-border hover:border-border-strong hover:bg-secondary")
                     }
                   >
                     <div className="flex items-center justify-center w-10 h-10 shrink-0">
@@ -540,6 +550,82 @@ export function StackBuilder() {
                 />
                 <span>Oxlint strict (regras mais pesadas no .oxlintrc.json)</span>
               </label>
+            )}
+            {config.addons.includes("lefthook") && (
+              <div className="mt-3 border border-border p-3 bg-secondary/40 space-y-2">
+                <p className="text-[11px] text-muted-foreground px-0.5">
+                  CI local + GitHub Actions (escolha um nível ou nenhum)
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    void setState({
+                      lefthookCi: !config.lefthookCi,
+                      lefthookAdvanced: false,
+                      preset: "custom",
+                    })
+                  }
+                  className={
+                    "w-full text-left flex items-start gap-3 min-h-[56px] rounded-sm " +
+                    (config.lefthookCi
+                      ? "border border-brand bg-brand-subtle/30"
+                      : "border border-transparent hover:bg-secondary/60")
+                  }
+                >
+                  <div
+                    className={
+                      "mt-0.5 w-4 h-4 border flex items-center justify-center shrink-0 " +
+                      (config.lefthookCi ? "bg-brand border-brand" : "border-border-strong")
+                    }
+                  >
+                    {config.lefthookCi && (
+                      <Check className="w-3 h-3 text-brand-foreground" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-sm">CI básico</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                      Pre-push paralelo (typecheck, lint se Biome, build) + workflow mínimo
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    void setState({
+                      lefthookAdvanced: !config.lefthookAdvanced,
+                      lefthookCi: false,
+                      preset: "custom",
+                    })
+                  }
+                  className={
+                    "w-full text-left flex items-start gap-3 min-h-[56px] rounded-sm " +
+                    (config.lefthookAdvanced
+                      ? "border border-brand bg-brand-subtle/30"
+                      : "border border-transparent hover:bg-secondary/60")
+                  }
+                >
+                  <div
+                    className={
+                      "mt-0.5 w-4 h-4 border flex items-center justify-center shrink-0 " +
+                      (config.lefthookAdvanced
+                        ? "bg-brand border-brand"
+                        : "border-border-strong")
+                    }
+                  >
+                    {config.lefthookAdvanced && (
+                      <Check className="w-3 h-3 text-brand-foreground" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-sm">Avançado (TypeScript)</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                      Biome CI nos staged, typecheck no commit, Conventional Commits, pre-push em
+                      pipeline (biome ci, build, test com Turborepo) + CI com commitlint
+                    </div>
+                  </div>
+                </button>
+              </div>
             )}
           </section>
 
@@ -650,6 +736,10 @@ const ADDON_META: Record<(typeof AddonId.options)[number], { label: string; tagl
   oxlint: {
     label: "oxlint + oxfmt",
     tagline: "Linter Oxc + formatador — alternativa ao Biome (não misture os dois)",
+  },
+  lefthook: {
+    label: "Lefthook",
+    tagline: "Hooks Git em YAML — pre-commit com Biome nos arquivos staged (se Biome ativo)",
   },
 };
 

@@ -1,0 +1,63 @@
+# Git hooks — `pnpm install` runs `lefthook install` via the prepare script.
+{{#if lefthookAdvanced}}
+# Modo avançado: Biome CI nos staged, typecheck no commit, Conventional Commits, pre-push em pipeline.
+{{#if (includes addons "biome")}}
+pre-commit:
+  parallel: true
+  commands:
+    biome-ci:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,mjs,cjs}"
+      run: {{pmExec "biome ci --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}" pm}}
+    types:
+      run: {{pmRun "check-types" pm}}
+{{else}}
+pre-commit:
+  commands:
+    types:
+      run: {{pmRun "check-types" pm}}
+{{/if}}
+
+commit-msg:
+  commands:
+    commitlint:
+      run: {{pmExec "commitlint --edit {1}" pm}}
+
+pre-push:
+  piped: true
+  commands:
+    types:
+      run: {{pmRun "check-types" pm}}
+    {{#if (includes addons "biome")}}
+    lint-ci:
+      run: {{pmRun "lint:ci" pm}}
+    {{/if}}
+    build:
+      run: {{pmRun "build" pm}}
+    {{#if (includes addons "turborepo")}}
+    test:
+      run: {{pmRun "test" pm}}
+    {{/if}}
+{{else}}
+{{#if (includes addons "biome")}}
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,jsx,ts,tsx,json,md}"
+      run: {{pmExec "biome check --write --no-errors-on-unmatched {staged_files}" pm}}
+      stage_fixed: true
+{{/if}}
+{{#if lefthookCi}}
+pre-push:
+  parallel: true
+  commands:
+    types:
+      run: {{pmRun "check-types" pm}}
+    {{#if (includes addons "biome")}}
+    lint:
+      run: {{pmRun "lint" pm}}
+    {{/if}}
+    build:
+      run: {{pmRun "build" pm}}
+{{/if}}
+{{/if}}

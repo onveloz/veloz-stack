@@ -20,6 +20,8 @@ export type CreateInput = Partial<ProjectConfig> & {
   modules?: string;
   examples?: string;
   addons?: string;
+  lefthookCi?: boolean;
+  lefthookAdvanced?: boolean;
   yes?: boolean;
   dryRun?: boolean;
   oxlintStrict?: boolean;
@@ -120,6 +122,8 @@ function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectCo
   }
   if (input.install !== undefined) out.install = input.install;
   if (input.git !== undefined) out.git = input.git;
+  if (input.lefthookCi !== undefined) out.lefthookCi = input.lefthookCi;
+  if (input.lefthookAdvanced !== undefined) out.lefthookAdvanced = input.lefthookAdvanced;
   if (typeof input.modules === "string") {
     out.modules = parseModules(input.modules);
   }

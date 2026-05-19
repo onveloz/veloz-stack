@@ -1,0 +1,47 @@
+# Basic CI — typecheck, lint (Biome), build. Matches Lefthook pre-push when lefthookCi is on.
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: typecheck · lint · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      {{#if (eq pm "pnpm")}}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      {{else}}{{#if (eq pm "bun")}}
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      {{else}}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      {{/if}}{{/if}}
+
+      - name: Typecheck
+        run: {{pmRun "check-types" pm}}
+
+      {{#if (includes addons "biome")}}
+      - name: Lint
+        run: {{pmRun "lint" pm}}
+      {{/if}}
+
+      - name: Build
+        run: {{pmRun "build" pm}}

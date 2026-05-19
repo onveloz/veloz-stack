@@ -73,7 +73,7 @@ export const PresetId = z.enum([
 ]);
 export type PresetId = z.infer<typeof PresetId>;
 
-export const AddonId = z.enum(["turborepo", "biome", "husky", "oxlint"]);
+export const AddonId = z.enum(["turborepo", "biome", "husky", "oxlint", "lefthook"]);
 export type AddonId = z.infer<typeof AddonId>;
 
 export const UiId = z.enum(["tailwind", "shadcn", "none"]);
@@ -104,6 +104,10 @@ export const ProjectConfig = z.object({
   addons: z.array(AddonId).default([]),
   /** When `oxlint` addon is on, enables stricter oxlint rules in generated `.oxlintrc.json`. */
   oxlintStrict: z.boolean().default(false),
+  /** Pre-push + GitHub Actions CI básico (requires `lefthook` addon). */
+  lefthookCi: z.boolean().default(false),
+  /** Hooks rigorosos + commitlint + CI avançado (requires `lefthook`; incompatível com `lefthookCi`). */
+  lefthookAdvanced: z.boolean().default(false),
   git: z.boolean().default(true),
   install: z.boolean().default(true),
   preset: PresetId.default("custom"),

@@ -74,6 +74,7 @@ const LOGO_MAP = {
   turborepo: ["Turborepo", "Turbo"],
   biome: ["Biome"],
   husky: ["Husky"],
+  lefthook: ["Lefthook"],
 
   // modules — tech brands that exist on svgl
   claude: ["Claude AI", "Claude", "Anthropic"],

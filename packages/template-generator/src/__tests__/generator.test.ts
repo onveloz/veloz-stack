@@ -419,6 +419,89 @@ describe("addons", () => {
     expect(velozHome).toMatch(/^\s*Database,/m);
   });
 
+  it("lefthook addon adds lefthook.yml + prepare script", () => {
+    const vfs = generate(cfg({ addons: ["lefthook", "biome"], pm: "pnpm" }));
+    const hook = vfs.read("lefthook.yml")!;
+    expect(hook).toContain("pre-commit:");
+    expect(hook).toContain("pnpm exec biome check --write --no-errors-on-unmatched");
+    expect(hook).not.toContain("pre-push:");
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts.prepare).toBe("lefthook install");
+    expect(pkg.devDependencies.lefthook).toBeDefined();
+    expect(pkg.devDependencies.husky).toBeUndefined();
+    expect(vfs.read(".github/workflows/ci.yml")).toBeUndefined();
+  });
+
+  it("lefthookCi adds pre-push hooks and GitHub Actions workflow", () => {
+    const vfs = generate(
+      cfg({ addons: ["lefthook", "biome"], lefthookCi: true, pm: "pnpm" }),
+    );
+    const hook = vfs.read("lefthook.yml")!;
+    expect(hook).toContain("pre-push:");
+    expect(hook).toContain("pnpm run check-types");
+    expect(hook).toContain("pnpm run lint");
+    expect(hook).toContain("pnpm run build");
+    const ci = vfs.read(".github/workflows/ci.yml")!;
+    expect(ci).toContain("name: ci");
+    expect(ci).toContain("pnpm run check-types");
+    expect(ci).toContain("pnpm run lint");
+    expect(ci).toContain("pnpm run build");
+  });
+
+  it("lefthookCi without lefthook addon is rejected", () => {
+    const errs = validateConfig(cfg({ lefthookCi: true, addons: ["biome"] }));
+    expect(errs.some((e) => e.includes("lefthookCi"))).toBe(true);
+  });
+
+  it("lefthookAdvanced adds strict hooks, commitlint, and advanced CI", () => {
+    const vfs = generate(
+      cfg({
+        addons: ["lefthook", "biome", "turborepo"],
+        lefthookAdvanced: true,
+        pm: "pnpm",
+      }),
+    );
+    const hook = vfs.read("lefthook.yml")!;
+    expect(hook).toContain("biome ci");
+    expect(hook).toContain("commit-msg:");
+    expect(hook).toContain("commitlint");
+    expect(hook).toContain("pre-push:");
+    expect(hook).toContain("piped: true");
+    expect(hook).toContain("lint:ci");
+    expect(hook).toContain("pnpm run test");
+    expect(vfs.read("commitlint.config.cjs")).toContain("config-conventional");
+    const ci = vfs.read(".github/workflows/ci.yml")!;
+    expect(ci).toContain("commitlint");
+    expect(ci).toContain("Biome CI");
+    const pkg = JSON.parse(vfs.read("package.json")!);
+    expect(pkg.scripts["lint:ci"]).toBe("biome ci .");
+    expect(pkg.scripts.test).toContain("turbo run test");
+    expect(pkg.devDependencies["@commitlint/cli"]).toBeDefined();
+  });
+
+  it("rejects lefthookCi and lefthookAdvanced together", () => {
+    const errs = validateConfig(
+      cfg({ addons: ["lefthook"], lefthookCi: true, lefthookAdvanced: true }),
+    );
+    expect(errs.some((e) => e.includes("básico ou avançado"))).toBe(true);
+  });
+
+  it("tanstack home omits conditional lucide imports when steps are disabled", () => {
+    const flyHome = generate(cfg({ deploy: "fly" })).read("apps/web/src/routes/index.tsx")!;
+    expect(flyHome).not.toMatch(/^\s*Rocket,/m);
+    expect(flyHome).not.toContain("Deploy no Veloz");
+
+    const noDbHome = generate(
+      cfg({ db: "none", orm: "none", dbHosting: "none", auth: "none" }),
+    ).read("apps/web/src/routes/index.tsx")!;
+    expect(noDbHome).not.toMatch(/^\s*Database,/m);
+    expect(noDbHome).not.toContain("Aplique o schema");
+
+    const velozHome = generate(cfg({ deploy: "veloz" })).read("apps/web/src/routes/index.tsx")!;
+    expect(velozHome).toMatch(/^\s*Rocket,/m);
+    expect(velozHome).toMatch(/^\s*Database,/m);
+  });
+
   it("both addons: turbo scripts + biome commands coexist", () => {
     const vfs = generate(cfg({ addons: ["turborepo", "biome"] }));
     const pkg = JSON.parse(vfs.read("package.json")!);
@@ -568,6 +651,11 @@ describe("validateConfig", () => {
   it("rejects oxlintStrict without oxlint addon", () => {
     const errs = validateConfig(cfg({ addons: ["turborepo", "biome"], oxlintStrict: true }));
     expect(errs.some((e) => e.includes("oxlint strict"))).toBe(true);
+  });
+
+  it("rejects husky and lefthook together", () => {
+    const errs = validateConfig(cfg({ addons: ["husky", "lefthook", "biome"] }));
+    expect(errs.some((e) => e.includes("Husky e Lefthook"))).toBe(true);
   });
 });
 

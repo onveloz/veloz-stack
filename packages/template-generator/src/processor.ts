@@ -24,6 +24,20 @@ hb.registerHelper("includes", (arr: unknown[] | undefined, v: unknown) =>
   Array.isArray(arr) ? arr.includes(v) : false,
 );
 hb.registerHelper("json", (v: unknown) => JSON.stringify(v));
+hb.registerHelper("pmRun", (script: unknown, pm: unknown) => {
+  const cmd = String(script);
+  const p = String(pm);
+  if (p === "pnpm") return `pnpm run ${cmd}`;
+  if (p === "bun") return `bun run ${cmd}`;
+  return `npm run ${cmd}`;
+});
+hb.registerHelper("pmExec", (command: unknown, pm: unknown) => {
+  const cmd = String(command);
+  const p = String(pm);
+  if (p === "pnpm") return `pnpm exec ${cmd}`;
+  if (p === "bun") return `bunx ${cmd}`;
+  return `npx ${cmd}`;
+});
 
 export function render(template: string, config: ProjectConfig): string {
   const compiled = hb.compile(template, { noEscape: true });
