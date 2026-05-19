@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import {
@@ -70,6 +71,9 @@ export async function runCreate(input: CreateInput): Promise<void> {
   }
 
   const { fileCount } = await scaffold(config, target);
+  if (config.git) {
+    execSync("git init", { cwd: target, stdio: "ignore" });
+  }
   console.log(chalk.green(`\n✓ ${fileCount} arquivos criados.`));
   console.log(chalk.dim(`  cd ${config.projectName}`));
   console.log(chalk.dim(`  ${config.pm} install`));

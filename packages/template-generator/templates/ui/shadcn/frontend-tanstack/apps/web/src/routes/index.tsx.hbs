@@ -4,10 +4,12 @@ import { useState } from "react";
 import {
   ArrowUpRight,
   BookOpen,
-  Database,
+  {{#if (ne db "none")}}Database,
+  {{/if}}
   FileCode2,
   Layers,
-  Rocket,
+  {{#if (eq deploy "veloz")}}Rocket,
+  {{/if}}
   Sparkles,
   Terminal,
 } from "lucide-react";
