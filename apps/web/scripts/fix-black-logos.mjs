@@ -36,6 +36,10 @@ function repaint(svg) {
   return out;
 }
 
+function hasGradientPaint(svg) {
+  return /<(?:linear|radial)Gradient/i.test(svg) || /fill="url\s*\(#/i.test(svg);
+}
+
 function isMostlyColored(svg) {
   // Any non-black hex or named color beyond black/white counts as "colored"
   const fills = svg.match(/(fill|stroke)="[^"]+"/gi) ?? [];
@@ -59,8 +63,8 @@ async function main() {
     const path = join(DIR, f);
     const orig = await readFile(path, "utf8");
 
-    // If logo already has real brand colors, leave it alone.
-    if (isMostlyColored(orig)) {
+    // Gradients / brand marks (e.g. Next.js) must not be flattened to white.
+    if (isMostlyColored(orig) || hasGradientPaint(orig)) {
       skipped.push(f);
       continue;
     }

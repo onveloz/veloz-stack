@@ -8,9 +8,6 @@ const CONCEPTS = new Set<string>([
   "lgpd-consent",
   "pt-br-i18n",
   "better-auth-social",
-  "pino",
-  "opentelemetry",
-  "next-intl",
   "oxlint",
 ]);
 

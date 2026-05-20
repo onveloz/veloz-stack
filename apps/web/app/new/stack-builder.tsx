@@ -684,6 +684,9 @@ export function StackBuilder() {
                 })}
             </div>
           </section>
+          <div className="lg:hidden mt-8 border border-border bg-secondary/20 overflow-hidden">
+            <PreviewPanel config={config} maxHeight={280} />
+          </div>
         </main>
 
         {/* Right preview panel */}
@@ -702,15 +705,15 @@ export function StackBuilder() {
       />
 
       {/* Sticky bottom command bar */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur z-30">
-        <div className="max-w-[1200px] mx-auto px-6 py-3 flex items-center gap-3">
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground hidden sm:block">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur z-30 pb-[env(safe-area-inset-bottom)]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground shrink-0 hidden sm:block">
             Rode este comando
           </span>
-          <code className="flex-1 font-mono text-xs md:text-sm text-foreground bg-secondary border border-border-strong px-3 py-2 overflow-x-auto whitespace-nowrap">
+          <code className="min-w-0 w-full sm:flex-1 font-mono text-[11px] sm:text-xs md:text-sm text-foreground bg-secondary border border-border-strong px-3 py-2 overflow-x-auto sm:whitespace-nowrap whitespace-pre-wrap break-all leading-relaxed">
             <span className="text-brand">$</span> {command}
           </code>
-          <CopyButton value={command} label="Copiar comando" />
+          <CopyButton value={command} label="Copiar comando" className="shrink-0 self-end sm:self-auto" />
         </div>
       </div>
     </div>

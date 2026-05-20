@@ -1,5 +1,11 @@
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
-import { StackBuilder } from "./stack-builder";
+import { StackBuilderSkeleton } from "./stack-builder-skeleton";
+
+const StackBuilder = dynamic(
+  () => import("./stack-builder").then((m) => m.StackBuilder),
+  { ssr: false, loading: () => <StackBuilderSkeleton /> },
+);
 
 export const metadata = {
   title: "Build your stack — Veloz Stack",
@@ -7,7 +13,7 @@ export const metadata = {
 
 export default function NewPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<StackBuilderSkeleton />}>
       <StackBuilder />
     </Suspense>
   );

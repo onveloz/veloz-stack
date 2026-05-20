@@ -73,6 +73,10 @@ export function resolveConfig(
         "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor Hono separado",
     });
     proposed.backend = "next";
+    applyNextStackRuntime(proposed, changes);
+  }
+  if (pending.key === "backend" && pending.value === "next" && proposed.frontend === "next") {
+    applyNextStackRuntime(proposed, changes);
   }
   if (
     pending.key === "frontend" &&
@@ -86,6 +90,15 @@ export function resolveConfig(
       reason: "Route Handlers do Next só funcionam com frontend Next.js",
     });
     proposed.backend = "hono";
+    if (proposed.runtime === "node") {
+      changes.push({
+        key: "runtime",
+        from: "node",
+        to: "bun",
+        reason: "Stack Hono + TanStack usa Bun como runtime padrão",
+      });
+      proposed.runtime = "bun";
+    }
   }
 
   // Seed with the primary change and its reason (if any)
@@ -138,7 +151,23 @@ export function resolveConfig(
   }
   proposed.modules = keptModules;
 
+  if (proposed.frontend === "next" && proposed.backend === "next") {
+    applyNextStackRuntime(proposed, changes);
+  }
+
   return { newCfg: proposed, changes };
+}
+
+/** Route Handlers on Next.js target Node in production (Vercel / Veloz). */
+function applyNextStackRuntime(cfg: ProjectConfig, changes: ConfigChange[]) {
+  if (cfg.runtime !== "bun") return;
+  changes.push({
+    key: "runtime",
+    from: "bun",
+    to: "node",
+    reason: "Route Handlers no Next.js usam runtime Node em produção",
+  });
+  cfg.runtime = "node";
 }
 
 function findReason(

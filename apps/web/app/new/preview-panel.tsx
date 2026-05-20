@@ -53,7 +53,14 @@ function buildTree(paths: string[]): TreeNode[] {
   return sort(root);
 }
 
-export function PreviewPanel({ config }: { config: ProjectConfig }) {
+export function PreviewPanel({
+  config,
+  maxHeight,
+}: {
+  config: ProjectConfig;
+  /** When set (e.g. mobile embed), caps scroll area instead of filling viewport column. */
+  maxHeight?: number;
+}) {
   const tree = useMemo(() => {
     try {
       const vfs = generate(config);
@@ -73,8 +80,11 @@ export function PreviewPanel({ config }: { config: ProjectConfig }) {
   }, [config]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-4 py-2 border-b border-border flex items-center justify-between bg-secondary/30">
+    <div
+      className="flex flex-col h-full"
+      style={maxHeight ? { maxHeight } : undefined}
+    >
+      <div className="px-4 py-2 border-b border-border flex items-center justify-between bg-secondary/30 shrink-0">
         <div className="flex items-center gap-2">
           <FileCode2 className="w-3.5 h-3.5 text-brand" />
           <span className="text-[11px] uppercase tracking-wider font-medium">Preview</span>
