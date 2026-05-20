@@ -270,3 +270,16 @@ jobs:
             exit 1
           fi
           echo "✓ Rejected with exit code $code"
+
+      - name: Backend next + deploy cloudflare (runtime node) must be rejected
+        run: |
+          set +e
+          ./apps/cli/node_modules/.bin/tsx apps/cli/src/index.ts \
+            /tmp/veloz-invalid7 --yes --no-install --pm pnpm \
+            --frontend next --backend next --runtime node --deploy cloudflare
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::Scaffolder accepted backend=next + deploy=cloudflare"
+            exit 1
+          fi
+          echo "✓ Rejected with exit code $code"

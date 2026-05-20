@@ -5,7 +5,16 @@ import { appRouter } from "@{{projectName}}/api/routers/index";
 import { createContext } from "@{{projectName}}/api/context";
 
 const handler = new RPCHandler(appRouter, {
-  interceptors: [onError((err: unknown) => console.error(err))],
+  interceptors: [
+    onError((err: unknown) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.error(err);
+        return;
+      }
+      const message = err instanceof Error ? err.message : "RPC error";
+      console.error(message);
+    }),
+  ],
 });
 
 async function handleRequest(request: Request) {

@@ -7,11 +7,17 @@ import type { VirtualFs } from "../vfs";
 function writeDockerfile(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.backend === "next") {
     const src = EMBEDDED_TEMPLATES.get("deploy/veloz/Dockerfile.next.hbs");
-    if (src) vfs.write("Dockerfile", render(src, config));
+    if (!src) {
+      throw new Error("Missing embedded template: deploy/veloz/Dockerfile.next.hbs");
+    }
+    vfs.write("Dockerfile", render(src, config));
     return;
   }
   const src = EMBEDDED_TEMPLATES.get("deploy/veloz/Dockerfile");
-  if (src) vfs.write("Dockerfile", src);
+  if (!src) {
+    throw new Error("Missing embedded template: deploy/veloz/Dockerfile");
+  }
+  vfs.write("Dockerfile", src);
 }
 
 export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
