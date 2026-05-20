@@ -318,6 +318,8 @@ export function StackBuilder() {
       label: "Alvo de deploy",
       tiles: tiles(DeployId.options, labelsDeploy, "veloz"),
       getDisabled: (id) => getDeployDisableReason(config, id as any),
+      categoryHint:
+        "Stack opinado da Veloz: deploy com `npx onveloz deploy`, Dockerfile e health checks no repo.",
     },
     {
       key: "pm",
@@ -844,6 +846,9 @@ function CategorySection({
           const active = selected === t.id;
           const reason = getDisabled(t.id);
           const needsAdjust = !active && reason !== null;
+          const recommended = t.brandHint && !active;
+          const recommendLabel =
+            sectionKey === "deploy" || sectionKey === "dbHosting" ? "RECOMENDADO" : "DEFAULT";
           return (
             <button
               key={t.id}
@@ -859,6 +864,8 @@ function CategorySection({
                   ? "border-brand bg-brand-subtle"
                   : needsAdjust
                   ? "border-warning/40 bg-warning/5 hover:border-warning/60 hover:bg-warning/10"
+                  : recommended
+                  ? "border-brand/50 bg-brand/5 hover:border-brand hover:bg-brand/10 ring-1 ring-brand/20"
                   : "border-border hover:border-border-strong hover:bg-secondary")
               }
             >
@@ -874,8 +881,10 @@ function CategorySection({
                   >
                     {t.label}
                   </span>
-                  {t.brandHint && !active && (
-                    <span className="text-[9px] font-bold px-1 bg-brand/20 text-brand">DEFAULT</span>
+                  {recommended && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-brand/20 text-brand uppercase tracking-wide">
+                      {recommendLabel}
+                    </span>
                   )}
                 </div>
                 {getHint(t.id, sectionKey) && (

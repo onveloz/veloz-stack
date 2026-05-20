@@ -73,6 +73,12 @@ const SECTION_HINTS: Partial<Record<string, Partial<Record<string, string>>>> = 
   backend: {
     next: "APIs nativas no App Router (/app/api) · same-origin · sem apps/server",
   },
+  deploy: {
+    veloz: "Deploy opinado · npx onveloz deploy · Dockerfile + health checks",
+  },
+  dbHosting: {
+    veloz: "Recomendado no stack Veloz BR — Postgres/MySQL gerenciado em pt-BR",
+  },
 };
 
 export function getHint(id: string, section?: string): string | undefined {

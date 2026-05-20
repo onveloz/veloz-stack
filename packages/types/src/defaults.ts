@@ -75,7 +75,7 @@ export const PRESETS = {
   },
   "next-native": {
     label: "Next.js nativo",
-    description: "App Router · Route Handlers · oRPC same-origin · ideal pro Vercel",
+    description: "App Router · Route Handlers · oRPC same-origin · deploy Veloz ou Vercel",
     config: {
       ...DEFAULT_CONFIG,
       preset: "next-native" as const,
@@ -83,7 +83,7 @@ export const PRESETS = {
       backend: "next" as const,
       runtime: "node" as const,
       api: "orpc" as const,
-      deploy: "vercel" as const,
+      deploy: "veloz" as const,
       pm: "pnpm" as const,
       modules: [] as ModuleId[],
     },
