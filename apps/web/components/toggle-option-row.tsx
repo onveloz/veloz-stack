@@ -17,6 +17,9 @@ export function ToggleOptionRow({
   return (
     <button
       type="button"
+      role="checkbox"
+      aria-checked={active}
+      aria-label={label}
       onClick={onClick}
       className={
         "w-full text-left flex items-start gap-3 min-h-[52px] px-2 py-2 transition-colors " +

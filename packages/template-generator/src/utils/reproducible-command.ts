@@ -44,15 +44,9 @@ export function buildReproducibleCommand(config: ProjectConfig): string {
     ...flag("deploy", config.deploy !== d.deploy ? config.deploy : ""),
     ...flag("pm", config.pm !== d.pm ? config.pm : ""),
     ...flag("ui", config.ui !== d.ui ? config.ui : ""),
-    ...listFlag(
-      "modules",
-      config.modules.length > 0 ? config.modules : [],
-    ),
-    ...listFlag(
-      "examples",
-      config.examples.length > 0 ? config.examples : [],
-    ),
-    ...listFlag("addons", config.addons.length > 0 ? config.addons : []),
+    ...listFlag("modules", config.modules),
+    ...listFlag("examples", config.examples),
+    ...listFlag("addons", config.addons),
     ...(config.oxlintStrict ? ["--oxlint-strict"] : []),
     ...(config.lefthookCi ? ["--lefthook-ci"] : []),
     ...(config.lefthookAdvanced ? ["--lefthook-advanced"] : []),

@@ -182,15 +182,6 @@ export function validateConfig(cfg: ProjectConfig): string[] {
   pushIf(getUiDisableReason(cfg, cfg.ui), "ui");
 
   // Cross-field invariants the per-field helpers don't cover
-  if (
-    cfg.frontend === "next" &&
-    cfg.backend !== "next" &&
-    cfg.backend !== "none"
-  ) {
-    errors.push(
-      "backend: Com frontend Next.js, use Route Handlers (APIs em /app/api no mesmo app)",
-    );
-  }
   if (cfg.auth === "better-auth" && cfg.db === "none") {
     errors.push(
       "auth: Better Auth precisa de um banco (usa o adapter Drizzle no packages/db)",
@@ -204,15 +195,6 @@ export function validateConfig(cfg: ProjectConfig): string[] {
 
   for (const m of cfg.modules) {
     pushIf(getModuleDisableReason(cfg, m), `módulo ${m}`);
-  }
-  if (
-    cfg.frontend === "next" &&
-    cfg.modules.includes("next-intl") &&
-    cfg.modules.includes("pt-br-i18n")
-  ) {
-    errors.push(
-      "módulos: next-intl e pt-BR i18n não devem ficar ativos juntos no Next.js — escolha um",
-    );
   }
 
   if (cfg.addons.includes("biome") && cfg.addons.includes("oxlint")) {

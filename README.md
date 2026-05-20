@@ -12,7 +12,7 @@ bun create veloz-stack@latest my-app
 pnpm create veloz-stack@latest my-app
 ```
 
-Pick your stack visually at [veloz-stack.runveloz.com/new](https://veloz-stack.runveloz.com/new).
+Pick your stack visually at [www.veloz-stack.com/new](https://www.veloz-stack.com/new).
 
 ## Packages
 

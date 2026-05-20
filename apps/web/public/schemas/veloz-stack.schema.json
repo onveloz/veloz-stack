@@ -55,7 +55,41 @@
       "type": "array",
       "items": { "type": "string", "enum": ["todo", "ai-chat", "pix-checkout", "none"] }
     },
-    "modules": { "type": "array", "items": { "type": "string" } },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "claude",
+          "abacatepay",
+          "asaas",
+          "pagarme",
+          "mercadopago",
+          "stripe-br",
+          "ararahq-sms",
+          "ararahq-wa",
+          "twilio",
+          "cpf-cnpj",
+          "viacep",
+          "brasilapi",
+          "lgpd-consent",
+          "nfe-io",
+          "pt-br-i18n",
+          "himetrica",
+          "posthog",
+          "sentry",
+          "caramelosec",
+          "resend",
+          "better-auth-social",
+          "upstash-redis",
+          "s3",
+          "cloudflare-r2",
+          "pino",
+          "opentelemetry",
+          "next-intl"
+        ]
+      }
+    },
     "addons": {
       "type": "array",
       "items": {

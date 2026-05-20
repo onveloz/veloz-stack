@@ -1,5 +1,6 @@
 "use client";
 
+import type { KeyboardEvent } from "react";
 import type { ProjectConfig } from "@veloz-stack/types";
 import { BrandLogo } from "@/components/brand-logo";
 import { ToggleOptionRow } from "@/components/toggle-option-row";
@@ -54,6 +55,22 @@ function ExclusiveChoiceGroup<T extends string>({
   logos?: Partial<Record<T, string>>;
   onChange: (v: T) => void;
 }) {
+  function move(delta: number) {
+    const idx = choices.indexOf(value);
+    const next = choices[(idx + delta + choices.length) % choices.length]!;
+    onChange(next);
+  }
+
+  function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, id: T) {
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      e.preventDefault();
+      move(1);
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      move(-1);
+    }
+  }
+
   return (
     <div className="border border-border p-3 bg-secondary/40 space-y-2">
       <div>
@@ -62,7 +79,11 @@ function ExclusiveChoiceGroup<T extends string>({
           <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>
         ) : null}
       </div>
-      <ul className="border border-border divide-y divide-border bg-background">
+      <ul
+        role="radiogroup"
+        aria-label={title}
+        className="border border-border divide-y divide-border bg-background"
+      >
         {choices.map((id) => {
           const active = value === id;
           const meta = labels[id];
@@ -71,7 +92,11 @@ function ExclusiveChoiceGroup<T extends string>({
             <li key={id}>
               <button
                 type="button"
+                role="radio"
+                aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => onChange(id)}
+                onKeyDown={(e) => onKeyDown(e, id)}
                 className={
                   "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors " +
                   (active ? "bg-brand-subtle" : "hover:bg-secondary")
@@ -178,6 +203,9 @@ export function StackAddonPickers({
       <div className="border border-border p-3 bg-secondary/40">
         <button
           type="button"
+          role="checkbox"
+          aria-checked={turborepoOn}
+          aria-label={ADDON_META.turborepo.label}
           onClick={() => onTurborepoChange(!turborepoOn)}
           className={
             "w-full flex items-center gap-3 text-left " +

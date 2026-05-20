@@ -57,13 +57,13 @@ Packages internos: `packages/template-generator`, `packages/types`.
 | dep_yvXTLE9V8r0c | BUILD_FAILED | `templates.generated.ts` ausente (em .gitignore) |
 | dep_final | **LIVE** | Build command corrigido para gerar templates antes do build |
 
-**URL final:** https://veloz-stack.runveloz.com
+**URL final:** https://www.veloz-stack.com
 
 ---
 
 ## Health Check
 
-- **HTTP check:** GET https://veloz-stack.runveloz.com/ → **200 OK** (0.9s, 27KB)
+- **HTTP check:** GET https://www.veloz-stack.com/ → **200 OK** (0.9s, 27KB)
 - **Logs:** Next.js 15.5.15 iniciou em 1094ms. Nenhum erro.
 - **Métricas:** 0 restarts, 0 OOM events, 0% CPU throttle.
 

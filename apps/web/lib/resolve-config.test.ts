@@ -10,6 +10,8 @@ describe("resolveConfig", () => {
     expect(newCfg.backend).toBe("next");
     expect(newCfg.runtime).toBe("bun");
     expect(changes[0]?.key).toBe("frontend");
+    expect(changes[0]?.from).toBe("tanstack-start");
+    expect(changes[0]?.to).toBe("next");
     expect(changes.some((c) => c.key === "backend" && c.to === "next")).toBe(true);
     expect(changes.some((c) => c.key === "runtime")).toBe(false);
   });
@@ -27,6 +29,8 @@ describe("resolveConfig", () => {
     const { newCfg, changes } = resolveConfig(cfg, { key: "frontend", value: "next" });
     expect(newCfg.backend).toBe("next");
     expect(changes[0]?.key).toBe("frontend");
+    expect(changes[0]?.from).toBe("tanstack-start");
+    expect(changes[0]?.to).toBe("next");
     const backendChange = changes.find((c) => c.key === "backend" && c.to === "next");
     expect(backendChange?.from).toBe("express");
   });
@@ -59,6 +63,8 @@ describe("resolveConfig", () => {
     expect(newCfg.backend).toBe("hono");
     expect(newCfg.runtime).toBe("bun");
     expect(changes[0]?.key).toBe("frontend");
+    expect(changes[0]?.from).toBe("next");
+    expect(changes[0]?.to).toBe("tanstack-start");
     expect(changes.some((c) => c.key === "backend" && c.to === "hono")).toBe(true);
     expect(changes.some((c) => c.key === "runtime" && c.to === "bun")).toBe(true);
   });

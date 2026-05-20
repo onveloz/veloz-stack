@@ -74,22 +74,19 @@ export function resolveConfig(
   const cascadesBeforePrimary: ConfigChange[] = [];
 
   // Next.js App Router: prefer native Route Handlers (same-origin API routes)
-  if (pending.key === "frontend" && pending.value === "next") {
-    const separateServerBackends = ["hono", "express", "fastify", "elysia"] as const;
-    if (
-      separateServerBackends.includes(
-        proposed.backend as (typeof separateServerBackends)[number],
-      )
-    ) {
-      cascadesBeforePrimary.push({
-        key: "backend",
-        from: proposed.backend,
-        to: "next",
-        reason:
-          "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor separado",
-      });
-      proposed.backend = "next";
-    }
+  if (
+    pending.key === "frontend" &&
+    pending.value === "next" &&
+    proposed.backend !== "next"
+  ) {
+    cascadesBeforePrimary.push({
+      key: "backend",
+      from: String(proposed.backend),
+      to: "next",
+      reason:
+        "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor separado",
+    });
+    proposed.backend = "next";
   }
   if (
     pending.key === "frontend" &&
