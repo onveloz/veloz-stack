@@ -71,7 +71,7 @@ export const OPTION_HINTS: Record<string, string> = {
 /** Hints when the same option id appears in multiple categories (e.g. frontend vs backend `next`). */
 const SECTION_HINTS: Partial<Record<string, Partial<Record<string, string>>>> = {
   backend: {
-    next: "Route Handlers no App Router · same-origin · ideal pro Vercel",
+    next: "APIs nativas no App Router (/app/api) · same-origin · sem apps/server",
   },
 };
 

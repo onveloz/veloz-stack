@@ -73,6 +73,21 @@ export const PRESETS = {
       modules: [] as ModuleId[],
     },
   },
+  "next-native": {
+    label: "Next.js nativo",
+    description: "App Router · Route Handlers · oRPC same-origin · ideal pro Vercel",
+    config: {
+      ...DEFAULT_CONFIG,
+      preset: "next-native" as const,
+      frontend: "next" as const,
+      backend: "next" as const,
+      runtime: "node" as const,
+      api: "orpc" as const,
+      deploy: "vercel" as const,
+      pm: "pnpm" as const,
+      modules: [] as ModuleId[],
+    },
+  },
 } satisfies Record<string, { label: string; description: string; config: ProjectConfig }>;
 
 export type PresetKey = keyof typeof PRESETS;

@@ -63,6 +63,31 @@ export function resolveConfig(
   const proposed = { ...cfg, [pending.key]: pending.value } as ProjectConfig;
   const changes: ConfigChange[] = [];
 
+  // Next.js App Router: prefer native Route Handlers (same-origin API routes)
+  if (pending.key === "frontend" && pending.value === "next" && proposed.backend === "hono") {
+    changes.push({
+      key: "backend",
+      from: "hono",
+      to: "next",
+      reason:
+        "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor Hono separado",
+    });
+    proposed.backend = "next";
+  }
+  if (
+    pending.key === "frontend" &&
+    pending.value !== "next" &&
+    proposed.backend === "next"
+  ) {
+    changes.push({
+      key: "backend",
+      from: "next",
+      to: "hono",
+      reason: "Route Handlers do Next só funcionam com frontend Next.js",
+    });
+    proposed.backend = "hono";
+  }
+
   // Seed with the primary change and its reason (if any)
   const originReason = findReason(cfg, pending.key, pending.value);
   changes.push({

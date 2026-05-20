@@ -229,7 +229,7 @@ export function StackBuilder() {
     {
       key: "backend",
       label: "Backend",
-      tiles: tiles(BackendId.options, titleCase),
+      tiles: tiles(BackendId.options, labelsBackend, config.frontend === "next" ? "next" : undefined),
       getDisabled: (id) => getBackendDisableReason(config, id as any),
     },
     {
@@ -407,7 +407,7 @@ export function StackBuilder() {
         </aside>
 
         {/* Center: category grid */}
-        <main className="px-6 py-6 pb-40">
+        <main className="px-6 py-6 pb-52 sm:pb-44 lg:pb-40">
           {categories.map((cat) => (
             <CategorySection
               key={cat.key as string}
@@ -644,13 +644,18 @@ export function StackBuilder() {
                 .map((id) => {
                   const active = config.examples.includes(id);
                   const meta = EXAMPLE_META[id];
+                  const comingSoon = id === "ai-chat";
                   return (
                     <button
                       key={id}
-                      onClick={() => toggleExample(id)}
+                      onClick={() => !comingSoon && toggleExample(id)}
+                      disabled={comingSoon}
+                      title={comingSoon ? meta.tagline : undefined}
                       className={
                         "group text-left p-3 border transition-colors min-h-[64px] flex items-center gap-3 " +
-                        (active
+                        (comingSoon
+                          ? "border-border bg-secondary/30 opacity-50 cursor-not-allowed"
+                          : active
                           ? "border-brand bg-brand-subtle"
                           : "border-border hover:border-border-strong hover:bg-secondary")
                       }
@@ -788,9 +793,11 @@ function CategorySection({
           return (
             <button
               key={t.id}
-              onClick={() => onSelect(t.id, t.label)}
+              type="button"
+              disabled={disabled}
+              onClick={() => !disabled && onSelect(t.id, t.label)}
               title={reason ?? undefined}
-              aria-disabled={disabled || undefined}
+              aria-pressed={active}
               className={
                 "group text-left p-3 border transition-colors flex items-center gap-3 min-h-[64px] relative " +
                 (active
@@ -842,8 +849,20 @@ function tiles(
   }));
 }
 
+function labelsBackend(id: string): string {
+  const map: Record<string, string> = {
+    hono: "Hono",
+    next: "Route Handlers",
+    express: "Express",
+    fastify: "Fastify",
+    elysia: "Elysia",
+    none: "Nenhum",
+  };
+  return map[id] ?? titleCase(id);
+}
+
 function titleCase(s: string): string {
-  if (s === "none") return "None";
+  if (s === "none") return "Nenhum";
   return s
     .split("-")
     .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
@@ -880,7 +899,7 @@ function labelsDbHost(id: string): string {
     turso: "Turso",
     "mongodb-atlas": "MongoDB Atlas",
     docker: "Docker (local)",
-    none: "None",
+    none: "Nenhum",
   };
   return map[id] ?? titleCase(id);
 }
@@ -893,7 +912,7 @@ function labelsDeploy(id: string): string {
     fly: "Fly.io",
     render: "Render",
     docker: "Docker",
-    none: "None",
+    none: "Nenhum",
   };
   return map[id] ?? titleCase(id);
 }

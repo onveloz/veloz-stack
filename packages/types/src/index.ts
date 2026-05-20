@@ -69,6 +69,7 @@ export const PresetId = z.enum([
   "minimal",
   "mern",
   "pern",
+  "next-native",
   "custom",
 ]);
 export type PresetId = z.infer<typeof PresetId>;
