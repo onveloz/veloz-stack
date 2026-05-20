@@ -20,8 +20,18 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
+  validateConfig,
+  type ProjectConfig,
 } from "@veloz-stack/types";
-import { MODULES, type ProjectConfig } from "@veloz-stack/types";
+import { MODULES } from "@veloz-stack/types";
+import {
+  addonFlagsAfterGitHook,
+  addonFlagsAfterLinter,
+  getGitHookChoice,
+  getLinterChoice,
+  patchAddonsForGitHook,
+  patchAddonsForLinter,
+} from "@/lib/stack-addons";
 
 export type ConfigChange = {
   key: keyof ProjectConfig | "modules";
@@ -61,25 +71,32 @@ export function resolveConfig(
   pending: { key: keyof ProjectConfig; value: string },
 ): { newCfg: ProjectConfig; changes: ConfigChange[] } {
   const proposed = { ...cfg, [pending.key]: pending.value } as ProjectConfig;
-  const changes: ConfigChange[] = [];
+  const cascadesBeforePrimary: ConfigChange[] = [];
 
   // Next.js App Router: prefer native Route Handlers (same-origin API routes)
-  if (pending.key === "frontend" && pending.value === "next" && proposed.backend === "hono") {
-    changes.push({
-      key: "backend",
-      from: "hono",
-      to: "next",
-      reason:
-        "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor Hono separado",
-    });
-    proposed.backend = "next";
+  if (pending.key === "frontend" && pending.value === "next") {
+    const separateServerBackends = ["hono", "express", "fastify", "elysia"] as const;
+    if (
+      separateServerBackends.includes(
+        proposed.backend as (typeof separateServerBackends)[number],
+      )
+    ) {
+      cascadesBeforePrimary.push({
+        key: "backend",
+        from: proposed.backend,
+        to: "next",
+        reason:
+          "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor separado",
+      });
+      proposed.backend = "next";
+    }
   }
   if (
     pending.key === "frontend" &&
     pending.value !== "next" &&
     proposed.backend === "next"
   ) {
-    changes.push({
+    cascadesBeforePrimary.push({
       key: "backend",
       from: "next",
       to: "hono",
@@ -87,7 +104,7 @@ export function resolveConfig(
     });
     proposed.backend = "hono";
     if (proposed.runtime === "node") {
-      changes.push({
+      cascadesBeforePrimary.push({
         key: "runtime",
         from: "node",
         to: "bun",
@@ -97,14 +114,17 @@ export function resolveConfig(
     }
   }
 
-  // Seed with the primary change and its reason (if any)
+  // Primary change first — confirm dialog uses changes[0] + slice(1) for cascades
   const originReason = findReason(cfg, pending.key, pending.value);
-  changes.push({
-    key: pending.key,
-    from: String((cfg as any)[pending.key]),
-    to: String(pending.value),
-    reason: originReason ?? "Mudança solicitada",
-  });
+  const changes: ConfigChange[] = [
+    {
+      key: pending.key,
+      from: String((cfg as any)[pending.key]),
+      to: String(pending.value),
+      reason: originReason ?? "Mudança solicitada",
+    },
+    ...cascadesBeforePrimary,
+  ];
 
   satisfyPendingChoice(proposed, pending, changes);
 
@@ -150,6 +170,71 @@ export function resolveConfig(
   proposed.modules = keptModules;
 
   return { newCfg: proposed, changes };
+}
+
+/** Repair cross-field incompatibilities without recording cascade changes (Surpreender, etc.). */
+export function repairStackConfig(cfg: ProjectConfig): ProjectConfig {
+  let proposed = { ...cfg, modules: [...cfg.modules], addons: [...cfg.addons] };
+
+  for (let pass = 0; pass < 10; pass++) {
+    let dirty = false;
+    for (const r of RESOLVERS) {
+      const current = (proposed as Record<string, unknown>)[r.key] as string;
+      const currentReason = r.check(proposed, current as never);
+      if (!currentReason) continue;
+      const next = r.options.find((o) => !r.check(proposed, o));
+      if (next && next !== current) {
+        (proposed as Record<string, unknown>)[r.key] = next;
+        dirty = true;
+      }
+    }
+
+    const keptModules = proposed.modules.filter((m) => !getModuleDisableReason(proposed, m));
+    if (keptModules.length !== proposed.modules.length) {
+      proposed.modules = keptModules;
+      dirty = true;
+    }
+
+    if (
+      proposed.frontend === "next" &&
+      proposed.modules.includes("next-intl") &&
+      proposed.modules.includes("pt-br-i18n")
+    ) {
+      proposed.modules = proposed.modules.filter((m) => m !== "pt-br-i18n");
+      dirty = true;
+    }
+
+    const linter = getLinterChoice(proposed.addons);
+    const patchedLinter = patchAddonsForLinter(proposed.addons, linter);
+    const gitHook = getGitHookChoice(proposed.addons);
+    const patchedHooks = patchAddonsForGitHook(patchedLinter, gitHook);
+    if (
+      patchedHooks.length !== proposed.addons.length ||
+      patchedHooks.some((a, i) => a !== proposed.addons[i])
+    ) {
+      proposed.addons = patchedHooks;
+      dirty = true;
+    }
+
+    proposed = {
+      ...proposed,
+      ...addonFlagsAfterLinter(linter),
+      ...addonFlagsAfterGitHook(gitHook),
+    };
+    if (proposed.lefthookCi && proposed.lefthookAdvanced) {
+      proposed.lefthookAdvanced = false;
+      dirty = true;
+    }
+
+    if (!dirty) break;
+  }
+
+  return proposed;
+}
+
+/** True when `validateConfig` reports no errors. */
+export function isStackConfigValid(cfg: ProjectConfig): boolean {
+  return validateConfig(cfg).length === 0;
 }
 
 /** Plan enabling a module that is currently blocked; returns prerequisite adjustments. */
@@ -220,9 +305,24 @@ export function resolveEnableModule(
     proposed.runtime = "bun";
   }
 
-  const modules = proposed.modules.includes(moduleId)
+  let modules = proposed.modules.includes(moduleId)
     ? proposed.modules
     : [...proposed.modules, moduleId];
+
+  if (
+    moduleId === "next-intl" &&
+    proposed.frontend === "next" &&
+    modules.includes("pt-br-i18n")
+  ) {
+    modules = modules.filter((m) => m !== "pt-br-i18n");
+    changes.push({
+      key: "modules",
+      from: "pt-br-i18n",
+      to: null,
+      reason: "next-intl substitui pt-BR i18n no App Router",
+    });
+  }
+
   changes.push({
     key: "modules",
     from: "—",

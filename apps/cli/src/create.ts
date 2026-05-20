@@ -13,7 +13,11 @@ import {
   validateConfig,
 } from "@veloz-stack/types";
 import { scaffold } from "@veloz-stack/template-generator/scaffold";
+import { createRequire } from "node:module";
 import { gatherInteractive } from "./prompts.js";
+
+const require = createRequire(import.meta.url);
+const CLI_VERSION = require("../package.json").version as string;
 
 export type CreateInput = Partial<ProjectConfig> & {
   projectName?: string;
@@ -72,7 +76,9 @@ export async function runCreate(input: CreateInput): Promise<void> {
     return;
   }
 
-  const { fileCount } = await scaffold(config, target);
+  const { fileCount } = await scaffold(config, target, {
+    cliVersion: CLI_VERSION,
+  });
   if (config.git) {
     execSync("git init", { cwd: target, stdio: "ignore" });
   }

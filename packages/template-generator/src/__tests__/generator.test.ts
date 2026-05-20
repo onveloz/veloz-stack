@@ -24,6 +24,20 @@ describe("generate()", () => {
     expect(files).toContain("README.md");
   });
 
+  it("writes veloz-stack.jsonc when cliVersion is provided", () => {
+    const vfs = generate(cfg({ projectName: "demo-app" }), { cliVersion: "0.0.1" });
+    expect(vfs.exists("veloz-stack.jsonc")).toBe(true);
+    const raw = vfs.read("veloz-stack.jsonc")!;
+    expect(raw).toContain("reproducibleCommand");
+    expect(raw).toContain("demo-app");
+    expect(raw).toContain("https://www.veloz-stack.com/schemas/veloz-stack.schema.json");
+  });
+
+  it("omits veloz-stack.jsonc in browser preview (no cliVersion)", () => {
+    const files = paths(cfg({}));
+    expect(files).not.toContain("veloz-stack.jsonc");
+  });
+
   it("pnpm produces pnpm-workspace.yaml; bun does not", () => {
     const pnpmFiles = paths(cfg({ pm: "pnpm" }));
     const bunFiles = paths(cfg({ pm: "bun" }));
@@ -650,7 +664,11 @@ describe("validateConfig", () => {
     const errs = validateConfig(
       cfg({ backend: "next", frontend: "next", runtime: "workers", deploy: "cloudflare" }),
     );
-    expect(errs.some((e) => e.includes("Runtime Workers precisa de backend Hono"))).toBe(true);
+    expect(
+      errs.some((e) =>
+        e.includes("Route Handlers do Next.js não rodam em Cloudflare Workers"),
+      ),
+    ).toBe(true);
   });
 
   it("accepts the default config", () => {

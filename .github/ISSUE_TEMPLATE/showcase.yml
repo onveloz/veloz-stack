@@ -1,0 +1,42 @@
+name: Showcase submission
+description: Add your public project to veloz-stack.com/showcase
+title: "[Showcase] "
+labels: ["showcase"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Projetos listados em [veloz-stack.com/showcase](https://www.veloz-stack.com/showcase).
+        O repositório deve ser **público** e incluir `veloz-stack.jsonc` na raiz (gerado pelo CLI).
+  - type: input
+    id: title
+    attributes:
+      label: Nome do projeto
+      placeholder: Meu SaaS
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição curta (1–2 frases)
+    validations:
+      required: true
+  - type: input
+    id: liveUrl
+    attributes:
+      label: URL ao vivo (opcional)
+      placeholder: https://...
+  - type: input
+    id: sourceUrl
+    attributes:
+      label: URL do repositório GitHub
+      placeholder: https://github.com/org/repo
+    validations:
+      required: true
+  - type: input
+    id: tags
+    attributes:
+      label: Tags do stack (separadas por vírgula)
+      placeholder: TanStack Start, Hono, oRPC, Drizzle, Better Auth
+    validations:
+      required: true

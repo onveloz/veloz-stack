@@ -9,8 +9,26 @@ describe("resolveConfig", () => {
     expect(newCfg.frontend).toBe("next");
     expect(newCfg.backend).toBe("next");
     expect(newCfg.runtime).toBe("bun");
+    expect(changes[0]?.key).toBe("frontend");
     expect(changes.some((c) => c.key === "backend" && c.to === "next")).toBe(true);
     expect(changes.some((c) => c.key === "runtime")).toBe(false);
+  });
+
+  it("switches express to route handlers when frontend becomes next", () => {
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      frontend: "tanstack-start" as const,
+      backend: "express" as const,
+      runtime: "node" as const,
+      api: "rest" as const,
+      db: "mongodb" as const,
+      orm: "mongoose" as const,
+    };
+    const { newCfg, changes } = resolveConfig(cfg, { key: "frontend", value: "next" });
+    expect(newCfg.backend).toBe("next");
+    expect(changes[0]?.key).toBe("frontend");
+    const backendChange = changes.find((c) => c.key === "backend" && c.to === "next");
+    expect(backendChange?.from).toBe("express");
   });
 
   it("allows bun runtime with next frontend and backend", () => {
@@ -22,6 +40,7 @@ describe("resolveConfig", () => {
     };
     const { newCfg, changes } = resolveConfig(cfg, { key: "runtime", value: "bun" });
     expect(newCfg.runtime).toBe("bun");
+    expect(changes[0]?.key).toBe("runtime");
     expect(changes.filter((c) => c.key === "runtime")).toHaveLength(1);
   });
 
@@ -39,6 +58,7 @@ describe("resolveConfig", () => {
     expect(newCfg.frontend).toBe("tanstack-start");
     expect(newCfg.backend).toBe("hono");
     expect(newCfg.runtime).toBe("bun");
+    expect(changes[0]?.key).toBe("frontend");
     expect(changes.some((c) => c.key === "backend" && c.to === "hono")).toBe(true);
     expect(changes.some((c) => c.key === "runtime" && c.to === "bun")).toBe(true);
   });

@@ -43,6 +43,9 @@ export default function Home() {
           <a href="https://github.com/onveloz/veloz-stack" className="hover:text-foreground">
             GitHub
           </a>
+          <Link href="/showcase" className="hover:text-foreground">
+            Showcase
+          </Link>
           <a href="/docs" className="hover:text-foreground">
             Docs
           </a>
