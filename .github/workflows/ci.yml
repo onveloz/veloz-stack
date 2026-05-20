@@ -50,6 +50,8 @@ jobs:
           # ─────── Frontend axis
           - { name: frontend-tanstack, args: "--frontend tanstack-start" }
           - { name: frontend-next, args: "--frontend next" }
+          - { name: backend-next, args: "--frontend next --backend next" }
+          - { name: next-hono-split, args: "--frontend next --backend hono" }
           - { name: frontend-astro, args: "--frontend astro" }
           - { name: frontend-nuxt, args: "--frontend nuxt" }
           - { name: frontend-svelte, args: "--frontend svelte-kit" }
@@ -239,6 +241,45 @@ jobs:
           code=$?
           if [ "$code" -eq 0 ]; then
             echo "::error::Scaffolder accepted desktop=tauri + frontend=none"
+            exit 1
+          fi
+          echo "✓ Rejected with exit code $code"
+
+      - name: Backend next + frontend tanstack-start must be rejected
+        run: |
+          set +e
+          ./apps/cli/node_modules/.bin/tsx apps/cli/src/index.ts \
+            /tmp/veloz-invalid5 --yes --no-install --pm pnpm \
+            --frontend tanstack-start --backend next
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::Scaffolder accepted backend=next + frontend=tanstack-start"
+            exit 1
+          fi
+          echo "✓ Rejected with exit code $code"
+
+      - name: Backend next + runtime workers must be rejected
+        run: |
+          set +e
+          ./apps/cli/node_modules/.bin/tsx apps/cli/src/index.ts \
+            /tmp/veloz-invalid6 --yes --no-install --pm pnpm \
+            --frontend next --backend next --runtime workers --deploy cloudflare
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::Scaffolder accepted backend=next + runtime=workers"
+            exit 1
+          fi
+          echo "✓ Rejected with exit code $code"
+
+      - name: Backend next + deploy cloudflare (runtime node) must be rejected
+        run: |
+          set +e
+          ./apps/cli/node_modules/.bin/tsx apps/cli/src/index.ts \
+            /tmp/veloz-invalid7 --yes --no-install --pm pnpm \
+            --frontend next --backend next --runtime node --deploy cloudflare
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::Scaffolder accepted backend=next + deploy=cloudflare"
             exit 1
           fi
           echo "✓ Rejected with exit code $code"

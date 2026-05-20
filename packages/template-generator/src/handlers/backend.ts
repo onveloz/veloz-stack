@@ -5,6 +5,12 @@ import type { VirtualFs } from "../vfs";
 
 export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.backend === "none") return;
+
+  if (config.backend === "next") {
+    processTemplatesFromPrefix(vfs, "backend/next/", "apps/web/", config);
+    return;
+  }
+
   if (config.backend !== "hono") return;
 
   const runtime = config.runtime;

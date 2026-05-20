@@ -1,25 +1,47 @@
 import type { ProjectConfig } from "@veloz-stack/types";
+import { render } from "../processor";
+import { EMBEDDED_TEMPLATES } from "../templates.generated";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
+
+function writeDockerfile(vfs: VirtualFs, config: ProjectConfig): void {
+  if (config.backend === "next") {
+    const src = EMBEDDED_TEMPLATES.get("deploy/veloz/Dockerfile.next.hbs");
+    if (!src) {
+      throw new Error("Missing embedded template: deploy/veloz/Dockerfile.next.hbs");
+    }
+    vfs.write("Dockerfile", render(src, config));
+    return;
+  }
+  const src = EMBEDDED_TEMPLATES.get("deploy/veloz/Dockerfile");
+  if (!src) {
+    throw new Error("Missing embedded template: deploy/veloz/Dockerfile");
+  }
+  vfs.write("Dockerfile", src);
+}
 
 export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
   switch (config.deploy) {
     case "veloz": {
       processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
+      writeDockerfile(vfs, config);
       vfs.write("veloz.json", velozJson(config));
       break;
     }
     case "fly":
       processTemplatesFromPrefix(vfs, "deploy/fly/", "", config);
-      processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config); // shares Dockerfile
+      processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
+      writeDockerfile(vfs, config);
       break;
     case "render":
       processTemplatesFromPrefix(vfs, "deploy/render/", "", config);
       processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
+      writeDockerfile(vfs, config);
       break;
     case "docker":
       processTemplatesFromPrefix(vfs, "deploy/docker/", "", config);
       processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
+      writeDockerfile(vfs, config);
       break;
     case "vercel":
       vfs.write(
@@ -60,8 +82,8 @@ function velozJson(config: ProjectConfig): string {
   const hasTurborepo = config.addons.includes("turborepo");
   const services: Record<string, unknown> = {};
 
-  // Server — always emitted when backend != none
-  if (config.backend !== "none") {
+  // Server — separate process when backend is Hono (or future express/fastify/elysia)
+  if (config.backend !== "none" && config.backend !== "next") {
     services["apps/server"] = {
       name: "server",
       type: "web",
@@ -89,6 +111,9 @@ function velozJson(config: ProjectConfig): string {
   // but we ship with SSR adapter so it's a web service.
   const webService = webServiceShape(config);
   if (webService) {
+    if (config.backend === "next") {
+      webService.healthCheck = { path: "/api/health" };
+    }
     services["apps/web"] = webService;
   }
 

@@ -27,4 +27,7 @@ export function processAuth(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.orm === "prisma" && config.db !== "none") {
     processTemplatesFromPrefix(vfs, "auth/better-auth/prisma/", "", config);
   }
+  if (config.frontend === "next") {
+    processTemplatesFromPrefix(vfs, "auth/better-auth/next/", "", config);
+  }
 }

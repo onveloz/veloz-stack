@@ -411,6 +411,7 @@ export function StackBuilder() {
           {categories.map((cat) => (
             <CategorySection
               key={cat.key as string}
+              sectionKey={cat.key as string}
               label={cat.label}
               tiles={cat.tiles}
               selected={config[cat.key] as string}
@@ -762,12 +763,14 @@ const EXAMPLE_META: Record<
 };
 
 function CategorySection({
+  sectionKey,
   label,
   tiles,
   selected,
   getDisabled,
   onSelect,
 }: {
+  sectionKey: string;
   label: string;
   tiles: OptionTile[];
   selected: string;
@@ -813,9 +816,9 @@ function CategorySection({
                     <span className="text-[9px] font-bold px-1 bg-brand/20 text-brand">DEFAULT</span>
                   )}
                 </div>
-                {getHint(t.id) && (
+                {getHint(t.id, sectionKey) && (
                   <div className="text-[11px] text-muted-foreground truncate mt-0.5">
-                    {getHint(t.id)}
+                    {getHint(t.id, sectionKey)}
                   </div>
                 )}
               </div>

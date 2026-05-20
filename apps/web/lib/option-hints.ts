@@ -68,6 +68,16 @@ export const OPTION_HINTS: Record<string, string> = {
   tailwind: "Tailwind 4 puro · sem componentes",
 };
 
-export function getHint(id: string): string | undefined {
+/** Hints when the same option id appears in multiple categories (e.g. frontend vs backend `next`). */
+const SECTION_HINTS: Partial<Record<string, Partial<Record<string, string>>>> = {
+  backend: {
+    next: "Route Handlers no App Router · same-origin · ideal pro Vercel",
+  },
+};
+
+export function getHint(id: string, section?: string): string | undefined {
+  if (section) {
+    return SECTION_HINTS[section]?.[id] ?? OPTION_HINTS[id];
+  }
   return OPTION_HINTS[id];
 }

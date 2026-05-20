@@ -1,4 +1,7 @@
 import { betterAuth } from "better-auth";
+{{#if (eq backend "next")}}
+import { nextCookies } from "better-auth/next-js";
+{{/if}}
 {{#if (eq orm "drizzle")}}
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db, schema } from "@{{projectName}}/db";
@@ -24,9 +27,12 @@ export const auth = betterAuth({
   }),
   {{/if}}
   secret,
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
-  trustedOrigins: [process.env.APP_URL ?? "http://localhost:3001"],
+  baseURL: process.env.BETTER_AUTH_URL ?? "{{#if (eq backend "next")}}http://localhost:3001{{else}}http://localhost:3000{{/if}}",
+  trustedOrigins: [process.env.APP_URL ?? "{{#if (eq backend "next")}}http://localhost:3001{{else}}http://localhost:3001{{/if}}"],
   emailAndPassword: { enabled: true },
+  {{#if (eq backend "next")}}
+  plugins: [nextCookies()],
+  {{/if}}
   {{#if (includes modules "better-auth-social")}}
   socialProviders: {
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -57,8 +63,13 @@ export const auth = betterAuth({
   {{/if}}
   advanced: {
     defaultCookieAttributes: {
+      {{#if (eq backend "next")}}
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      {{else}}
       sameSite: "none",
       secure: true,
+      {{/if}}
       httpOnly: true,
     },
   },

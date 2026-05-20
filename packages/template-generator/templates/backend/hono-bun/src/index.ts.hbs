@@ -41,7 +41,7 @@ const rpcHandler = new RPCHandler(appRouter, {
 app.use("/rpc/*", async (c, next) => {
   const result = await rpcHandler.handle(c.req.raw, {
     prefix: "/rpc",
-    context: await createContext({ context: c }),
+    context: await createContext({ headers: c.req.raw.headers }),
   });
   if (result.matched) {
     return c.newResponse(result.response.body, result.response);

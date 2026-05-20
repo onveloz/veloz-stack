@@ -1,0 +1,35 @@
+{{#if (eq api "orpc")}}
+import { RPCHandler } from "@orpc/server/fetch";
+import { onError } from "@orpc/server";
+import { appRouter } from "@{{projectName}}/api/routers/index";
+import { createContext } from "@{{projectName}}/api/context";
+
+const handler = new RPCHandler(appRouter, {
+  interceptors: [
+    onError((err: unknown) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.error(err);
+        return;
+      }
+      const message = err instanceof Error ? err.message : "RPC error";
+      console.error(message);
+    }),
+  ],
+});
+
+async function handleRequest(request: Request) {
+  const { response } = await handler.handle(request, {
+    prefix: "/api/rpc",
+    context: await createContext({ headers: request.headers }),
+  });
+
+  return response ?? new Response("Not found", { status: 404 });
+}
+
+export const HEAD = handleRequest;
+export const GET = handleRequest;
+export const POST = handleRequest;
+export const PUT = handleRequest;
+export const PATCH = handleRequest;
+export const DELETE = handleRequest;
+{{/if}}

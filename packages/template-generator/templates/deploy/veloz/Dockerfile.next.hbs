@@ -1,0 +1,19 @@
+FROM oven/bun:1.1-alpine AS deps
+WORKDIR /app
+COPY package.json bun.lock* pnpm-lock.yaml* ./
+COPY apps/web/package.json ./apps/web/package.json
+RUN bun install --frozen-lockfile --production
+
+FROM oven/bun:1.1-alpine AS runtime
+WORKDIR /app
+RUN addgroup -S app && adduser -S app -G app
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY . .
+RUN chown -R app:app /app
+ENV NODE_ENV=production
+ENV PORT=3001
+EXPOSE 3001
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -qO- http://127.0.0.1:3001/api/health || exit 1
+USER app
+CMD ["bun", "run", "--filter", "@{{projectName}}/web", "start"]

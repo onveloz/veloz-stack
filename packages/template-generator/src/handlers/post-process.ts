@@ -84,11 +84,15 @@ function wireModuleDependencies(vfs: VirtualFs, config: ProjectConfig): void {
     }
   }
 
-  if (Object.keys(serverDeps).length > 0 && vfs.exists("apps/server/package.json")) {
-    vfs.updateJson<Record<string, any>>("apps/server/package.json", (pkg) => {
-      pkg.dependencies = { ...pkg.dependencies, ...serverDeps };
-      return pkg;
-    });
+  if (Object.keys(serverDeps).length > 0) {
+    const serverPkg =
+      config.backend === "next" ? "apps/web/package.json" : "apps/server/package.json";
+    if (vfs.exists(serverPkg)) {
+      vfs.updateJson<Record<string, any>>(serverPkg, (pkg) => {
+        pkg.dependencies = { ...pkg.dependencies, ...serverDeps };
+        return pkg;
+      });
+    }
   }
   if (Object.keys(webDeps).length > 0 && vfs.exists("apps/web/package.json")) {
     vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {

@@ -4,6 +4,8 @@ Opinionated full-stack TypeScript scaffolder — 100% deployable on [Veloz](http
 
 Default stack: **Bun · Hono · oRPC · TanStack Start (Vite SSR) · Better Auth · Drizzle · Postgres**.
 
+For **Next.js on Vercel** (same-origin API, no separate server), use `--frontend next --backend next` — oRPC, Better Auth, and `/api/health` run as App Router route handlers inside `apps/web`.
+
 ```sh
 bun create veloz-stack@latest my-app
 # or
