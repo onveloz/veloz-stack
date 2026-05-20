@@ -17,7 +17,10 @@ export function getBackendDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["backend"],
 ): DisableReason {
-  if (id !== "hono" && cfg.runtime === "workers") {
+  if (id === "next" && cfg.frontend !== "next") {
+    return "Backend Next só funciona com frontend Next.js";
+  }
+  if (id !== "hono" && id !== "none" && cfg.runtime === "workers") {
     return "Cloudflare Workers só suporta Hono por enquanto";
   }
   return null;
@@ -71,6 +74,9 @@ export function getDeployDisableReason(
 ): DisableReason {
   if (id === "cloudflare" && cfg.runtime !== "workers" && cfg.runtime !== "node") {
     return "Deploy no Cloudflare precisa de runtime workers ou node";
+  }
+  if (id === "cloudflare" && cfg.backend === "next") {
+    return "Backend Next não faz deploy no Cloudflare — use Vercel ou Veloz";
   }
   return null;
 }

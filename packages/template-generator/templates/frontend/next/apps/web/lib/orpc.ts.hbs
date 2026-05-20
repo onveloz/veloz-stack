@@ -4,10 +4,17 @@ import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import type { AppRouter } from "@{{projectName}}/api/routers/index";
 import type { RouterClient } from "@orpc/server";
 
+{{#if (eq backend "next")}}
+const serverUrl =
+  typeof window !== "undefined"
+    ? window.location.origin
+    : (process.env.APP_URL ?? "http://localhost:3001");
+{{else}}
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:3000";
+{{/if}}
 
 const link = new RPCLink({
-  url: `${serverUrl}/rpc`,
+  url: `${serverUrl}{{#if (eq backend "next")}}/api/rpc{{else}}/rpc{{/if}}`,
   {{#if (eq auth "better-auth")}}
   fetch: (url, options) => fetch(url, { ...options, credentials: "include" }),
   {{/if}}

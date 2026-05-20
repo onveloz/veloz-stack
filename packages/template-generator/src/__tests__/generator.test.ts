@@ -639,6 +639,20 @@ describe("validateConfig", () => {
     expect(errs.length).toBeGreaterThan(0);
   });
 
+  it("rejects backend next without frontend next", () => {
+    const errs = validateConfig(cfg({ backend: "next", frontend: "tanstack-start" }));
+    expect(errs.some((e) => e.includes("Backend Next só funciona com frontend Next"))).toBe(
+      true,
+    );
+  });
+
+  it("rejects backend next with runtime workers", () => {
+    const errs = validateConfig(
+      cfg({ backend: "next", frontend: "next", runtime: "workers", deploy: "cloudflare" }),
+    );
+    expect(errs.some((e) => e.includes("Runtime Workers precisa de backend Hono"))).toBe(true);
+  });
+
   it("accepts the default config", () => {
     expect(validateConfig(cfg({}))).toEqual([]);
   });
@@ -656,6 +670,90 @@ describe("validateConfig", () => {
   it("rejects husky and lefthook together", () => {
     const errs = validateConfig(cfg({ addons: ["husky", "lefthook", "biome"] }));
     expect(errs.some((e) => e.includes("Husky e Lefthook"))).toBe(true);
+  });
+});
+
+describe("backend next", () => {
+  it("next+next emits rpc/auth/health routes and no apps/server", () => {
+    const files = paths(cfg({ frontend: "next", backend: "next" }));
+
+    expect(files).toContain("apps/web/app/api/rpc/[...path]/route.ts");
+    expect(files).toContain("apps/web/app/api/auth/[...all]/route.ts");
+    expect(files).toContain("apps/web/app/api/health/route.ts");
+    expect(files).not.toContain("apps/server/src/index.ts");
+  });
+
+  it("next+next orpc client uses same-origin /api/rpc", () => {
+    const vfs = generate(cfg({ frontend: "next", backend: "next" }));
+    const orpc = vfs.read("apps/web/lib/orpc.ts")!;
+    expect(orpc).toContain("window.location.origin");
+    expect(orpc).toContain("/api/rpc");
+    expect(orpc).not.toContain("NEXT_PUBLIC_SERVER_URL");
+  });
+
+  it("next+hono split still emits apps/server (regression)", () => {
+    const files = paths(cfg({ frontend: "next", backend: "hono" }));
+    expect(files).toContain("apps/server/src/index.ts");
+    expect(files).not.toContain("apps/web/app/api/rpc/[...path]/route.ts");
+  });
+
+  it("next+hono orpc client uses NEXT_PUBLIC_SERVER_URL", () => {
+    const vfs = generate(cfg({ frontend: "next", backend: "hono" }));
+    const orpc = vfs.read("apps/web/lib/orpc.ts")!;
+    expect(orpc).toContain("NEXT_PUBLIC_SERVER_URL");
+    expect(orpc).toContain("/rpc");
+  });
+
+  it("context.ts uses headers-based createContext (no Hono)", () => {
+    const vfs = generate(cfg({ frontend: "next", backend: "next" }));
+    const ctx = vfs.read("packages/api/src/context.ts")!;
+    expect(ctx).toContain("headers: Headers");
+    expect(ctx).not.toContain("HonoContext");
+    expect(ctx).not.toContain("hono");
+  });
+
+  it("hono server still calls createContext with headers", () => {
+    const vfs = generate(cfg({ backend: "hono" }));
+    const server = vfs.read("apps/server/src/index.ts")!;
+    expect(server).toContain("createContext({ headers: c.req.raw.headers })");
+  });
+
+  it("backend next auth uses nextCookies plugin", () => {
+    const vfs = generate(cfg({ frontend: "next", backend: "next" }));
+    const auth = vfs.read("packages/auth/src/index.ts")!;
+    expect(auth).toContain("nextCookies");
+    expect(auth).toContain('sameSite: "lax"');
+  });
+
+  it("backend next auth client uses same-origin baseURL", () => {
+    const vfs = generate(cfg({ frontend: "next", backend: "next", auth: "better-auth" }));
+    const client = vfs.read("apps/web/lib/auth-client.ts")!;
+    expect(client).toContain("window.location.origin");
+    expect(client).not.toContain("VITE_SERVER_URL");
+  });
+
+  it("veloz.json omits apps/server and sets web healthCheck when backend next", () => {
+    const vfs = generate(cfg({ deploy: "veloz", frontend: "next", backend: "next" }));
+    const doc = JSON.parse(vfs.read("veloz.json")!);
+    expect(doc.services["apps/server"]).toBeUndefined();
+    expect(doc.services["apps/web"].healthCheck.path).toBe("/api/health");
+  });
+
+  it("Dockerfile targets apps/web when backend next", () => {
+    const vfs = generate(cfg({ deploy: "veloz", frontend: "next", backend: "next" }));
+    const docker = vfs.read("Dockerfile")!;
+    expect(docker).toContain("apps/web");
+    expect(docker).toContain("/api/health");
+    expect(docker).not.toContain("apps/server");
+  });
+
+  it("abacatepay module wires into apps/web when backend next", () => {
+    const vfs = generate(
+      cfg({ frontend: "next", backend: "next", modules: ["abacatepay"] }),
+    );
+    const web = JSON.parse(vfs.read("apps/web/package.json")!);
+    expect(web.dependencies["@test-app/abacatepay"]).toBe("workspace:*");
+    expect(vfs.read("apps/server/package.json")).toBeUndefined();
   });
 });
 

@@ -15,6 +15,7 @@ export const OPTION_HINTS: Record<string, string> = {
 
   // Backend
   hono: "Ultra-rápido · padrões web · roda em edge",
+  next: "Route Handlers no App Router · same-origin · ideal pro Vercel",
   express: "Clássico do Node, testado à exaustão",
   fastify: "Overhead baixo · schema-validated",
   elysia: "Nativo do Bun · tipos end-to-end",

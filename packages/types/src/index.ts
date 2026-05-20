@@ -17,7 +17,7 @@ export type MobileId = z.infer<typeof MobileId>;
 export const DesktopId = z.enum(["tauri", "none"]);
 export type DesktopId = z.infer<typeof DesktopId>;
 
-export const BackendId = z.enum(["hono", "express", "fastify", "elysia", "none"]);
+export const BackendId = z.enum(["hono", "next", "express", "fastify", "elysia", "none"]);
 export type BackendId = z.infer<typeof BackendId>;
 
 export const RuntimeId = z.enum(["bun", "node", "workers"]);
