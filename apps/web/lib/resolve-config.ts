@@ -21,7 +21,7 @@ import {
   getRuntimeDisableReason,
   getUiDisableReason,
 } from "@veloz-stack/types";
-import type { ProjectConfig } from "@veloz-stack/types";
+import { MODULES, type ProjectConfig } from "@veloz-stack/types";
 
 export type ConfigChange = {
   key: keyof ProjectConfig | "modules";
@@ -73,10 +73,6 @@ export function resolveConfig(
         "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor Hono separado",
     });
     proposed.backend = "next";
-    applyNextStackRuntime(proposed, changes);
-  }
-  if (pending.key === "backend" && pending.value === "next" && proposed.frontend === "next") {
-    applyNextStackRuntime(proposed, changes);
   }
   if (
     pending.key === "frontend" &&
@@ -109,6 +105,8 @@ export function resolveConfig(
     to: String(pending.value),
     reason: originReason ?? "Mudança solicitada",
   });
+
+  satisfyPendingChoice(proposed, pending, changes);
 
   // Iteratively repair until stable
   for (let pass = 0; pass < 6; pass++) {
@@ -151,23 +149,129 @@ export function resolveConfig(
   }
   proposed.modules = keptModules;
 
-  if (proposed.frontend === "next" && proposed.backend === "next") {
-    applyNextStackRuntime(proposed, changes);
-  }
-
   return { newCfg: proposed, changes };
 }
 
-/** Route Handlers on Next.js target Node in production (Vercel / Veloz). */
-function applyNextStackRuntime(cfg: ProjectConfig, changes: ConfigChange[]) {
-  if (cfg.runtime !== "bun") return;
+/** Plan enabling a module that is currently blocked; returns prerequisite adjustments. */
+export function resolveEnableModule(
+  cfg: ProjectConfig,
+  moduleId: ModuleId,
+): { newCfg: ProjectConfig; changes: ConfigChange[] } {
+  const block = getModuleDisableReason(cfg, moduleId);
+  if (!block) {
+    return {
+      newCfg: {
+        ...cfg,
+        modules: cfg.modules.includes(moduleId) ? cfg.modules : [...cfg.modules, moduleId],
+        preset: "custom",
+      },
+      changes: [],
+    };
+  }
+
+  let proposed = { ...cfg } as ProjectConfig;
+  const changes: ConfigChange[] = [];
+  const meta = MODULES[moduleId];
+
+  if (meta.requires?.auth && proposed.auth === "none") {
+    changes.push({
+      key: "auth",
+      from: "none",
+      to: "better-auth",
+      reason: block,
+    });
+    proposed.auth = "better-auth";
+  }
+  if (meta.requires?.backend && proposed.backend === "none") {
+    changes.push({
+      key: "backend",
+      from: "none",
+      to: "hono",
+      reason: block,
+    });
+    proposed.backend = "hono";
+  }
+  if (meta.requires?.db && proposed.db === "none") {
+    changes.push({
+      key: "db",
+      from: "none",
+      to: "postgres",
+      reason: block,
+    });
+    proposed.db = "postgres";
+  }
+
+  if (moduleId === "next-intl" && proposed.frontend !== "next") {
+    const resolved = resolveConfig(proposed, { key: "frontend", value: "next" });
+    proposed = resolved.newCfg;
+    changes.push(...resolved.changes);
+  }
+
+  if (
+    (moduleId === "pino" || moduleId === "opentelemetry") &&
+    proposed.runtime === "workers"
+  ) {
+    changes.push({
+      key: "runtime",
+      from: "workers",
+      to: "bun",
+      reason: block,
+    });
+    proposed.runtime = "bun";
+  }
+
+  const modules = proposed.modules.includes(moduleId)
+    ? proposed.modules
+    : [...proposed.modules, moduleId];
   changes.push({
-    key: "runtime",
-    from: "bun",
-    to: "node",
-    reason: "Route Handlers no Next.js usam runtime Node em produção",
+    key: "modules",
+    from: "—",
+    to: moduleId,
+    reason: `Ativar ${meta.name}`,
   });
-  cfg.runtime = "node";
+
+  return { newCfg: { ...proposed, modules, preset: "custom" }, changes };
+}
+
+/**
+ * When the user's pick is invalid with the current stack, adjust other fields
+ * first (never revert the pending key) until the choice is valid or no progress.
+ */
+function satisfyPendingChoice(
+  proposed: ProjectConfig,
+  pending: { key: keyof ProjectConfig; value: string },
+  changes: ConfigChange[],
+) {
+  const resolver = RESOLVERS.find((r) => r.key === (pending.key as StackKey));
+  if (!resolver) return;
+
+  for (let pass = 0; pass < 8; pass++) {
+    const block = resolver.check(proposed, pending.value as never);
+    if (!block) return;
+
+    let fixed = false;
+    for (const r of RESOLVERS) {
+      if (r.key === pending.key) continue;
+      for (const candidate of r.options) {
+        const current = String((proposed as any)[r.key]);
+        if (candidate === current) continue;
+        if (r.check(proposed, candidate as never)) continue;
+        const trial = { ...proposed, [r.key]: candidate } as ProjectConfig;
+        if (resolver.check(trial, pending.value as never)) continue;
+        changes.push({
+          key: r.key,
+          from: current,
+          to: candidate,
+          reason: block,
+        });
+        (proposed as any)[r.key] = candidate;
+        fixed = true;
+        break;
+      }
+      if (fixed) break;
+    }
+    if (!fixed) return;
+  }
 }
 
 function findReason(

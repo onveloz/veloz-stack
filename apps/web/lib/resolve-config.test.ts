@@ -3,14 +3,26 @@ import { DEFAULT_CONFIG } from "@veloz-stack/types";
 import { resolveConfig } from "./resolve-config";
 
 describe("resolveConfig", () => {
-  it("switches backend to next and runtime to node when frontend becomes next", () => {
+  it("switches backend to next but keeps runtime when frontend becomes next", () => {
     const cfg = { ...DEFAULT_CONFIG, frontend: "tanstack-start" as const, backend: "hono" as const };
     const { newCfg, changes } = resolveConfig(cfg, { key: "frontend", value: "next" });
     expect(newCfg.frontend).toBe("next");
     expect(newCfg.backend).toBe("next");
-    expect(newCfg.runtime).toBe("node");
+    expect(newCfg.runtime).toBe("bun");
     expect(changes.some((c) => c.key === "backend" && c.to === "next")).toBe(true);
-    expect(changes.some((c) => c.key === "runtime" && c.to === "node")).toBe(true);
+    expect(changes.some((c) => c.key === "runtime")).toBe(false);
+  });
+
+  it("allows bun runtime with next frontend and backend", () => {
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      frontend: "next" as const,
+      backend: "next" as const,
+      runtime: "node" as const,
+    };
+    const { newCfg, changes } = resolveConfig(cfg, { key: "runtime", value: "bun" });
+    expect(newCfg.runtime).toBe("bun");
+    expect(changes.filter((c) => c.key === "runtime")).toHaveLength(1);
   });
 
   it("reverts backend and runtime when leaving next frontend", () => {

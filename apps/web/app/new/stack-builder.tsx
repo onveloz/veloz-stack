@@ -45,7 +45,11 @@ import { BrandLogo } from "@/components/brand-logo";
 import { CopyButton } from "@/components/copy-button";
 import { ConfirmCascadeDialog } from "@/components/confirm-dialog";
 import { PreviewPanel } from "./preview-panel";
-import { resolveConfig, type ConfigChange } from "@/lib/resolve-config";
+import {
+  resolveConfig,
+  resolveEnableModule,
+  type ConfigChange,
+} from "@/lib/resolve-config";
 
 type OptionTile = {
   id: string;
@@ -123,9 +127,42 @@ export function StackBuilder() {
 
   function toggleModule(id: ModuleId) {
     const has = config.modules.includes(id);
-    void setState({
-      modules: has ? config.modules.filter((m) => m !== id) : [...config.modules, id],
-      preset: "custom",
+    if (has) {
+      void setState({
+        modules: config.modules.filter((m) => m !== id),
+        preset: "custom",
+      });
+      return;
+    }
+
+    const { newCfg, changes } = resolveEnableModule(config, id);
+    if (changes.length === 0) {
+      void setState({ modules: newCfg.modules, preset: "custom" });
+      return;
+    }
+
+    setPending({
+      title: `Ativar ${MODULES[id].name}?`,
+      primaryReason: changes[changes.length - 1]?.reason ?? "Ajustes necessários no stack.",
+      changes,
+      apply: () => {
+        void setState({
+          frontend: newCfg.frontend,
+          backend: newCfg.backend,
+          runtime: newCfg.runtime,
+          api: newCfg.api,
+          db: newCfg.db,
+          orm: newCfg.orm,
+          dbHosting: newCfg.dbHosting,
+          auth: newCfg.auth,
+          deploy: newCfg.deploy,
+          pm: newCfg.pm,
+          ui: newCfg.ui,
+          modules: newCfg.modules,
+          preset: "custom",
+        });
+        setPending(null);
+      },
     });
   }
 
@@ -168,13 +205,14 @@ export function StackBuilder() {
     if (current === value) return;
 
     const { newCfg, changes } = resolveConfig(config, { key, value });
-    const cascade = changes.slice(1);
 
-    // No conflict — just apply
-    if (cascade.length === 0) {
+    // Only the requested field changes — apply immediately
+    if (changes.length <= 1) {
       void setState({ [key]: value, preset: "custom" } as any);
       return;
     }
+
+    const cascade = changes.slice(1);
 
     // Open confirm dialog
     setPending({
@@ -207,6 +245,7 @@ export function StackBuilder() {
     label: string;
     tiles: OptionTile[];
     getDisabled: (id: string) => string | null;
+    categoryHint?: string;
   }> = [
     {
       key: "frontend",
@@ -237,6 +276,10 @@ export function StackBuilder() {
       label: "Runtime",
       tiles: tiles(RuntimeId.options, titleCase),
       getDisabled: (id) => getRuntimeDisableReason(config, id as any),
+      categoryHint:
+        config.frontend === "next" && config.backend === "next"
+          ? "Com Route Handlers, Bun e Node são válidos (dev/CLI). Workers exige backend Hono."
+          : undefined,
     },
     {
       key: "api",
@@ -416,6 +459,7 @@ export function StackBuilder() {
               tiles={cat.tiles}
               selected={config[cat.key] as string}
               getDisabled={cat.getDisabled}
+              categoryHint={cat.categoryHint}
               onSelect={(id, label) => requestChange(cat.key as any, id, label)}
             />
           ))}
@@ -440,19 +484,19 @@ export function StackBuilder() {
                     {mods.map((m) => {
                       const active = config.modules.includes(m.id);
                       const reason = getModuleDisableReason(config, m.id);
-                      const disabled = !active && reason !== null;
+                      const needsAdjust = !active && reason !== null;
                       return (
                         <button
                           key={m.id}
-                          onClick={() => !disabled && toggleModule(m.id)}
-                          disabled={disabled}
-                          title={reason ?? undefined}
+                          type="button"
+                          onClick={() => toggleModule(m.id)}
+                          title={needsAdjust ? `${reason} — clique para ver os ajustes` : undefined}
                           className={
                             "group text-left p-3 border transition-colors relative flex items-center gap-3 min-h-[64px] " +
                             (active
                               ? "border-brand bg-brand-subtle"
-                              : disabled
-                              ? "border-border bg-secondary/30 opacity-40 cursor-not-allowed"
+                              : needsAdjust
+                              ? "border-warning/40 bg-warning/5 hover:border-warning/60 hover:bg-warning/10"
                               : "border-border hover:border-border-strong hover:bg-secondary")
                           }
                         >
@@ -502,19 +546,19 @@ export function StackBuilder() {
                 const active = config.addons.includes(id);
                 const meta = ADDON_META[id];
                 const reason = getAddonDisableReason(config, id);
-                const disabled = !active && reason !== null;
+                const needsAdjust = !active && reason !== null;
                 return (
                   <button
                     key={id}
-                    onClick={() => !disabled && toggleAddon(id)}
-                    title={reason ?? undefined}
-                    aria-disabled={disabled || undefined}
+                    type="button"
+                    onClick={() => toggleAddon(id)}
+                    title={needsAdjust ? `${reason} — clique para trocar` : undefined}
                     className={
                       "group text-left p-3 border transition-colors relative flex items-center gap-3 min-h-[64px] " +
                       (active
                         ? "border-brand bg-brand-subtle"
-                        : disabled
-                          ? "border-destructive/30 bg-destructive/5 cursor-not-allowed"
+                        : needsAdjust
+                          ? "border-warning/40 bg-warning/5 hover:border-warning/60 hover:bg-warning/10"
                           : "border-border hover:border-border-strong hover:bg-secondary")
                     }
                   >
@@ -777,6 +821,7 @@ function CategorySection({
   selected,
   getDisabled,
   onSelect,
+  categoryHint,
 }: {
   sectionKey: string;
   label: string;
@@ -784,29 +829,36 @@ function CategorySection({
   selected: string;
   getDisabled: (id: string) => string | null;
   onSelect: (id: string, label: string) => void;
+  categoryHint?: string;
 }) {
   return (
     <section className="mb-6">
-      <h2 className="font-heading text-lg font-semibold mb-3">{label}</h2>
+      <h2 className="font-heading text-lg font-semibold mb-1">{label}</h2>
+      {categoryHint ? (
+        <p className="text-xs text-muted-foreground mb-3">{categoryHint}</p>
+      ) : (
+        <div className="mb-3" />
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {tiles.map((t) => {
           const active = selected === t.id;
           const reason = getDisabled(t.id);
-          const disabled = !active && reason !== null;
+          const needsAdjust = !active && reason !== null;
           return (
             <button
               key={t.id}
               type="button"
-              disabled={disabled}
-              onClick={() => !disabled && onSelect(t.id, t.label)}
-              title={reason ?? undefined}
+              onClick={() => onSelect(t.id, t.label)}
+              title={
+                needsAdjust ? `${reason} — clique para ver o que vai mudar` : reason ?? undefined
+              }
               aria-pressed={active}
               className={
                 "group text-left p-3 border transition-colors flex items-center gap-3 min-h-[64px] relative " +
                 (active
                   ? "border-brand bg-brand-subtle"
-                  : disabled
-                  ? "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
+                  : needsAdjust
+                  ? "border-warning/40 bg-warning/5 hover:border-warning/60 hover:bg-warning/10"
                   : "border-border hover:border-border-strong hover:bg-secondary")
               }
             >

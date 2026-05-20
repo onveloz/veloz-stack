@@ -30,6 +30,9 @@ export function getRuntimeDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["runtime"],
 ): DisableReason {
+  if (id === "workers" && cfg.backend === "next") {
+    return "Route Handlers do Next.js não rodam em Cloudflare Workers";
+  }
   if (id === "workers" && cfg.backend !== "hono" && cfg.backend !== "none") {
     return "Runtime Workers precisa de backend Hono";
   }
