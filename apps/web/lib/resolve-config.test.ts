@@ -68,4 +68,21 @@ describe("resolveConfig", () => {
     expect(changes.some((c) => c.key === "backend" && c.to === "hono")).toBe(true);
     expect(changes.some((c) => c.key === "runtime" && c.to === "bun")).toBe(true);
   });
+
+  it("uses the proposed stack (not the old config) for dropped-module reasons", () => {
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      frontend: "next" as const,
+      backend: "next" as const,
+      modules: ["next-intl"] as const,
+    };
+    const { newCfg, changes } = resolveConfig(cfg, {
+      key: "frontend",
+      value: "tanstack-start",
+    });
+    expect(newCfg.modules).toEqual([]);
+    const drop = changes.find((c) => c.key === "modules" && c.from === "next-intl");
+    expect(drop?.to).toBeNull();
+    expect(drop?.reason).toBe("next-intl funciona só com frontend Next.js");
+  });
 });

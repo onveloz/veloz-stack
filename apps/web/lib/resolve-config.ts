@@ -155,7 +155,7 @@ export function resolveConfig(
       key: "modules",
       from: m,
       to: null,
-      reason: getModuleDisableReason(cfg, m) ?? "Incompatível",
+      reason: getModuleDisableReason(proposed, m) ?? "Incompatível",
     });
   }
   proposed.modules = keptModules;
