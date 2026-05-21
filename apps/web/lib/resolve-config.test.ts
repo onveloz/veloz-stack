@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG } from "@veloz-stack/types";
+import { DEFAULT_CONFIG, type ModuleId } from "@veloz-stack/types";
 import { resolveConfig } from "./resolve-config";
 
 describe("resolveConfig", () => {
@@ -74,7 +74,7 @@ describe("resolveConfig", () => {
       ...DEFAULT_CONFIG,
       frontend: "next" as const,
       backend: "next" as const,
-      modules: ["next-intl"] as const,
+      modules: ["next-intl"] satisfies ModuleId[],
     };
     const { newCfg, changes } = resolveConfig(cfg, {
       key: "frontend",
