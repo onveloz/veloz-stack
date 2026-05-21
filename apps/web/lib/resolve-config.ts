@@ -20,6 +20,10 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
+  applyImplicitStackRules,
+  FRONTEND_NEXT_BACKEND_CASCADE_REASON,
+  LEAVE_NEXT_BACKEND_CASCADE_REASON,
+  LEAVE_NEXT_RUNTIME_CASCADE_REASON,
   validateConfig,
   type ProjectConfig,
 } from "@veloz-stack/types";
@@ -73,42 +77,32 @@ export function resolveConfig(
   const proposed = { ...cfg, [pending.key]: pending.value } as ProjectConfig;
   const cascadesBeforePrimary: ConfigChange[] = [];
 
-  // Next.js App Router: prefer native Route Handlers (same-origin API routes)
-  if (
-    pending.key === "frontend" &&
-    pending.value === "next" &&
-    proposed.backend !== "next"
-  ) {
-    cascadesBeforePrimary.push({
-      key: "backend",
-      from: String(proposed.backend),
-      to: "next",
-      reason:
-        "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor separado",
+  if (pending.key === "frontend") {
+    const beforeCascade = { ...proposed };
+    const withCascade = applyImplicitStackRules(proposed, {
+      backend: false,
+      runtime: false,
     });
-    proposed.backend = "next";
-  }
-  if (
-    pending.key === "frontend" &&
-    pending.value !== "next" &&
-    proposed.backend === "next"
-  ) {
-    cascadesBeforePrimary.push({
-      key: "backend",
-      from: "next",
-      to: "hono",
-      reason: "Route Handlers do Next só funcionam com frontend Next.js",
-    });
-    proposed.backend = "hono";
-    if (proposed.runtime === "node") {
+    if (beforeCascade.backend !== withCascade.backend) {
+      cascadesBeforePrimary.push({
+        key: "backend",
+        from: String(beforeCascade.backend),
+        to: withCascade.backend,
+        reason:
+          pending.value === "next"
+            ? FRONTEND_NEXT_BACKEND_CASCADE_REASON
+            : LEAVE_NEXT_BACKEND_CASCADE_REASON,
+      });
+    }
+    if (beforeCascade.runtime !== withCascade.runtime) {
       cascadesBeforePrimary.push({
         key: "runtime",
-        from: "node",
-        to: "bun",
-        reason: "Stack Hono + TanStack usa Bun como runtime padrão",
+        from: String(beforeCascade.runtime),
+        to: withCascade.runtime,
+        reason: LEAVE_NEXT_RUNTIME_CASCADE_REASON,
       });
-      proposed.runtime = "bun";
     }
+    Object.assign(proposed, withCascade);
   }
 
   // Primary change first — confirm dialog uses changes[0] + slice(1) for cascades

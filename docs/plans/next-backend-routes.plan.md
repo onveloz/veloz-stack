@@ -13,7 +13,7 @@ Evidence:
 - [`packages/template-generator/src/handlers/deploy.ts`](packages/template-generator/src/handlers/deploy.ts) — `velozJson` always adds `apps/server` when `backend !== "none"`.
 - [`packages/template-generator/templates/deploy/veloz/Dockerfile`](packages/template-generator/templates/deploy/veloz/Dockerfile) — Hono-only CMD and health on `:3000/health`.
 - [`packages/template-generator/src/__tests__/generator.test.ts`](packages/template-generator/src/__tests__/generator.test.ts) — module wiring tests assert `apps/server/package.json`.
-- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — e2e matrix has `--frontend next` but no `--backend next`; invalid-combos tests workers+express only.
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — e2e includes `frontend-next`, `backend-next`, `next-hono-split`, and invalid-combos for `backend next` + wrong frontend/runtime/deploy.
 - External: [oRPC Next adapter](https://orpc.dev/docs/adapters/next), [Better Auth Next.js integration](https://www.better-auth.com/docs/integrations/next) (`toNextJsHandler`, `nextCookies`).
 
 Non-goals:
@@ -115,7 +115,7 @@ Research metadata:
 - `velozJson`: omit `apps/server` when `backend === "next"`; set web `healthCheck.path` to `/api/health`.
 - Dockerfile: emit Next-specific variant (build `apps/web`, `next start -p 3001`, health `/api/health`).
 - `post-process`: wire `SERVER_WORKSPACE_PACKAGES` to `apps/web/package.json` when `backend === "next"`.
-- README: Vercel-native recommendation (`frontend: next` + `backend: next`).
+- README: Vercel-native recommendation (`--frontend next` with implicit `backend: next`; split via `--backend hono`).
 - **Verification:** generator tests for veloz.json services; abacatepay module on `apps/web` when `backend: next`.
 
 ### TG6 — CI and regression tests (disjoint: `generator.test.ts`, `ci.yml`)
@@ -166,15 +166,15 @@ Research metadata:
 
 ## Test plan
 
-- [ ] `pnpm --filter @veloz-stack/template-generator gen`
-- [ ] `pnpm --filter @veloz-stack/template-generator test`
-- [ ] `pnpm -r --parallel check-types`
-- [ ] Generator: `next+next` emits rpc/auth/health routes, no server
-- [ ] Generator: `next+hono` still emits server (regression)
-- [ ] Generator: `validateConfig` rejects `next` without `next` frontend
-- [ ] Generator: abacatepay → `apps/web` deps when `backend: next`
-- [ ] Generator: veloz deploy single web service when `backend: next`
-- [ ] CI invalid: `backend next + frontend tanstack-start` exits non-zero
+- [x] `pnpm --filter @veloz-stack/template-generator gen`
+- [x] `pnpm --filter @veloz-stack/template-generator test`
+- [x] `pnpm -r --parallel check-types`
+- [x] Generator: `next+next` emits rpc/auth/health routes, no server
+- [x] Generator: `next+hono` still emits server (regression)
+- [x] Generator: `validateConfig` rejects `next` without `next` frontend
+- [x] Generator: abacatepay → `apps/web` deps when `backend: next`
+- [x] Generator: veloz deploy single web service when `backend: next`
+- [x] CI invalid: `backend next + frontend tanstack-start` exits non-zero
 - [ ] Manual (optional): scaffold + `curl localhost:3001/api/health`
 
 ## Failure modes

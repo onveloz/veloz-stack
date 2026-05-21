@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_CONFIG,
+  applyImplicitStackRules,
   validateConfig,
   type ProjectConfig,
 } from "@veloz-stack/types";
@@ -639,6 +640,37 @@ describe("Prisma", () => {
     const pkg = JSON.parse(vfs.read("packages/db/package.json")!);
     expect(pkg.scripts.postinstall).toBe("prisma generate");
     expect(pkg.dependencies["@prisma/client"]).toBeDefined();
+  });
+});
+
+describe("applyImplicitStackRules", () => {
+  it("sets backend next when only frontend next is implied (CLI default hono)", () => {
+    const resolved = applyImplicitStackRules(
+      cfg({ frontend: "next", backend: "hono" }),
+      { frontend: true },
+    );
+    expect(resolved.backend).toBe("next");
+    expect(validateConfig(resolved)).toEqual([]);
+  });
+
+  it("keeps hono split when backend was passed explicitly", () => {
+    const split = cfg({ frontend: "next", backend: "hono" });
+    const resolved = applyImplicitStackRules(split, {
+      frontend: true,
+      backend: true,
+    });
+    expect(resolved.backend).toBe("hono");
+    expect(validateConfig(resolved)).toEqual([]);
+    expect(paths(resolved)).toContain("apps/server/src/index.ts");
+  });
+
+  it("reverts backend next when leaving next frontend without explicit backend", () => {
+    const resolved = applyImplicitStackRules(
+      cfg({ frontend: "tanstack-start", backend: "next", runtime: "node" }),
+      { frontend: true },
+    );
+    expect(resolved.backend).toBe("hono");
+    expect(resolved.runtime).toBe("bun");
   });
 });
 

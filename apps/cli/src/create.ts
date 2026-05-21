@@ -9,6 +9,7 @@ import {
   PRESETS,
   type ProjectConfig,
   type ModuleId,
+  applyImplicitStackRules,
   getUiDisableReason,
   validateConfig,
 } from "@veloz-stack/types";
@@ -35,9 +36,10 @@ export async function runCreate(input: CreateInput): Promise<void> {
   const base = resolvePreset(input.preset);
   const fromFlags = coerceFlags(input, base);
   const seeded: ProjectConfig = { ...base, ...fromFlags };
+  const explicit = explicitFromFlags(input);
 
   const config = input.yes
-    ? seeded
+    ? applyImplicitStackRules(seeded, explicit)
     : await gatherInteractive(seeded, input);
 
   // If the user didn't explicitly pick a UI but the resolved frontend
@@ -102,6 +104,14 @@ function resolvePreset(preset: string | undefined): ProjectConfig {
   if (!preset || preset === "custom") return DEFAULT_CONFIG;
   const p = PRESETS[preset as keyof typeof PRESETS];
   return p ? p.config : DEFAULT_CONFIG;
+}
+
+function explicitFromFlags(input: CreateInput) {
+  return {
+    frontend: input.frontend !== undefined,
+    backend: input.backend !== undefined,
+    runtime: input.runtime !== undefined,
+  };
 }
 
 function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectConfig> {

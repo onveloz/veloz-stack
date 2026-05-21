@@ -167,6 +167,58 @@ export function isBrazilModule(id: ModuleId): boolean {
   return MODULES[id].brazilian === true;
 }
 
+/**
+ * Fields the caller set via CLI flags (or another explicit source).
+ * Omitted fields may receive implicit defaults — same rules as the web stack builder.
+ */
+export type ExplicitStackFields = {
+  frontend?: boolean;
+  backend?: boolean;
+  runtime?: boolean;
+};
+
+/** Shown when choosing Next.js frontend without an explicit separate backend. */
+export const FRONTEND_NEXT_BACKEND_CASCADE_REASON =
+  "Com frontend Next.js, as APIs nativas (Route Handlers em /app/api) ficam no mesmo app — sem servidor separado";
+
+/** Shown when leaving Next.js frontend while backend was Route Handlers. */
+export const LEAVE_NEXT_BACKEND_CASCADE_REASON =
+  "Route Handlers do Next só funcionam com frontend Next.js";
+
+/** Shown when reverting Node runtime after leaving Next + Route Handlers. */
+export const LEAVE_NEXT_RUNTIME_CASCADE_REASON =
+  "Stack Hono + TanStack usa Bun como runtime padrão";
+
+/**
+ * Aligns CLI/non-interactive config with the web builder's cascades when the user
+ * did not pass every related flag. Keeps split stacks (`--frontend next --backend hono`)
+ * valid while making `--frontend next` alone mean native Route Handlers.
+ */
+export function applyImplicitStackRules(
+  cfg: ProjectConfig,
+  explicit: ExplicitStackFields = {},
+): ProjectConfig {
+  const next = { ...cfg };
+
+  if (
+    next.frontend === "next" &&
+    !explicit.backend &&
+    next.backend !== "next" &&
+    next.backend !== "none"
+  ) {
+    next.backend = "next";
+  }
+
+  if (next.frontend !== "next" && !explicit.backend && next.backend === "next") {
+    next.backend = "hono";
+    if (!explicit.runtime && next.runtime === "node") {
+      next.runtime = "bun";
+    }
+  }
+
+  return next;
+}
+
 export function validateConfig(cfg: ProjectConfig): string[] {
   const errors: string[] = [];
   const pushIf = (reason: DisableReason, prefix: string) => {

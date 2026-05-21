@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG } from "@veloz-stack/types";
+import { DEFAULT_CONFIG, applyImplicitStackRules } from "@veloz-stack/types";
 import { buildReproducibleCommand } from "./reproducible-command";
 
 describe("buildReproducibleCommand", () => {
+  it("includes backend next after implicit stack rules (frontend next only)", () => {
+    const coerced = applyImplicitStackRules(
+      { ...DEFAULT_CONFIG, projectName: "native-next", frontend: "next" },
+      { backend: false },
+    );
+    const cmd = buildReproducibleCommand(coerced);
+    expect(cmd).toContain("--frontend next");
+    expect(cmd).toContain("--backend next");
+  });
+
   it("includes project name and non-default flags", () => {
     const cmd = buildReproducibleCommand({
       ...DEFAULT_CONFIG,

@@ -25,6 +25,7 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
+  applyImplicitStackRules,
 } from "@veloz-stack/types";
 
 type CreateInput = Partial<ProjectConfig> & { projectName?: string };
@@ -80,6 +81,14 @@ export async function gatherInteractive(
     () => null,
     frontendLabels,
   );
+  if (input.backend === undefined) {
+    const cascaded = applyImplicitStackRules(cfg, {
+      backend: false,
+      runtime: input.runtime !== undefined,
+    });
+    cfg.backend = cascaded.backend;
+    cfg.runtime = cascaded.runtime;
+  }
   cfg.backend = await pickOne(
     "Backend",
     BackendId.options,
