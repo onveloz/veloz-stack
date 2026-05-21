@@ -57,7 +57,7 @@ const cli = Cli.create("create-veloz-stack", {
   }),
   options: z.object({
     preset: PresetId.optional().describe(
-      "Modelo pronto: veloz-br | minimal | mern | pern | custom",
+      "Modelo pronto: veloz-br | minimal | mern | pern | next-native | custom",
     ),
     frontend: FrontendId.optional().describe("Frontend web (single-select)"),
     mobile: MobileId.optional().describe("App mobile (expo | none) — pode coexistir com frontend"),

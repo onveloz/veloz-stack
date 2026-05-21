@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Veloz Stack — Scaffolder TypeScript opinado pro Brasil",
   description:
     "Bun · Hono · oRPC · TanStack Start · Better Auth · Drizzle. Baterias incluídas pro Brasil: PIX, SMS, LGPD, pronto pro Claude. Deploy no Veloz.",
-  metadataBase: new URL("https://veloz-stack.runveloz.com"),
+  metadataBase: new URL("https://www.veloz-stack.com"),
   openGraph: {
     title: "Veloz Stack",
     description: "Scaffolder full-stack TypeScript opinado — 100% deployável no Veloz",

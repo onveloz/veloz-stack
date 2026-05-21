@@ -1,5 +1,5 @@
 import type { ProjectConfig } from "@veloz-stack/types";
-import { generate } from "./index";
+import { generate, type GenerateOptions } from "./index";
 import { writeTree } from "./writer";
 
 export { writeTree };
@@ -12,8 +12,9 @@ export { writeTree };
 export async function scaffold(
   config: ProjectConfig,
   targetDir: string,
+  options?: GenerateOptions,
 ): Promise<{ fileCount: number }> {
-  const vfs = generate(config);
+  const vfs = generate(config, options);
   const fileCount = await writeTree(vfs, targetDir);
   return { fileCount };
 }

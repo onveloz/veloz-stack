@@ -69,6 +69,7 @@ export const PresetId = z.enum([
   "minimal",
   "mern",
   "pern",
+  "next-native",
   "custom",
 ]);
 export type PresetId = z.infer<typeof PresetId>;
@@ -114,6 +115,20 @@ export const ProjectConfig = z.object({
 });
 export type ProjectConfig = z.infer<typeof ProjectConfig>;
 
+/** Persisted stack manifest written to `veloz-stack.jsonc` in every scaffolded project. */
+export const VelozStackConfigFile = ProjectConfig.omit({
+  projectName: true,
+  git: true,
+  install: true,
+}).extend({
+  $schema: z.string().optional(),
+  version: z.string(),
+  createdAt: z.string().datetime(),
+  reproducibleCommand: z.string().optional(),
+});
+export type VelozStackConfigFile = z.infer<typeof VelozStackConfigFile>;
+
+export * from "./veloz-stack-config";
 export * from "./modules";
 export * from "./defaults";
 export * from "./compatibility";

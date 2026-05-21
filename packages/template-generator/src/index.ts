@@ -13,9 +13,15 @@ import { processMobile } from "./handlers/mobile";
 import { processModules } from "./handlers/modules";
 import { postProcess } from "./handlers/post-process";
 import { processUi } from "./handlers/ui";
+import { writeVelozStackConfigToVfs } from "./veloz-stack-config";
 import { VirtualFs } from "./vfs";
 
 export { VirtualFs } from "./vfs";
+
+export type GenerateOptions = {
+  /** CLI version stamped into `veloz-stack.jsonc` (omitted in browser preview). */
+  cliVersion?: string;
+};
 
 /**
  * Order matters — mirrors BTS: base → frontend → backend → db → api → auth
@@ -26,7 +32,10 @@ export { VirtualFs } from "./vfs";
  * can call it client-side to render a preview tree. Server-only writing
  * lives in `./scaffold`.
  */
-export function generate(config: ProjectConfig): VirtualFs {
+export function generate(
+  config: ProjectConfig,
+  options?: GenerateOptions,
+): VirtualFs {
   const vfs = new VirtualFs();
   processBase(vfs, config);
   processFrontend(vfs, config);
@@ -42,5 +51,8 @@ export function generate(config: ProjectConfig): VirtualFs {
   processModules(vfs, config);
   processAddons(vfs, config);
   postProcess(vfs, config);
+  if (options?.cliVersion) {
+    writeVelozStackConfigToVfs(vfs, config, options.cliVersion);
+  }
   return vfs;
 }

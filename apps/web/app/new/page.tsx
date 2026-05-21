@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { StackBuilder } from "./stack-builder";
+import { StackBuilderClient } from "./stack-builder-client";
+import { StackBuilderSkeleton } from "./stack-builder-skeleton";
 
 export const metadata = {
   title: "Build your stack — Veloz Stack",
@@ -7,8 +8,8 @@ export const metadata = {
 
 export default function NewPage() {
   return (
-    <Suspense fallback={null}>
-      <StackBuilder />
+    <Suspense fallback={<StackBuilderSkeleton />}>
+      <StackBuilderClient />
     </Suspense>
   );
 }

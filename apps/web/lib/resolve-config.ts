@@ -20,8 +20,22 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
+  applyImplicitStackRules,
+  FRONTEND_NEXT_BACKEND_CASCADE_REASON,
+  LEAVE_NEXT_BACKEND_CASCADE_REASON,
+  LEAVE_NEXT_RUNTIME_CASCADE_REASON,
+  validateConfig,
+  type ProjectConfig,
 } from "@veloz-stack/types";
-import type { ProjectConfig } from "@veloz-stack/types";
+import { MODULES } from "@veloz-stack/types";
+import {
+  addonFlagsAfterGitHook,
+  addonFlagsAfterLinter,
+  getGitHookChoice,
+  getLinterChoice,
+  patchAddonsForGitHook,
+  patchAddonsForLinter,
+} from "@/lib/stack-addons";
 
 export type ConfigChange = {
   key: keyof ProjectConfig | "modules";
@@ -61,16 +75,49 @@ export function resolveConfig(
   pending: { key: keyof ProjectConfig; value: string },
 ): { newCfg: ProjectConfig; changes: ConfigChange[] } {
   const proposed = { ...cfg, [pending.key]: pending.value } as ProjectConfig;
-  const changes: ConfigChange[] = [];
+  const cascadesBeforePrimary: ConfigChange[] = [];
 
-  // Seed with the primary change and its reason (if any)
+  if (pending.key === "frontend") {
+    const beforeCascade = { ...proposed };
+    const withCascade = applyImplicitStackRules(proposed, {
+      backend: false,
+      runtime: false,
+    });
+    if (beforeCascade.backend !== withCascade.backend) {
+      cascadesBeforePrimary.push({
+        key: "backend",
+        from: String(beforeCascade.backend),
+        to: withCascade.backend,
+        reason:
+          pending.value === "next"
+            ? FRONTEND_NEXT_BACKEND_CASCADE_REASON
+            : LEAVE_NEXT_BACKEND_CASCADE_REASON,
+      });
+    }
+    if (beforeCascade.runtime !== withCascade.runtime) {
+      cascadesBeforePrimary.push({
+        key: "runtime",
+        from: String(beforeCascade.runtime),
+        to: withCascade.runtime,
+        reason: LEAVE_NEXT_RUNTIME_CASCADE_REASON,
+      });
+    }
+    Object.assign(proposed, withCascade);
+  }
+
+  // Primary change first — confirm dialog uses changes[0] + slice(1) for cascades
   const originReason = findReason(cfg, pending.key, pending.value);
-  changes.push({
-    key: pending.key,
-    from: String((cfg as any)[pending.key]),
-    to: String(pending.value),
-    reason: originReason ?? "Mudança solicitada",
-  });
+  const changes: ConfigChange[] = [
+    {
+      key: pending.key,
+      from: String((cfg as any)[pending.key]),
+      to: String(pending.value),
+      reason: originReason ?? "Mudança solicitada",
+    },
+    ...cascadesBeforePrimary,
+  ];
+
+  satisfyPendingChoice(proposed, pending, changes);
 
   // Iteratively repair until stable
   for (let pass = 0; pass < 6; pass++) {
@@ -108,12 +155,214 @@ export function resolveConfig(
       key: "modules",
       from: m,
       to: null,
-      reason: getModuleDisableReason(cfg, m) ?? "Incompatível",
+      reason: getModuleDisableReason(proposed, m) ?? "Incompatível",
     });
   }
   proposed.modules = keptModules;
 
   return { newCfg: proposed, changes };
+}
+
+/** Repair cross-field incompatibilities without recording cascade changes (Surpreender, etc.). */
+export function repairStackConfig(cfg: ProjectConfig): ProjectConfig {
+  let proposed = { ...cfg, modules: [...cfg.modules], addons: [...cfg.addons] };
+
+  for (let pass = 0; pass < 10; pass++) {
+    let dirty = false;
+    for (const r of RESOLVERS) {
+      const current = (proposed as Record<string, unknown>)[r.key] as string;
+      const currentReason = r.check(proposed, current as never);
+      if (!currentReason) continue;
+      const next = r.options.find((o) => !r.check(proposed, o));
+      if (next && next !== current) {
+        (proposed as Record<string, unknown>)[r.key] = next;
+        dirty = true;
+      }
+    }
+
+    const keptModules = proposed.modules.filter((m) => !getModuleDisableReason(proposed, m));
+    if (keptModules.length !== proposed.modules.length) {
+      proposed.modules = keptModules;
+      dirty = true;
+    }
+
+    if (
+      proposed.frontend === "next" &&
+      proposed.modules.includes("next-intl") &&
+      proposed.modules.includes("pt-br-i18n")
+    ) {
+      proposed.modules = proposed.modules.filter((m) => m !== "pt-br-i18n");
+      dirty = true;
+    }
+
+    const linter = getLinterChoice(proposed.addons);
+    const patchedLinter = patchAddonsForLinter(proposed.addons, linter);
+    const gitHook = getGitHookChoice(proposed.addons);
+    const patchedHooks = patchAddonsForGitHook(patchedLinter, gitHook);
+    if (
+      patchedHooks.length !== proposed.addons.length ||
+      patchedHooks.some((a, i) => a !== proposed.addons[i])
+    ) {
+      proposed.addons = patchedHooks;
+      dirty = true;
+    }
+
+    proposed = {
+      ...proposed,
+      ...addonFlagsAfterLinter(linter),
+      ...addonFlagsAfterGitHook(gitHook),
+    };
+    if (proposed.lefthookCi && proposed.lefthookAdvanced) {
+      proposed.lefthookAdvanced = false;
+      dirty = true;
+    }
+
+    if (!dirty) break;
+  }
+
+  return proposed;
+}
+
+/** True when `validateConfig` reports no errors. */
+export function isStackConfigValid(cfg: ProjectConfig): boolean {
+  return validateConfig(cfg).length === 0;
+}
+
+/** Plan enabling a module that is currently blocked; returns prerequisite adjustments. */
+export function resolveEnableModule(
+  cfg: ProjectConfig,
+  moduleId: ModuleId,
+): { newCfg: ProjectConfig; changes: ConfigChange[] } {
+  const block = getModuleDisableReason(cfg, moduleId);
+  if (!block) {
+    return {
+      newCfg: {
+        ...cfg,
+        modules: cfg.modules.includes(moduleId) ? cfg.modules : [...cfg.modules, moduleId],
+        preset: "custom",
+      },
+      changes: [],
+    };
+  }
+
+  let proposed = { ...cfg } as ProjectConfig;
+  const changes: ConfigChange[] = [];
+  const meta = MODULES[moduleId];
+
+  if (meta.requires?.auth && proposed.auth === "none") {
+    changes.push({
+      key: "auth",
+      from: "none",
+      to: "better-auth",
+      reason: block,
+    });
+    proposed.auth = "better-auth";
+  }
+  if (meta.requires?.backend && proposed.backend === "none") {
+    changes.push({
+      key: "backend",
+      from: "none",
+      to: "hono",
+      reason: block,
+    });
+    proposed.backend = "hono";
+  }
+  if (meta.requires?.db && proposed.db === "none") {
+    changes.push({
+      key: "db",
+      from: "none",
+      to: "postgres",
+      reason: block,
+    });
+    proposed.db = "postgres";
+  }
+
+  if (moduleId === "next-intl" && proposed.frontend !== "next") {
+    const resolved = resolveConfig(proposed, { key: "frontend", value: "next" });
+    proposed = resolved.newCfg;
+    changes.push(...resolved.changes);
+  }
+
+  if (
+    (moduleId === "pino" || moduleId === "opentelemetry") &&
+    proposed.runtime === "workers"
+  ) {
+    changes.push({
+      key: "runtime",
+      from: "workers",
+      to: "bun",
+      reason: block,
+    });
+    proposed.runtime = "bun";
+  }
+
+  let modules = proposed.modules.includes(moduleId)
+    ? proposed.modules
+    : [...proposed.modules, moduleId];
+
+  if (
+    moduleId === "next-intl" &&
+    proposed.frontend === "next" &&
+    modules.includes("pt-br-i18n")
+  ) {
+    modules = modules.filter((m) => m !== "pt-br-i18n");
+    changes.push({
+      key: "modules",
+      from: "pt-br-i18n",
+      to: null,
+      reason: "next-intl substitui pt-BR i18n no App Router",
+    });
+  }
+
+  changes.push({
+    key: "modules",
+    from: "—",
+    to: moduleId,
+    reason: `Ativar ${meta.name}`,
+  });
+
+  return { newCfg: { ...proposed, modules, preset: "custom" }, changes };
+}
+
+/**
+ * When the user's pick is invalid with the current stack, adjust other fields
+ * first (never revert the pending key) until the choice is valid or no progress.
+ */
+function satisfyPendingChoice(
+  proposed: ProjectConfig,
+  pending: { key: keyof ProjectConfig; value: string },
+  changes: ConfigChange[],
+) {
+  const resolver = RESOLVERS.find((r) => r.key === (pending.key as StackKey));
+  if (!resolver) return;
+
+  for (let pass = 0; pass < 8; pass++) {
+    const block = resolver.check(proposed, pending.value as never);
+    if (!block) return;
+
+    let fixed = false;
+    for (const r of RESOLVERS) {
+      if (r.key === pending.key) continue;
+      for (const candidate of r.options) {
+        const current = String((proposed as any)[r.key]);
+        if (candidate === current) continue;
+        if (r.check(proposed, candidate as never)) continue;
+        const trial = { ...proposed, [r.key]: candidate } as ProjectConfig;
+        if (resolver.check(trial, pending.value as never)) continue;
+        changes.push({
+          key: r.key,
+          from: current,
+          to: candidate,
+          reason: block,
+        });
+        (proposed as any)[r.key] = candidate;
+        fixed = true;
+        break;
+      }
+      if (fixed) break;
+    }
+    if (!fixed) return;
+  }
 }
 
 function findReason(

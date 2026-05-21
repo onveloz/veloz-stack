@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_CONFIG,
+  applyImplicitStackRules,
   validateConfig,
   type ProjectConfig,
 } from "@veloz-stack/types";
@@ -22,6 +23,20 @@ describe("generate()", () => {
     expect(files).toContain("tsconfig.json");
     expect(files).toContain(".gitignore");
     expect(files).toContain("README.md");
+  });
+
+  it("writes veloz-stack.jsonc when cliVersion is provided", () => {
+    const vfs = generate(cfg({ projectName: "demo-app" }), { cliVersion: "0.0.1" });
+    expect(vfs.exists("veloz-stack.jsonc")).toBe(true);
+    const raw = vfs.read("veloz-stack.jsonc")!;
+    expect(raw).toContain("reproducibleCommand");
+    expect(raw).toContain("demo-app");
+    expect(raw).toContain("https://www.veloz-stack.com/schemas/veloz-stack.schema.json");
+  });
+
+  it("omits veloz-stack.jsonc in browser preview (no cliVersion)", () => {
+    const files = paths(cfg({}));
+    expect(files).not.toContain("veloz-stack.jsonc");
   });
 
   it("pnpm produces pnpm-workspace.yaml; bun does not", () => {
@@ -628,6 +643,37 @@ describe("Prisma", () => {
   });
 });
 
+describe("applyImplicitStackRules", () => {
+  it("sets backend next when only frontend next is implied (CLI default hono)", () => {
+    const resolved = applyImplicitStackRules(
+      cfg({ frontend: "next", backend: "hono" }),
+      { frontend: true },
+    );
+    expect(resolved.backend).toBe("next");
+    expect(validateConfig(resolved)).toEqual([]);
+  });
+
+  it("keeps hono split when backend was passed explicitly", () => {
+    const split = cfg({ frontend: "next", backend: "hono" });
+    const resolved = applyImplicitStackRules(split, {
+      frontend: true,
+      backend: true,
+    });
+    expect(resolved.backend).toBe("hono");
+    expect(validateConfig(resolved)).toEqual([]);
+    expect(paths(resolved)).toContain("apps/server/src/index.ts");
+  });
+
+  it("reverts backend next when leaving next frontend without explicit backend", () => {
+    const resolved = applyImplicitStackRules(
+      cfg({ frontend: "tanstack-start", backend: "next", runtime: "node" }),
+      { frontend: true },
+    );
+    expect(resolved.backend).toBe("hono");
+    expect(resolved.runtime).toBe("bun");
+  });
+});
+
 describe("validateConfig", () => {
   it("rejects better-auth + db:none", () => {
     const errs = validateConfig(cfg({ db: "none", orm: "none", dbHosting: "none" }));
@@ -650,7 +696,11 @@ describe("validateConfig", () => {
     const errs = validateConfig(
       cfg({ backend: "next", frontend: "next", runtime: "workers", deploy: "cloudflare" }),
     );
-    expect(errs.some((e) => e.includes("Runtime Workers precisa de backend Hono"))).toBe(true);
+    expect(
+      errs.some((e) =>
+        e.includes("Route Handlers do Next.js não rodam em Cloudflare Workers"),
+      ),
+    ).toBe(true);
   });
 
   it("accepts the default config", () => {

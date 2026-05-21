@@ -43,10 +43,30 @@ fi
 pm_field=$(node -p "require('./package.json').packageManager || 'pnpm@0'" 2>/dev/null || echo "pnpm@0")
 pm=${pm_field%%@*}
 
+install_with_retry() {
+  local attempt=1
+  local max=3
+  while [ "$attempt" -le "$max" ]; do
+    set +e
+    eval "$1" 2>&1 | tail -5
+    local status=${PIPESTATUS[0]}
+    set -e
+    if [ "$status" -eq 0 ]; then
+      return 0
+    fi
+    if [ "$attempt" -eq "$max" ]; then
+      return 1
+    fi
+    echo "   install failed (attempt $attempt/$max), retrying…" >&2
+    attempt=$((attempt + 1))
+    sleep 2
+  done
+}
+
 case "$pm" in
   bun)
     echo "   using bun install"
-    bun install 2>&1 | tail -5
+    install_with_retry "bun install"
     ;;
   npm)
     echo "   using npm install"

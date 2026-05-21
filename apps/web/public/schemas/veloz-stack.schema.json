@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.veloz-stack.com/schemas/veloz-stack.schema.json",
+  "title": "VelozStackConfigFile",
+  "description": "Stack manifest written by create-veloz-stack to veloz-stack.jsonc",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string", "format": "uri" },
+    "version": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "reproducibleCommand": { "type": "string" },
+    "preset": {
+      "type": "string",
+      "enum": ["veloz-br", "minimal", "mern", "pern", "next-native", "custom"]
+    },
+    "frontend": {
+      "type": "string",
+      "enum": ["tanstack-start", "next", "nuxt", "svelte-kit", "astro", "none"]
+    },
+    "mobile": { "type": "string", "enum": ["expo", "none"] },
+    "desktop": { "type": "string", "enum": ["tauri", "none"] },
+    "backend": {
+      "type": "string",
+      "enum": ["hono", "next", "express", "fastify", "elysia", "none"]
+    },
+    "runtime": { "type": "string", "enum": ["bun", "node", "workers"] },
+    "api": { "type": "string", "enum": ["orpc", "trpc", "rest", "none"] },
+    "db": {
+      "type": "string",
+      "enum": ["postgres", "mysql", "sqlite", "mongodb", "none"]
+    },
+    "orm": { "type": "string", "enum": ["drizzle", "prisma", "mongoose", "none"] },
+    "dbHosting": {
+      "type": "string",
+      "enum": [
+        "veloz",
+        "neon",
+        "supabase",
+        "planetscale",
+        "turso",
+        "mongodb-atlas",
+        "docker",
+        "none"
+      ]
+    },
+    "auth": { "type": "string", "enum": ["better-auth", "clerk", "none"] },
+    "deploy": {
+      "type": "string",
+      "enum": ["veloz", "vercel", "cloudflare", "fly", "render", "docker", "none"]
+    },
+    "pm": { "type": "string", "enum": ["bun", "pnpm", "npm"] },
+    "ui": { "type": "string", "enum": ["tailwind", "shadcn", "none"] },
+    "examples": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["todo", "ai-chat", "pix-checkout", "none"] }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "claude",
+          "abacatepay",
+          "asaas",
+          "pagarme",
+          "mercadopago",
+          "stripe-br",
+          "ararahq-sms",
+          "ararahq-wa",
+          "twilio",
+          "cpf-cnpj",
+          "viacep",
+          "brasilapi",
+          "lgpd-consent",
+          "nfe-io",
+          "pt-br-i18n",
+          "himetrica",
+          "posthog",
+          "sentry",
+          "caramelosec",
+          "resend",
+          "better-auth-social",
+          "upstash-redis",
+          "s3",
+          "cloudflare-r2",
+          "pino",
+          "opentelemetry",
+          "next-intl"
+        ]
+      }
+    },
+    "addons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["turborepo", "biome", "husky", "oxlint", "lefthook"]
+      }
+    },
+    "oxlintStrict": { "type": "boolean" },
+    "lefthookCi": { "type": "boolean" },
+    "lefthookAdvanced": { "type": "boolean" }
+  },
+  "required": [
+    "version",
+    "createdAt",
+    "preset",
+    "frontend",
+    "mobile",
+    "desktop",
+    "backend",
+    "runtime",
+    "api",
+    "db",
+    "orm",
+    "dbHosting",
+    "auth",
+    "deploy",
+    "pm",
+    "ui",
+    "examples",
+    "modules",
+    "addons",
+    "oxlintStrict",
+    "lefthookCi",
+    "lefthookAdvanced"
+  ]
+}

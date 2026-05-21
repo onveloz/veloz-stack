@@ -37,6 +37,8 @@ export function useStackConfig() {
     {
       name: parseAsString.withDefault(DEFAULT_CONFIG.projectName),
       preset: parseAsStringEnum(enumVals(PresetId)).withDefault(DEFAULT_CONFIG.preset),
+      /** Last named preset applied; kept when user customizes (`preset=custom`). */
+      basePreset: parseAsStringEnum(enumVals(PresetId)).withDefault(DEFAULT_CONFIG.preset),
       frontend: parseAsStringEnum(enumVals(FrontendId)).withDefault(DEFAULT_CONFIG.frontend),
       mobile: parseAsStringEnum(enumVals(MobileId)).withDefault(DEFAULT_CONFIG.mobile),
       desktop: parseAsStringEnum(enumVals(DesktopId)).withDefault(DEFAULT_CONFIG.desktop),
@@ -94,7 +96,7 @@ export function useStackConfig() {
     install: state.install,
   };
 
-  return { config, setState };
+  return { config, basePreset: state.basePreset, setState };
 }
 
 export type StackSetter = ReturnType<typeof useStackConfig>["setState"];

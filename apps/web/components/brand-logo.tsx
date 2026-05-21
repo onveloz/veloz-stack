@@ -8,11 +8,13 @@ const CONCEPTS = new Set<string>([
   "lgpd-consent",
   "pt-br-i18n",
   "better-auth-social",
-  "pino",
-  "opentelemetry",
-  "next-intl",
   "oxlint",
 ]);
+
+/** Logo filename differs from option id (sync-logos / public assets). */
+const LOGO_ALIASES: Record<string, string> = {
+  expo: "native-expo",
+};
 
 /** Ids whose logo file is a PNG, not SVG. Keeps us from the silent 404 roundtrip. */
 const PNG_IDS = new Set<string>([
@@ -58,8 +60,9 @@ export function BrandLogo({
     );
   }
 
-  const ext = PNG_IDS.has(id) ? "png" : "svg";
-  const src = `/logos/${id}.${ext}`;
+  const fileId = LOGO_ALIASES[id] ?? id;
+  const ext = PNG_IDS.has(fileId) ? "png" : "svg";
+  const src = `/logos/${fileId}.${ext}`;
 
   return (
     <img

@@ -43,15 +43,12 @@ export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | 
   const defaultAddons = [...DEFAULT_CONFIG.addons].sort().join(",");
   const selectedAddons = [...cfg.addons].sort().join(",");
   if (selectedAddons !== defaultAddons) {
-    flags.push(`--addons ${cfg.addons.join(",")}`);
+    flags.push(`--addons ${cfg.addons.length ? cfg.addons.join(",") : "''"}`);
   }
   if (cfg.lefthookCi) flags.push("--lefthook-ci");
   if (cfg.lefthookAdvanced) flags.push("--lefthook-advanced");
   if (!cfg.install) flags.push("--no-install");
   if (!cfg.git) flags.push("--no-git");
-  if (sortedKeyList(cfg.addons) !== sortedKeyList(DEFAULT_CONFIG.addons)) {
-    flags.push(`--addons ${cfg.addons.length ? cfg.addons.join(",") : "''"}`);
-  }
   if (cfg.oxlintStrict) flags.push("--oxlint-strict");
   flags.push("--yes");
 

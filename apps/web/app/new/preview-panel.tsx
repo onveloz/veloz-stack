@@ -1,9 +1,8 @@
 "use client";
 
-import { ChevronRight, FileCode2, FolderClosed, FolderOpen } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ChevronRight, FileCode2, FolderClosed, FolderOpen, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { ProjectConfig } from "@veloz-stack/types";
-import { generate } from "@veloz-stack/template-generator";
 
 type TreeNode =
   | { kind: "file"; name: string; path: string }
@@ -53,42 +52,82 @@ function buildTree(paths: string[]): TreeNode[] {
   return sort(root);
 }
 
-export function PreviewPanel({ config }: { config: ProjectConfig }) {
-  const tree = useMemo(() => {
-    try {
-      const vfs = generate(config);
-      return buildTree([...vfs.entries()].map(([p]) => p));
-    } catch (err) {
-      console.error(err);
-      return [];
-    }
-  }, [config]);
+function usePreviewVfs(config: ProjectConfig) {
+  const configKey = useMemo(() => JSON.stringify(config), [config]);
+  const [tree, setTree] = useState<TreeNode[]>([]);
+  const [fileCount, setFileCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const fileCount = useMemo(() => {
-    try {
-      return generate(config).size();
-    } catch {
-      return 0;
-    }
-  }, [config]);
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    void import("@veloz-stack/template-generator")
+      .then(({ generate }) => {
+        if (cancelled) return;
+        const vfs = generate(config);
+        const paths = [...vfs.entries()].map(([p]) => p);
+        setTree(buildTree(paths));
+        setFileCount(vfs.size());
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) {
+          setTree([]);
+          setFileCount(0);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [configKey, config]);
+
+  return { tree, fileCount, loading };
+}
+
+export function PreviewPanel({
+  config,
+  maxHeight,
+}: {
+  config: ProjectConfig;
+  /** When set (e.g. mobile embed), caps scroll area instead of filling viewport column. */
+  maxHeight?: number;
+}) {
+  const { tree, fileCount, loading } = usePreviewVfs(config);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-4 py-2 border-b border-border flex items-center justify-between bg-secondary/30">
+    <div
+      className="flex flex-col h-full"
+      style={maxHeight ? { maxHeight } : undefined}
+    >
+      <div className="px-4 py-2 border-b border-border flex items-center justify-between bg-secondary/30 shrink-0">
         <div className="flex items-center gap-2">
           <FileCode2 className="w-3.5 h-3.5 text-brand" />
           <span className="text-[11px] uppercase tracking-wider font-medium">Preview</span>
         </div>
         <span className="text-[11px] text-muted-foreground tabular-nums">
-          {fileCount} {fileCount === 1 ? "file" : "files"}
+          {loading ? "…" : `${fileCount} ${fileCount === 1 ? "file" : "files"}`}
         </span>
       </div>
       <div className="flex-1 overflow-auto px-2 py-2 text-[12px] font-mono">
-        {tree.map((n) => (
-          <TreeRow key={n.path} node={n} depth={0} />
-        ))}
-        {tree.length === 0 && (
-          <div className="text-muted-foreground p-4">No files — everything set to none.</div>
+        {loading ? (
+          <div className="flex items-center gap-2 text-muted-foreground p-4">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            Gerando preview…
+          </div>
+        ) : (
+          <>
+            {tree.map((n) => (
+              <TreeRow key={n.path} node={n} depth={0} />
+            ))}
+            {tree.length === 0 && (
+              <div className="text-muted-foreground p-4">No files — everything set to none.</div>
+            )}
+          </>
         )}
       </div>
     </div>

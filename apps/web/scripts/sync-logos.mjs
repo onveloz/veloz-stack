@@ -24,7 +24,7 @@ const LOGO_MAP = {
 
   // backend
   hono: ["Hono"],
-  express: ["Express"],
+  express: ["Express.js"],
   fastify: ["Fastify"],
   elysia: ["ElysiaJS", "Elysia"],
 
@@ -70,6 +70,12 @@ const LOGO_MAP = {
   pnpm: ["pnpm"],
   npm: ["npm"],
 
+  // ui
+  shadcn: ["shadcn/ui", "shadcn"],
+
+  // desktop
+  tauri: ["Tauri"],
+
   // addons
   turborepo: ["Turborepo", "Turbo"],
   biome: ["Biome"],
@@ -88,6 +94,9 @@ const LOGO_MAP = {
   s3: ["AWS", "Amazon Web Services"],
   "cloudflare-r2": ["Cloudflare"],
   "mercadopago": ["Mercado Pago"],
+  pino: ["Pino"],
+  opentelemetry: ["OpenTelemetry"],
+  "next-intl": ["next-intl"],
 };
 
 function pickRoute(entry) {
@@ -106,7 +115,12 @@ function findByCandidates(catalog, candidates) {
     const needle = c.toLowerCase();
     const partial = catalog.find((e) => {
       const t = e.title.toLowerCase();
-      return t === needle || t.startsWith(needle + " ") || t.endsWith(" " + needle);
+      if (t === needle) return true;
+      if (t.startsWith(needle + " ") || t.startsWith(needle + "/") || t.startsWith(needle + "."))
+        return true;
+      // endsWith only for multi-word needles (avoids "Photoshop Express" for "Express")
+      if (needle.includes(" ") && t.endsWith(" " + needle)) return true;
+      return false;
     });
     if (partial) return partial;
   }

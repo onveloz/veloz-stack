@@ -49,8 +49,10 @@ jobs:
 
           # ─────── Frontend axis
           - { name: frontend-tanstack, args: "--frontend tanstack-start" }
+          # --frontend next alone → CLI applies implicit backend:next (Route Handlers)
           - { name: frontend-next, args: "--frontend next" }
           - { name: backend-next, args: "--frontend next --backend next" }
+          # explicit --backend hono → split monorepo (apps/server), regression guard
           - { name: next-hono-split, args: "--frontend next --backend hono" }
           - { name: frontend-astro, args: "--frontend astro" }
           - { name: frontend-nuxt, args: "--frontend nuxt" }

@@ -1,0 +1,9 @@
+[
+  {
+    "title": "Veloz Stack",
+    "description": "O próprio scaffolder e site do montador de stack — referência de layout TanStack Start + Hono + oRPC.",
+    "liveUrl": "https://www.veloz-stack.com",
+    "sourceUrl": "https://github.com/onveloz/veloz-stack",
+    "tags": ["TanStack Start", "Hono", "oRPC", "Bun", "Drizzle", "Better Auth"]
+  }
+]

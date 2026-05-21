@@ -9,11 +9,16 @@ import {
   PRESETS,
   type ProjectConfig,
   type ModuleId,
+  applyImplicitStackRules,
   getUiDisableReason,
   validateConfig,
 } from "@veloz-stack/types";
 import { scaffold } from "@veloz-stack/template-generator/scaffold";
+import { createRequire } from "node:module";
 import { gatherInteractive } from "./prompts.js";
+
+const require = createRequire(import.meta.url);
+const CLI_VERSION = require("../package.json").version as string;
 
 export type CreateInput = Partial<ProjectConfig> & {
   projectName?: string;
@@ -31,9 +36,10 @@ export async function runCreate(input: CreateInput): Promise<void> {
   const base = resolvePreset(input.preset);
   const fromFlags = coerceFlags(input, base);
   const seeded: ProjectConfig = { ...base, ...fromFlags };
+  const explicit = explicitFromFlags(input);
 
   const config = input.yes
-    ? seeded
+    ? applyImplicitStackRules(seeded, explicit)
     : await gatherInteractive(seeded, input);
 
   // If the user didn't explicitly pick a UI but the resolved frontend
@@ -72,7 +78,9 @@ export async function runCreate(input: CreateInput): Promise<void> {
     return;
   }
 
-  const { fileCount } = await scaffold(config, target);
+  const { fileCount } = await scaffold(config, target, {
+    cliVersion: CLI_VERSION,
+  });
   if (config.git) {
     execSync("git init", { cwd: target, stdio: "ignore" });
   }
@@ -96,6 +104,14 @@ function resolvePreset(preset: string | undefined): ProjectConfig {
   if (!preset || preset === "custom") return DEFAULT_CONFIG;
   const p = PRESETS[preset as keyof typeof PRESETS];
   return p ? p.config : DEFAULT_CONFIG;
+}
+
+function explicitFromFlags(input: CreateInput) {
+  return {
+    frontend: input.frontend !== undefined,
+    backend: input.backend !== undefined,
+    runtime: input.runtime !== undefined,
+  };
 }
 
 function coerceFlags(input: CreateInput, base: ProjectConfig): Partial<ProjectConfig> {
