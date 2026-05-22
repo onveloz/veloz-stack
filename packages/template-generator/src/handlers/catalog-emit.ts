@@ -3,7 +3,7 @@ import { DEPENDENCY_VERSIONS } from "../deps";
 import type { VirtualFs } from "../vfs";
 
 /** Values that must keep their literal specifier (never catalog substitution). */
-const SKIP_CATALOG_LITERAL = /^(workspace:|file:|link:|catalog:|catalogs:|git\+|npm:|\*)/i;
+const SKIP_CATALOG_LITERAL = /^(workspace:|file:|link:|catalog:|git\+|npm:|\*)/i;
 
 function depInCentralVersions(name: string): name is keyof typeof DEPENDENCY_VERSIONS {
   return Object.hasOwn(DEPENDENCY_VERSIONS, name);

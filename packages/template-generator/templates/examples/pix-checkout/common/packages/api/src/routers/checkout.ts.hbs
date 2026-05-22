@@ -16,7 +16,7 @@ const pixChargeStatusSchema = z.object({
   status: z.string().optional().default("PENDING"),
 });
 
-function isPixNotFound(error: unknown): boolean {
+function isPixNotFound(error: unknown): error is { status: 404 } {
   return (
     error !== null &&
     typeof error === "object" &&

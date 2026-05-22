@@ -13,5 +13,7 @@ export function packageManagerSpecifier(pm: "bun" | "pnpm" | "npm"): string {
       return "pnpm@11.2.2";
     case "npm":
       return "npm@11.15.0";
+    default:
+      throw new Error(`Unknown package manager: ${pm}`);
   }
 }

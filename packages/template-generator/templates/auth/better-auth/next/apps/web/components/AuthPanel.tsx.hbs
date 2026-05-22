@@ -2,6 +2,7 @@
 
 import { useMutation{{#unless (eq api "none")}}, useQuery{{/unless}}, useQueryClient } from "@tanstack/react-query";
 import { LogIn, LogOut, UserRound } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { signIn, signOut, signUp, useSession } from "@/lib/auth-client";
 {{#unless (eq api "none")}}
@@ -90,9 +91,9 @@ export function AuthPanel() {
           — sessão no cliente (sem camada RPC no monorepo)
           {{/unless}}
           .{" "}
-          <a href="/login" className="underline underline-offset-2">
+          <Link href="/login" className="underline underline-offset-2">
             Página de login →
-          </a>
+          </Link>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

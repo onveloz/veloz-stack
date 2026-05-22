@@ -16,14 +16,13 @@ export function AuthPanel() {
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
 {{#unless (eq api "none")}}
-  const hasSession = !!(session?.user);
   const rpcSession = useQuery({
     ...orpc.session.queryOptions(),
-    enabled: hasSession,
+    enabled: !session?.user,
   });
   const me = useQuery({
     ...orpc.me.queryOptions(),
-    enabled: hasSession,
+    enabled: !!session?.user,
   });
 {{/unless}}
 
@@ -44,6 +43,9 @@ export function AuthPanel() {
   const authAction = useMutation({
     mutationFn: async () => {
       setError(null);
+      if (password.length < 8) {
+        throw new Error("A senha deve ter pelo menos 8 caracteres");
+      }
       if (mode === "sign-up") {
         const res = await signUp.email({ email, password, name });
         if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
