@@ -35,10 +35,10 @@ export default function Home() {
 {{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
   const bannerDot =
-    health.data === "OK"
-      ? "bg-green-500"
-      : health.isLoading
-        ? "bg-yellow-500"
+    health.isLoading
+      ? "bg-yellow-500"
+      : health.data === "OK"
+        ? "bg-green-500"
         : "bg-red-500";
   const bannerLabel = health.isLoading
     ? t("api.checking")

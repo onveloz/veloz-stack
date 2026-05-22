@@ -13,8 +13,17 @@ const pixChargeCreateSchema = z.object({
 
 const pixChargeStatusSchema = z.object({
   id: z.string(),
-  status: z.string().default("PENDING"),
+  status: z.string().optional().default("PENDING"),
 });
+
+function isPixNotFound(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "status" in error &&
+    (error as { status?: number }).status === 404
+  );
+}
 
 export const checkoutRouter = {
   /** Create a PIX QR for a given cart amount. Amount is reais — we convert. */
@@ -22,6 +31,7 @@ export const checkoutRouter = {
     .input(
       z.object({
         amountReais: z.number().positive().max(999_999),
+        // 189 = 200 - 11 chars for "[userId] " prefix when auth is enabled
         description: z.string().max({{#if (eq auth "better-auth")}}189{{else}}200{{/if}}),
       }),
     )
@@ -68,12 +78,7 @@ export const checkoutRouter = {
         return parsed.data;
       } catch (error) {
         if (error instanceof ORPCError) throw error;
-        if (
-          error &&
-          typeof error === "object" &&
-          "status" in error &&
-          (error as { status?: number }).status === 404
-        ) {
+        if (isPixNotFound(error)) {
           throw new ORPCError("NOT_FOUND", { message: "Cobrança não encontrada" });
         }
         throw new ORPCError("INTERNAL_SERVER_ERROR", {

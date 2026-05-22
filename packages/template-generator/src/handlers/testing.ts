@@ -24,6 +24,14 @@ export function processTesting(vfs: VirtualFs, config: ProjectConfig): void {
 
   if (config.api !== "none" && vfs.exists("packages/api/package.json")) {
     vfs.write("packages/api/src/smoke.test.ts", API_SMOKE_TEST);
+    vfs.updateJson<Record<string, any>>("packages/api/package.json", (pkg) => {
+      pkg.scripts = { ...(pkg.scripts ?? {}), test: "vitest run" };
+      pkg.devDependencies = {
+        ...(pkg.devDependencies ?? {}),
+        vitest: version("vitest"),
+      };
+      return pkg;
+    });
   }
 
   vfs.updateJson<Record<string, any>>("package.json", (pkg) => {
@@ -34,15 +42,4 @@ export function processTesting(vfs: VirtualFs, config: ProjectConfig): void {
     };
     return pkg;
   });
-
-  if (config.api !== "none" && vfs.exists("packages/api/package.json")) {
-    vfs.updateJson<Record<string, any>>("packages/api/package.json", (pkg) => {
-      pkg.scripts = { ...(pkg.scripts ?? {}), test: "vitest run" };
-      pkg.devDependencies = {
-        ...(pkg.devDependencies ?? {}),
-        vitest: version("vitest"),
-      };
-      return pkg;
-    });
-  }
 }

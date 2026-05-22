@@ -71,7 +71,7 @@ export function AuthPanel() {
   });
 
   const user = session?.user{{#unless (eq api "none")}} ?? rpcSession.data?.user{{/unless}} ?? null;
-  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading{{/unless}};
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading || me.isLoading{{/unless}};
 
   {{#if (eq ui "shadcn")}}
   return (
@@ -111,7 +111,7 @@ export function AuthPanel() {
               {me.data?.user && (
                 <div>
                   oRPC <code>me</code>:{" "}
-                  <Badge variant="outline">{me.data.user.id.slice(0, 8)}…</Badge>
+                  <Badge variant="outline">{String(me.data.user.id).slice(0, 8)}…</Badge>
                 </div>
               )}
 {{/unless}}
@@ -214,7 +214,7 @@ export function AuthPanel() {
 {{#unless (eq api "none")}}
                 {me.data?.user && (
                   <div>
-                    oRPC <code>me</code>: {me.data.user.id.slice(0, 8)}…
+                    oRPC <code>me</code>: {String(me.data.user.id).slice(0, 8)}…
                   </div>
                 )}
 {{/unless}}

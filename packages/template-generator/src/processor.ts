@@ -40,12 +40,11 @@ hb.registerHelper("pmExec", (command: unknown, pm: unknown) => {
   return `npx ${cmd}`;
 });
 hb.registerHelper("version", (name: unknown) => {
-  const key = String(name) as DependencyName;
-  const v = DEPENDENCY_VERSIONS[key];
-  if (!v) {
+  const key = String(name);
+  if (!(key in DEPENDENCY_VERSIONS)) {
     throw new Error(`Dependency "${key}" not in central version map. Add it to versions.yaml.`);
   }
-  return v;
+  return DEPENDENCY_VERSIONS[key as DependencyName];
 });
 
 export function render(template: string, config: ProjectConfig): string {

@@ -23,7 +23,7 @@ export function AuthPanel() {
   });
   const me = useQuery({
     ...orpc.me.queryOptions(),
-    enabled: hasSession || !!rpcSession.data?.user,
+    enabled: hasSession,
   });
 {{/unless}}
 
@@ -64,7 +64,7 @@ export function AuthPanel() {
   });
 
   const user = session?.user{{#unless (eq api "none")}} ?? rpcSession.data?.user{{/unless}} ?? null;
-  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading{{/unless}};
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading || me.isLoading{{/unless}};
 
   return (
     <View style={styles.section}>
@@ -88,7 +88,7 @@ export function AuthPanel() {
 {{#unless (eq api "none")}}
         {user && me.data?.user && (
           <Text style={styles.meta}>
-            oRPC me: {me.data.user.id.slice(0, 8)}…
+            oRPC me: {String(me.data.user.id).slice(0, 8)}…
           </Text>
         )}
 {{/unless}}

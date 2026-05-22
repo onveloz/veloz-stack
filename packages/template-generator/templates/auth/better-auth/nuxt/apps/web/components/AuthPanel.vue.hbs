@@ -23,7 +23,7 @@ async function refreshRpcSession() {
     const res = await client.session();
     if (res.user) {
       const me = await client.me();
-      rpcUserId.value = me.user?.id?.slice(0, 8) ?? null;
+      rpcUserId.value = me.user?.id ? String(me.user.id).slice(0, 8) : null;
     } else {
       rpcUserId.value = null;
     }

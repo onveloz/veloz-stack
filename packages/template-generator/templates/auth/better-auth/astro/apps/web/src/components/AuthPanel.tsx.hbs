@@ -16,7 +16,7 @@ function AuthPanelInner() {
   });
   const me = useQuery({
     ...orpc.me.queryOptions(),
-    enabled: hasSession || !!rpcSession.data?.user,
+    enabled: hasSession,
   });
 {{/unless}}
 
@@ -57,7 +57,7 @@ function AuthPanelInner() {
   });
 
   const user = session?.user{{#unless (eq api "none")}} ?? rpcSession.data?.user{{/unless}} ?? null;
-  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading{{/unless}};
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading || me.isLoading{{/unless}};
 
   return (
     <section className="auth-panel">
@@ -83,7 +83,7 @@ function AuthPanelInner() {
 {{#unless (eq api "none")}}
         {user && me.data?.user && (
           <div className="auth-meta">
-            oRPC <code>me</code>: {me.data.user.id.slice(0, 8)}…
+            oRPC <code>me</code>: {String(me.data.user.id).slice(0, 8)}…
           </div>
         )}
 {{/unless}}

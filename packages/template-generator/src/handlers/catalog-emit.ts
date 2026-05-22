@@ -32,8 +32,9 @@ export function applyCatalogRefs(vfs: VirtualFs, config: ProjectConfig): void {
 
   const catalogSorted = [...used]
     .sort((a, b) => a.localeCompare(b))
+    .filter(depInCentralVersions)
     .map((pkg) => {
-      const v = DEPENDENCY_VERSIONS[pkg as keyof typeof DEPENDENCY_VERSIONS];
+      const v = DEPENDENCY_VERSIONS[pkg];
       return [pkg, v] as const;
     });
 
