@@ -1,17 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import {
-  ArrowLeft,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Share2,
-  Shuffle,
-  Sparkles,
-} from "lucide-react";
-import { useMemo, useState } from "react";
 import {
   ApiId,
   AuthId,
@@ -23,58 +11,69 @@ import {
   DesktopId,
   ExampleId,
   FrontendId,
-  MODULES,
-  MODULE_CATEGORIES,
-  MODULE_CATEGORY_LABELS,
-  MobileId,
-  OrmId,
-  PRESETS,
-  PackageManagerId,
-  RuntimeId,
-  UiId,
   getApiDisableReason,
+  getAuthDisableReason,
   getBackendDisableReason,
   getDbHostingDisableReason,
   getDeployDisableReason,
   getFrontendDisableReason,
   getModuleDisableReason,
-  isBrazilModule,
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
-  getAuthDisableReason,
+  isBrazilModule,
+  MODULE_CATEGORIES,
+  MODULE_CATEGORY_LABELS,
+  MODULES,
+  MobileId,
   type ModuleId,
   type ModuleMeta,
+  OrmId,
+  PackageManagerId,
+  PRESETS,
   type ProjectConfig,
+  RuntimeId,
+  UiId,
   validateConfig,
 } from "@veloz-stack/types";
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Search,
+  Share2,
+  Shuffle,
+  Sparkles,
+} from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
+import { ConfirmCascadeDialog } from "@/components/confirm-dialog";
+import { CopyButton } from "@/components/copy-button";
+import { Logo } from "@/components/logo";
+import { StackAddonPickers } from "@/components/stack-addon-pickers";
 import { buildCommand } from "@/lib/build-command";
 import { getHint } from "@/lib/option-hints";
-import { useStackConfig } from "@/lib/use-stack-config";
-import { Logo } from "@/components/logo";
-import { BrandLogo } from "@/components/brand-logo";
-import { CopyButton } from "@/components/copy-button";
-import { ConfirmCascadeDialog } from "@/components/confirm-dialog";
-import { StackAddonPickers } from "@/components/stack-addon-pickers";
+import { buildSurpriseConfig } from "@/lib/randomize-stack";
+import {
+  type ConfigChange,
+  repairStackConfig,
+  resolveConfig,
+  resolveEnableModule,
+} from "@/lib/resolve-config";
 import {
   addonFlagsAfterGitHook,
   addonFlagsAfterLinter,
+  type GitHookChoice,
+  type LinterChoice,
   patchAddonsForGitHook,
   patchAddonsForLinter,
   patchAddonsTurborepo,
-  type GitHookChoice,
-  type LinterChoice,
 } from "@/lib/stack-addons";
-import { buildSurpriseConfig } from "@/lib/randomize-stack";
+import { useStackConfig } from "@/lib/use-stack-config";
 import { PreviewPanel } from "./preview-panel";
 import {
-  resolveConfig,
-  repairStackConfig,
-  resolveEnableModule,
-  type ConfigChange,
-} from "@/lib/resolve-config";
-import {
-  ADDON_META,
   EXAMPLE_META,
   labelsApi,
   labelsAuth,
@@ -132,10 +131,7 @@ export function StackBuilder() {
   const errors = useMemo(() => validateConfig(config), [config]);
 
   const customizedFromPreset =
-    config.preset === "custom" &&
-    basePreset &&
-    basePreset !== "custom" &&
-    basePreset in PRESETS
+    config.preset === "custom" && basePreset && basePreset !== "custom" && basePreset in PRESETS
       ? PRESETS[basePreset as keyof typeof PRESETS].label
       : null;
 
@@ -537,11 +533,7 @@ export function StackBuilder() {
               />
             )}
 
-            <StepFooter
-              visibleSteps={visibleSteps}
-              step={step}
-              onStep={setStep}
-            />
+            <StepFooter visibleSteps={visibleSteps} step={step} onStep={setStep} />
           </div>
         </main>
 
@@ -577,13 +569,7 @@ export function StackBuilder() {
   );
 }
 
-function ModeToggle({
-  mode,
-  onChange,
-}: {
-  mode: BuilderMode;
-  onChange: (m: BuilderMode) => void;
-}) {
+function ModeToggle({ mode, onChange }: { mode: BuilderMode; onChange: (m: BuilderMode) => void }) {
   return (
     <div className="inline-flex border border-border-strong text-[11px]">
       <button
@@ -662,7 +648,9 @@ function SectionTitle({ children, hint }: { children: React.ReactNode; hint?: st
 
 function SubLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">{children}</div>
+    <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+      {children}
+    </div>
   );
 }
 
@@ -689,7 +677,7 @@ function OptionChip({
     <button
       type="button"
       onClick={onSelect}
-      title={needsAdjust ? disabledReason ?? undefined : hint ?? undefined}
+      title={needsAdjust ? (disabledReason ?? undefined) : (hint ?? undefined)}
       aria-pressed={active}
       className={
         "inline-flex items-center gap-2 h-9 px-2.5 border text-left transition-colors max-w-full " +
@@ -703,7 +691,7 @@ function OptionChip({
       }
     >
       <BrandLogo id={id} label={label} height={20} />
-      <span className={"text-xs font-medium truncate " + (active ? "text-brand" : "text-foreground")}>
+      <span className={`text-xs font-medium truncate ${active ? "text-brand" : "text-foreground"}`}>
         {label}
       </span>
       {brandHint && !active ? (
@@ -830,7 +818,7 @@ function StepPlatform({
         className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-3"
       >
         <ChevronDown
-          className={"w-4 h-4 transition-transform " + (extraPlatforms ? "rotate-180" : "")}
+          className={`w-4 h-4 transition-transform ${extraPlatforms ? "rotate-180" : ""}`}
         />
         Plataformas extras (mobile / desktop)
       </button>
@@ -877,9 +865,7 @@ function StepData({
 }) {
   return (
     <>
-      <SectionTitle hint="Persistência, auth e onde o app vai rodar.">
-        Dados & deploy
-      </SectionTitle>
+      <SectionTitle hint="Persistência, auth e onde o app vai rodar.">Dados & deploy</SectionTitle>
 
       <div className="border border-border p-4 bg-secondary/30 mb-5">
         <SubLabel>Banco de dados</SubLabel>
@@ -1019,7 +1005,7 @@ function ModuleListSection({
                   <button
                     type="button"
                     onClick={() => onToggleModule(m.id)}
-                    title={needsAdjust ? reason ?? undefined : m.tagline}
+                    title={needsAdjust ? (reason ?? undefined) : m.tagline}
                     className={
                       "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors " +
                       (active
@@ -1086,8 +1072,7 @@ function StepBrazil({
         Módulos & integrações
       </SectionTitle>
       <p className="text-sm text-muted-foreground -mt-2 mb-4">
-        <span className="text-brand font-medium tabular-nums">{config.modules.length}</span>{" "}
-        ativos
+        <span className="text-brand font-medium tabular-nums">{config.modules.length}</span> ativos
         {config.preset === "veloz-br" ? " · preset Veloz BR já inclui o essencial" : ""}
       </p>
 
@@ -1137,7 +1122,9 @@ function StepBrazil({
           onToggleModule={onToggleModule}
         />
         {modules.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">Nenhum módulo encontrado.</p>
+          <p className="text-sm text-muted-foreground py-6 text-center">
+            Nenhum módulo encontrado.
+          </p>
         ) : null}
       </div>
     </>
@@ -1194,35 +1181,37 @@ function StepTools({
 
       <SubLabel>Exemplos prontos</SubLabel>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {(ExampleId.options.filter((id) => id !== "none") as Array<
-          Exclude<(typeof ExampleId.options)[number], "none">
-        >).map((id) => {
-            const active = config.examples.includes(id);
-            const meta = EXAMPLE_META[id]!;
-            const comingSoon = id === "ai-chat";
-            return (
-              <button
-                key={id}
-                type="button"
-                disabled={comingSoon}
-                onClick={() => !comingSoon && onToggleExample(id)}
-                className={
-                  "text-left p-3 border flex gap-3 items-start " +
-                  (comingSoon
-                    ? "opacity-50 cursor-not-allowed"
-                    : active
-                      ? "border-brand bg-brand-subtle"
-                      : "border-border hover:bg-secondary")
-                }
-              >
-                <Sparkles className="w-4 h-4 text-brand shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-sm font-medium">{meta.label}</div>
-                  <div className="text-[11px] text-muted-foreground">{meta.tagline}</div>
-                </div>
-              </button>
-            );
-          })}
+        {(
+          ExampleId.options.filter((id) => id !== "none") as Array<
+            Exclude<(typeof ExampleId.options)[number], "none">
+          >
+        ).map((id) => {
+          const active = config.examples.includes(id);
+          const meta = EXAMPLE_META[id]!;
+          const comingSoon = id === "ai-chat";
+          return (
+            <button
+              key={id}
+              type="button"
+              disabled={comingSoon}
+              onClick={() => !comingSoon && onToggleExample(id)}
+              className={
+                "text-left p-3 border flex gap-3 items-start " +
+                (comingSoon
+                  ? "opacity-50 cursor-not-allowed"
+                  : active
+                    ? "border-brand bg-brand-subtle"
+                    : "border-border hover:bg-secondary")
+              }
+            >
+              <Sparkles className="w-4 h-4 text-brand shrink-0 mt-0.5" />
+              <div>
+                <div className="text-sm font-medium">{meta.label}</div>
+                <div className="text-[11px] text-muted-foreground">{meta.tagline}</div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </>
   );

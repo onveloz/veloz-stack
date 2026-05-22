@@ -5,8 +5,10 @@ Guidance for changing the **template generator**, **CLI**, and **stack builder**
 ## Toolchain
 
 - **Node.js** 22 and **pnpm** for this repo (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+- **Biome** is the linter/formatter here (`pnpm lint`, `pnpm lint:fix`).
+- **Lefthook** installs local git hooks (`pnpm prepare` → `lefthook install`).
 - **Bun** is installed in CI for e2e scaffolds that use `bun create` / Bun workspaces.
-- Generated monorepos may use Bun or pnpm per `--pm`.
+- Generated monorepos may use Bun or pnpm per `--pm`. The **legacy Husky addon** still exists for generated projects and CLI reproducibility; the web picker steers contributors to **Lefthook** and hides Husky unless `?showLegacy=1` (see root [README](README.md)).
 
 ## Bumping dependency versions
 
@@ -21,7 +23,9 @@ From the repository root:
 
 ```bash
 pnpm install
-pnpm --filter @veloz-stack/template-generator gen
+pnpm sync-versions --check # optional sanity: manifest ↔ generated deps/catalog
+pnpm lint
+pnpm --filter @veloz-stack/template-generator gen # whenever templates/*.hbs change
 pnpm -r --parallel check-types
 pnpm --filter @veloz-stack/template-generator test
 ```
@@ -97,7 +101,7 @@ Files under `packages/template-generator/templates/**` named `*.partial.hbs` are
 1. Extend `AddonId` + `ProjectConfig` in [`packages/types/src/index.ts`](packages/types/src/index.ts).
 2. Add templates under `packages/template-generator/templates/addons/<id>/`.
 3. Register processing in [`addons.ts`](packages/template-generator/src/handlers/addons.ts).
-4. Update post-process (and [`post-process-lint.ts`](packages/template-generator/src/handlers/post-process-lint.ts) when touching lint/format/Husky): root `package.json` scripts, `lint-staged`, optional Husky.
+4. Update post-process (and [`post-process-lint.ts`](packages/template-generator/src/handlers/post-process-lint.ts) when touching lint/format): root `package.json` scripts — prefer **Lefthook**/`lint-staged` patterns from the scaffold; **Husky** remains supported as a legacy addon.
 5. Wire CLI flags in [`apps/cli`](apps/cli) and the web UI in [`stack-builder.tsx`](apps/web/app/new/stack-builder.tsx) / [`use-stack-config.ts`](apps/web/lib/use-stack-config.ts) / [`build-command.ts`](apps/web/lib/build-command.ts) as needed.
 
 ## Biome vs oxlint

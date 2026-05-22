@@ -14,7 +14,6 @@ const REPO_ROOT = path.resolve(PKG_ROOT, "../..");
 const VERSIONS_YAML = path.join(PKG_ROOT, "versions.yaml");
 const DEPS_TS = path.join(PKG_ROOT, "src/deps.ts");
 const PINS_TS = path.join(PKG_ROOT, "src/package-manager-pins.generated.ts");
-const PNPM_WS = path.join(REPO_ROOT, "pnpm-workspace.yaml");
 
 function loadManifest() {
   const raw = fs.readFileSync(VERSIONS_YAML, "utf8");
@@ -22,12 +21,16 @@ function loadManifest() {
   const doc = parseYaml(raw);
   const pkg = doc.packages;
   const repoOnly = doc.repoOnly && typeof doc.repoOnly === "object" ? doc.repoOnly : {};
-  const pm = doc.packageManagers && typeof doc.packageManagers === "object" ? doc.packageManagers : {};
+  const pm =
+    doc.packageManagers && typeof doc.packageManagers === "object" ? doc.packageManagers : {};
   if (!pkg || typeof pkg !== "object") {
     throw new Error(`${VERSIONS_YAML}: missing packages: map`);
   }
   /** @type {Record<string,string>} */
-  const mergedForCatalog = { .../** @type {Record<string,string>} */ (repoOnly), .../** @type {Record<string,string>} */ (pkg) };
+  const mergedForCatalog = {
+    .../** @type {Record<string,string>} */ (repoOnly),
+    .../** @type {Record<string,string>} */ (pkg),
+  };
   return {
     pkg: /** @type {Record<string,string>} */ (pkg),
     repoOnly: /** @type {Record<string,string>} */ (repoOnly),
@@ -63,7 +66,12 @@ function collectWorkspaceCatalogDeps(repoRoot) {
   const need = new Set();
   for (const jsonPath of enumerateWorkspaceManifests(repoRoot)) {
     const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-    for (const kind of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]) {
+    for (const kind of [
+      "dependencies",
+      "devDependencies",
+      "optionalDependencies",
+      "peerDependencies",
+    ]) {
       const block = j[kind];
       if (!block || typeof block !== "object") continue;
       for (const [dep, ver] of Object.entries(block)) {
@@ -146,8 +154,7 @@ function renderPnpmCatalogYaml(sortedEntries) {
   /** @type {string[]} */
   const lines = ["catalog:"];
   for (const [k, ver] of sortedEntries) {
-    const needsQuote =
-      k.startsWith("@") || k.includes(".") || !/^[A-Za-z0-9_-]+$/.test(k);
+    const needsQuote = k.startsWith("@") || k.includes(".") || !/^[A-Za-z0-9_-]+$/.test(k);
     const ks = needsQuote ? `"${String(k).replace(/"/g, '\\"')}"` : k;
     lines.push(`  ${ks}: ${String(ver).trim()}`);
   }

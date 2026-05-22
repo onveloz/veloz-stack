@@ -1,8 +1,8 @@
 import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
 import { version } from "../deps";
+import type { VirtualFs } from "../vfs";
 import { applyCatalogRefs } from "./catalog-emit";
 import { applyRootScriptsToPkg } from "./post-process-lint";
-import type { VirtualFs } from "../vfs";
 
 /** Modules that ship a workspace package, and the directory under `packages/` each creates. */
 const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
@@ -180,12 +180,7 @@ function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
     );
   }
   if (config.modules.includes("twilio")) {
-    additions.push(
-      "\n# Twilio",
-      "TWILIO_SID=",
-      "TWILIO_TOKEN=",
-      "TWILIO_SMS_FROM=",
-    );
+    additions.push("\n# Twilio", "TWILIO_SID=", "TWILIO_TOKEN=", "TWILIO_SMS_FROM=");
   }
   if (config.modules.includes("upstash-redis")) {
     additions.push("\n# Upstash Redis", "UPSTASH_REDIS_URL=", "UPSTASH_REDIS_TOKEN=");
@@ -233,5 +228,5 @@ function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
   if (additions.length === 0) return;
 
   const existing = vfs.read(".env.example") ?? "";
-  vfs.write(".env.example", existing.trimEnd() + "\n" + additions.join("\n") + "\n");
+  vfs.write(".env.example", `${existing.trimEnd()}\n${additions.join("\n")}\n`);
 }

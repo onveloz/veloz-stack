@@ -48,7 +48,7 @@ export default function Home() {
         <div className="tag-row tag-row-status">
           <span className="tag brand">
             {{#unless (eq api "none")}}
-            {health!.isLoading
+            {health.isLoading
               ? "Verificando API…"
               : connected
               ? "API conectada"

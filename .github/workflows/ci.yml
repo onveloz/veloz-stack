@@ -34,6 +34,9 @@ jobs:
       - name: Type-check all workspaces
         run: pnpm -r --parallel check-types
 
+      - name: Lint (Biome)
+        run: pnpm lint
+
       - name: Unit tests (template-generator)
         run: pnpm --filter @veloz-stack/template-generator test
 

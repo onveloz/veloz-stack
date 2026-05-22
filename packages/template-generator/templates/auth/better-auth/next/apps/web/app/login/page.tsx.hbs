@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AuthPanel } from "@/components/AuthPanel";
 
 export default function LoginPage() {
@@ -11,7 +12,7 @@ export default function LoginPage() {
       </div>
       <p className="lede">
         Better Auth — use email e senha. Depois volte pra{" "}
-        <a href="/">home</a>.
+        <Link href="/">home</Link>.
       </p>
       <AuthPanel />
     </main>

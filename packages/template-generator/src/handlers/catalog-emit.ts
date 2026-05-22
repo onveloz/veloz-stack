@@ -6,7 +6,7 @@ import type { VirtualFs } from "../vfs";
 const SKIP_CATALOG_LITERAL = /^(workspace:|file:|link:|catalog:|catalogs:|git\+|npm:|\*)/i;
 
 function depInCentralVersions(name: string): name is keyof typeof DEPENDENCY_VERSIONS {
-  return Object.prototype.hasOwnProperty.call(DEPENDENCY_VERSIONS, name);
+  return Object.hasOwn(DEPENDENCY_VERSIONS, name);
 }
 
 function yamlCatalogKey(pkg: string): string {
@@ -45,7 +45,12 @@ export function applyCatalogRefs(vfs: VirtualFs, config: ProjectConfig): void {
 }
 
 function scanPackageJsonForCandidates(data: Record<string, unknown>, used: Set<string>): void {
-  for (const blockName of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]) {
+  for (const blockName of [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+    "peerDependencies",
+  ]) {
     const block = data[blockName];
     if (!block || typeof block !== "object") continue;
 
@@ -64,7 +69,12 @@ function mutatePackageJsonsToCatalog(vfs: VirtualFs): void {
     const data = JSON.parse(raw) as Record<string, any>;
     let changed = false;
 
-    for (const blockName of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]) {
+    for (const blockName of [
+      "dependencies",
+      "devDependencies",
+      "optionalDependencies",
+      "peerDependencies",
+    ]) {
       const block = data[blockName];
       if (!block || typeof block !== "object") continue;
 
@@ -81,7 +91,10 @@ function mutatePackageJsonsToCatalog(vfs: VirtualFs): void {
   }
 }
 
-function writePnpmWorkspaceYaml(vfs: VirtualFs, entries: readonly (readonly [string, string])[]): void {
+function writePnpmWorkspaceYaml(
+  vfs: VirtualFs,
+  entries: readonly (readonly [string, string])[],
+): void {
   const lines = ["packages:", "  - apps/*", "  - packages/*", ""];
   if (entries.length > 0) {
     lines.push("catalog:");
@@ -91,7 +104,10 @@ function writePnpmWorkspaceYaml(vfs: VirtualFs, entries: readonly (readonly [str
   vfs.write("pnpm-workspace.yaml", lines.join("\n"));
 }
 
-function writeBunWorkspacesCatalog(vfs: VirtualFs, entries: readonly (readonly [string, string])[]): void {
+function writeBunWorkspacesCatalog(
+  vfs: VirtualFs,
+  entries: readonly (readonly [string, string])[],
+): void {
   if (!vfs.exists("package.json")) return;
 
   vfs.updateJson<Record<string, any>>("package.json", (pkg) => {

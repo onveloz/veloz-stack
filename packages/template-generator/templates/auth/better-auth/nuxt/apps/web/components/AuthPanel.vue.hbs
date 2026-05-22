@@ -7,9 +7,9 @@ import { client } from "../composables/useOrpc";
 
 const session = useSession();
 
-const email = ref("demo@example.com");
-const password = ref("password123");
-const name = ref("Demo User");
+const email = ref("");
+const password = ref("");
+const name = ref("");
 const mode = ref<"sign-in" | "sign-up">("sign-in");
 const error = ref<string | null>(null);
 const loading = ref(false);
@@ -23,7 +23,7 @@ async function refreshRpcSession() {
     const res = await client.session();
     if (res.user) {
       const me = await client.me();
-      rpcUserId.value = me.user.id.slice(0, 8);
+      rpcUserId.value = me.user?.id?.slice(0, 8) ?? null;
     } else {
       rpcUserId.value = null;
     }

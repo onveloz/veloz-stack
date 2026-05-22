@@ -100,15 +100,26 @@
   html {
     font-family: var(--font-sans);
   }
-  h1, h2, h3, h4, h5, h6, [data-heading] {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  [data-heading] {
     font-family: var(--font-heading), system-ui, sans-serif;
     color: var(--text-heading);
     letter-spacing: -0.02em;
   }
-  button, a, [role="button"] {
+  button,
+  a,
+  [role="button"] {
     touch-action: manipulation;
   }
-  code, pre, kbd, [data-tabular] {
+  code,
+  pre,
+  kbd,
+  [data-tabular] {
     font-variant-numeric: tabular-nums;
   }
 }

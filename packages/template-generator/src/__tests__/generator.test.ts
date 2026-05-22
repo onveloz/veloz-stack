@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_CONFIG,
   applyImplicitStackRules,
-  validateConfig,
+  DEFAULT_CONFIG,
   type ProjectConfig,
+  validateConfig,
 } from "@veloz-stack/types";
+import { describe, expect, it } from "vitest";
 import { generate } from "../index";
 
 function cfg(overrides: Partial<ProjectConfig>): ProjectConfig {
@@ -218,9 +218,7 @@ describe("generate()", () => {
   it("--db none --auth none drops the db package", () => {
     // Note: `db: none` with `auth: better-auth` is invalid (Better Auth's
     // drizzleAdapter needs the db package). Covered by validateConfig.
-    const files = paths(
-      cfg({ db: "none", orm: "none", dbHosting: "none", auth: "none" }),
-    );
+    const files = paths(cfg({ db: "none", orm: "none", dbHosting: "none", auth: "none" }));
     expect(files.some((p) => p.startsWith("packages/db/"))).toBe(false);
   });
 
@@ -424,9 +422,7 @@ describe("modules", () => {
     const vfs = generate(cfg({ modules: ["abacatepay"] }));
     expect(vfs.read(".claude/skills/abacatepay/SKILL.md")).toContain("AbacatePay");
     expect(vfs.read("packages/abacatepay/src/index.ts")).toContain("createPixCharge");
-    expect(vfs.read("packages/abacatepay/src/webhook.ts")).toContain(
-      "verifyAbacatePayWebhook",
-    );
+    expect(vfs.read("packages/abacatepay/src/webhook.ts")).toContain("verifyAbacatePayWebhook");
     expect(vfs.read(".env.example")).toContain("ABACATE_KEY");
   });
 
@@ -518,9 +514,7 @@ describe("addons", () => {
   });
 
   it("lefthookCi adds pre-push hooks and GitHub Actions workflow", () => {
-    const vfs = generate(
-      cfg({ addons: ["lefthook", "biome"], lefthookCi: true, pm: "pnpm" }),
-    );
+    const vfs = generate(cfg({ addons: ["lefthook", "biome"], lefthookCi: true, pm: "pnpm" }));
     const hook = vfs.read("lefthook.yml")!;
     expect(hook).toContain("pre-push:");
     expect(hook).toContain("pnpm run check-types");
@@ -624,14 +618,10 @@ describe("addons", () => {
 
 describe("examples: pix-checkout", () => {
   it("emits a checkout router when abacatepay module is picked", () => {
-    const vfs = generate(
-      cfg({ examples: ["pix-checkout"], modules: ["abacatepay"] }),
-    );
+    const vfs = generate(cfg({ examples: ["pix-checkout"], modules: ["abacatepay"] }));
     expect(vfs.read("packages/api/src/routers/checkout.ts")).toContain("createPixCharge");
     expect(vfs.read("packages/api/src/routers/index.ts")).toContain("checkoutRouter");
-    expect(vfs.read("packages/api/src/routers/index.ts")).toContain(
-      "checkout: checkoutRouter",
-    );
+    expect(vfs.read("packages/api/src/routers/index.ts")).toContain("checkout: checkoutRouter");
   });
 
   it("silently skips when abacatepay module is not picked", () => {
@@ -723,10 +713,9 @@ describe("Prisma", () => {
 
 describe("applyImplicitStackRules", () => {
   it("sets backend next when only frontend next is implied (CLI default hono)", () => {
-    const resolved = applyImplicitStackRules(
-      cfg({ frontend: "next", backend: "hono" }),
-      { frontend: true },
-    );
+    const resolved = applyImplicitStackRules(cfg({ frontend: "next", backend: "hono" }), {
+      frontend: true,
+    });
     expect(resolved.backend).toBe("next");
     expect(validateConfig(resolved)).toEqual([]);
   });
@@ -765,9 +754,7 @@ describe("validateConfig", () => {
 
   it("rejects backend next without frontend next", () => {
     const errs = validateConfig(cfg({ backend: "next", frontend: "tanstack-start" }));
-    expect(errs.some((e) => e.includes("Backend Next só funciona com frontend Next"))).toBe(
-      true,
-    );
+    expect(errs.some((e) => e.includes("Backend Next só funciona com frontend Next"))).toBe(true);
   });
 
   it("rejects backend next with runtime workers", () => {
@@ -775,9 +762,7 @@ describe("validateConfig", () => {
       cfg({ backend: "next", frontend: "next", runtime: "workers", deploy: "cloudflare" }),
     );
     expect(
-      errs.some((e) =>
-        e.includes("Route Handlers do Next.js não rodam em Cloudflare Workers"),
-      ),
+      errs.some((e) => e.includes("Route Handlers do Next.js não rodam em Cloudflare Workers")),
     ).toBe(true);
   });
 
@@ -798,6 +783,43 @@ describe("validateConfig", () => {
   it("rejects husky and lefthook together", () => {
     const errs = validateConfig(cfg({ addons: ["husky", "lefthook", "biome"] }));
     expect(errs.some((e) => e.includes("Husky e Lefthook"))).toBe(true);
+  });
+
+  /** Every axis marketed as disabled in compatibility.ts must surface "Em breve" via validateConfig. */
+  it("rejects unimplemented stacks with Em breve (parity with stack builder)", () => {
+    const cases: { overrides: Partial<ProjectConfig>; prefix: string }[] = [
+      { overrides: { backend: "fastify" }, prefix: "backend" },
+      { overrides: { backend: "elysia" }, prefix: "backend" },
+      { overrides: { api: "trpc" }, prefix: "api" },
+      { overrides: { api: "rest" }, prefix: "api" },
+      { overrides: { auth: "clerk" }, prefix: "auth" },
+      {
+        overrides: {
+          db: "mongodb",
+          orm: "mongoose",
+          dbHosting: "mongodb-atlas",
+          auth: "none",
+        },
+        prefix: "orm",
+      },
+      {
+        overrides: {
+          db: "mysql",
+          orm: "drizzle",
+          dbHosting: "planetscale",
+          auth: "none",
+        },
+        prefix: "orm",
+      },
+    ];
+
+    for (const { overrides, prefix } of cases) {
+      const errs = validateConfig(cfg(overrides));
+      expect(
+        errs.some((e) => e.startsWith(`${prefix}: `) && e.includes("Em breve")),
+        `expected "${prefix}: … Em breve" in ${JSON.stringify(errs)} for ${JSON.stringify(overrides)}`,
+      ).toBe(true);
+    }
   });
 });
 
@@ -927,6 +949,30 @@ describe("backend next", () => {
     expect(vfs.read("apps/mobile/app/index.tsx")).toContain("AuthPanel");
     expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("better-auth/react");
     expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("@better-auth/expo/client");
+    expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("useSession");
+  });
+
+  it("better-auth + expo + api:none AuthPanel skips orpc hooks", () => {
+    const vfs = generate(
+      cfg({ mobile: "expo", frontend: "none", auth: "better-auth", api: "none" }),
+    );
+    const panel = vfs.read("apps/mobile/src/components/AuthPanel.tsx")!;
+    expect(panel).not.toContain("orpc");
+    expect(panel).toContain("useSession");
+  });
+
+  it("better-auth + api:none next AuthPanel skips orpc hooks", () => {
+    const vfs = generate(
+      cfg({ frontend: "next", backend: "next", auth: "better-auth", api: "none" }),
+    );
+    const panel = vfs.read("apps/web/components/AuthPanel.tsx")!;
+    expect(panel).not.toContain('from "@/lib/orpc"');
+    expect(panel).not.toContain("orpc.session");
+    expect(panel).toContain("useSession");
+  });
+
+  it("validateConfig rejects temporarily disabled backends with Em breve", () => {
+    expect(validateConfig(cfg({ backend: "express" })).join("\n")).toContain("Em breve");
   });
 
   it("better-auth + next emits orpc-server helper and login route", () => {
@@ -946,9 +992,9 @@ describe("backend next", () => {
     const errors = validateConfig(
       cfg({ auth: "better-auth", runtime: "workers", deploy: "cloudflare" }),
     );
-    expect(errors.some((e) => e.includes("Better Auth não está disponível em Cloudflare Workers"))).toBe(
-      true,
-    );
+    expect(
+      errors.some((e) => e.includes("Better Auth não está disponível em Cloudflare Workers")),
+    ).toBe(true);
   });
 
   it("pix-checkout uses ORPCError and scopes description when auth enabled", () => {
@@ -976,9 +1022,7 @@ describe("backend next", () => {
   });
 
   it("abacatepay module wires into apps/web when backend next", () => {
-    const vfs = generate(
-      cfg({ frontend: "next", backend: "next", modules: ["abacatepay"] }),
-    );
+    const vfs = generate(cfg({ frontend: "next", backend: "next", modules: ["abacatepay"] }));
     const web = JSON.parse(vfs.read("apps/web/package.json")!);
     expect(web.dependencies["@test-app/abacatepay"]).toBe("workspace:*");
     expect(vfs.read("apps/server/package.json")).toBeUndefined();
@@ -1023,9 +1067,7 @@ describe("module workspace wiring", () => {
   it("mercadopago module ships a typed client + HMAC webhook verifier", () => {
     const vfs = generate(cfg({ modules: ["mercadopago"] }));
     expect(vfs.read("packages/mercadopago/src/index.ts")).toContain("createPixPayment");
-    expect(vfs.read("packages/mercadopago/src/webhook.ts")).toContain(
-      "verifyMercadoPagoWebhook",
-    );
+    expect(vfs.read("packages/mercadopago/src/webhook.ts")).toContain("verifyMercadoPagoWebhook");
     const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
     expect(pkg.dependencies["@test-app/mercadopago"]).toBe("workspace:*");
   });

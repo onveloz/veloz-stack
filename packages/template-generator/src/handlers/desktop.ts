@@ -19,12 +19,7 @@ export function processDesktop(vfs: VirtualFs, config: ProjectConfig): void {
   processTemplatesFromPrefix(vfs, "desktop/tauri/apps/", "apps/", config);
 
   if (config.frontend === "tanstack-start") {
-    processTemplatesFromPrefix(
-      vfs,
-      "desktop/tauri/frontend-tanstack/apps/",
-      "apps/",
-      config,
-    );
+    processTemplatesFromPrefix(vfs, "desktop/tauri/frontend-tanstack/apps/", "apps/", config);
     if (vfs.exists("apps/web/package.json")) {
       vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {
         pkg.dependencies = {

@@ -9,12 +9,15 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!!**/dist/**",
-      "!!**/.next/**",
-      "!!**/node_modules/**",
-      "!!**/.turbo/**",
-      "!!**/build/**",
-      "!!**/.prisma/**"
+      "!!**/packages/template-generator/templates",
+      "!!**/dist",
+      "!!**/.next",
+      "!!**/node_modules",
+      "!!**/.turbo",
+      "!!**/build",
+      "!!**/.prisma",
+      "!!**/pnpm-lock.yaml",
+      "!!**/.git"
     ]
   },
   "formatter": {
@@ -30,12 +33,28 @@
       }
     }
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "noAutofocus": "off",
+        "noLabelWithoutControl": "off",
+        "noStaticElementInteractions": "off",
+        "noSvgWithoutTitle": "off",
+        "useKeyWithClickEvents": "off",
+        "useSemanticElements": "off"
+      },
       "style": {
         "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
       }
     }
   },

@@ -1,23 +1,17 @@
 "use client";
 
-import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsString,
-  parseAsStringEnum,
-  useQueryStates,
-} from "nuqs";
 import type { ProjectConfig } from "@veloz-stack/types";
 import {
   AddonId,
   ApiId,
   AuthId,
   BackendId,
-  DEFAULT_CONFIG,
   DbHostingId,
   DbId,
+  DEFAULT_CONFIG,
   DeployId,
   DesktopId,
+  ExampleId,
   FrontendId,
   MODULE_IDS,
   MobileId,
@@ -26,8 +20,14 @@ import {
   PresetId,
   RuntimeId,
   UiId,
-  ExampleId,
 } from "@veloz-stack/types";
+import {
+  parseAsArrayOf,
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryStates,
+} from "nuqs";
 
 const enumVals = (schema: { options: readonly string[] }) => {
   const opts = [...schema.options];

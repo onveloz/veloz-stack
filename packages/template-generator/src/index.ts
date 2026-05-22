@@ -5,9 +5,9 @@ import { processAuth } from "./handlers/auth";
 import { processBackend } from "./handlers/backend";
 import { processBase } from "./handlers/base";
 import { processDb } from "./handlers/db";
-import { processAdrs } from "./handlers/docs";
 import { processDeploy } from "./handlers/deploy";
 import { processDesktop } from "./handlers/desktop";
+import { processAdrs } from "./handlers/docs";
 import { processExamples } from "./handlers/examples";
 import { processFrontend } from "./handlers/frontend";
 import { processMobile } from "./handlers/mobile";
@@ -34,10 +34,7 @@ export type GenerateOptions = {
  * can call it client-side to render a preview tree. Server-only writing
  * lives in `./scaffold`.
  */
-export function generate(
-  config: ProjectConfig,
-  options?: GenerateOptions,
-): VirtualFs {
+export function generate(config: ProjectConfig, options?: GenerateOptions): VirtualFs {
   const vfs = new VirtualFs();
   processBase(vfs, config);
   processFrontend(vfs, config);

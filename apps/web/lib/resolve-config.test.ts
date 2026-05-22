@@ -1,10 +1,14 @@
-import { describe, expect, it } from "vitest";
 import { DEFAULT_CONFIG, type ModuleId } from "@veloz-stack/types";
+import { describe, expect, it } from "vitest";
 import { resolveConfig } from "./resolve-config";
 
 describe("resolveConfig", () => {
   it("switches backend to next but keeps runtime when frontend becomes next", () => {
-    const cfg = { ...DEFAULT_CONFIG, frontend: "tanstack-start" as const, backend: "hono" as const };
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      frontend: "tanstack-start" as const,
+      backend: "hono" as const,
+    };
     const { newCfg, changes } = resolveConfig(cfg, { key: "frontend", value: "next" });
     expect(newCfg.frontend).toBe("next");
     expect(newCfg.backend).toBe("next");

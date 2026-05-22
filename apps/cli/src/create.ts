@@ -1,20 +1,20 @@
-import chalk from "chalk";
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { basename, resolve } from "node:path";
+import { scaffold } from "@veloz-stack/template-generator/scaffold";
 import {
   AddonId,
+  applyImplicitStackRules,
   DEFAULT_CONFIG,
+  getUiDisableReason,
   MODULE_IDS,
+  type ModuleId,
   PRESETS,
   type ProjectConfig,
-  type ModuleId,
-  applyImplicitStackRules,
-  getUiDisableReason,
   validateConfig,
 } from "@veloz-stack/types";
-import { scaffold } from "@veloz-stack/template-generator/scaffold";
-import { createRequire } from "node:module";
+import chalk from "chalk";
 import { gatherInteractive } from "./prompts.js";
 
 const require = createRequire(import.meta.url);
@@ -54,20 +54,20 @@ export async function runCreate(input: CreateInput): Promise<void> {
   // the last segment as the package name and the whole thing as the target
   // directory. Package names can't have slashes.
   const target = resolve(process.cwd(), config.projectName);
-  const pkgName = basename(target).replace(/[^a-z0-9-_]/gi, "-").toLowerCase();
+  const pkgName = basename(target)
+    .replace(/[^a-z0-9-_]/gi, "-")
+    .toLowerCase();
   config.projectName = pkgName;
 
   const errors = validateConfig(config);
   if (errors.length > 0) {
     console.error(chalk.red("\n✗ Configuração incompatível:"));
-    for (const e of errors) console.error("  • " + e);
+    for (const e of errors) console.error(`  • ${e}`);
     process.exit(1);
   }
 
   if (existsSync(target)) {
-    console.error(
-      chalk.red(`\n✗ A pasta "${config.projectName}" já existe em ${target}`),
-    );
+    console.error(chalk.red(`\n✗ A pasta "${config.projectName}" já existe em ${target}`));
     process.exit(1);
   }
 
@@ -179,9 +179,8 @@ function parseModules(csv: string): ModuleId[] {
 }
 
 function printSummary(cfg: ProjectConfig, target: string): void {
-  const line = (k: string, v: string) =>
-    `  ${chalk.dim(k.padEnd(12))} ${chalk.bold(v)}`;
-  console.log("\n" + chalk.hex("#FF4D00").bold("◆ veloz/stack"));
+  const line = (k: string, v: string) => `  ${chalk.dim(k.padEnd(12))} ${chalk.bold(v)}`;
+  console.log(`\n${chalk.hex("#FF4D00").bold("◆ veloz/stack")}`);
   console.log(chalk.dim(`  → ${target}\n`));
   console.log(line("preset", cfg.preset));
   console.log(line("frontend", cfg.frontend));

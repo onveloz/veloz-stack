@@ -1,5 +1,5 @@
-import Handlebars from "handlebars";
 import type { ProjectConfig } from "@veloz-stack/types";
+import Handlebars from "handlebars";
 import { DEPENDENCY_VERSIONS, type DependencyName } from "./deps";
 import { EMBEDDED_TEMPLATES } from "./templates.generated";
 
@@ -43,9 +43,7 @@ hb.registerHelper("version", (name: unknown) => {
   const key = String(name) as DependencyName;
   const v = DEPENDENCY_VERSIONS[key];
   if (!v) {
-    throw new Error(
-      `Dependency "${key}" not in central version map. Add it to packages/template-generator/src/deps.ts first.`,
-    );
+    throw new Error(`Dependency "${key}" not in central version map. Add it to versions.yaml.`);
   }
   return v;
 });

@@ -1,23 +1,14 @@
 import * as p from "@clack/prompts";
-import chalk from "chalk";
 import {
   ApiId,
   AuthId,
+  applyImplicitStackRules,
   BackendId,
   COMING_SOON_PRESETS,
   DbHostingId,
   DbId,
   DeployId,
   FrontendId,
-  MODULES,
-  MODULE_CATEGORIES,
-  MODULE_CATEGORY_LABELS,
-  OrmId,
-  PRESETS,
-  PackageManagerId,
-  RuntimeId,
-  UiId,
-  type ProjectConfig,
   getApiDisableReason,
   getAuthDisableReason,
   getBackendDisableReason,
@@ -27,8 +18,17 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
-  applyImplicitStackRules,
+  MODULE_CATEGORIES,
+  MODULE_CATEGORY_LABELS,
+  MODULES,
+  OrmId,
+  PackageManagerId,
+  PRESETS,
+  type ProjectConfig,
+  RuntimeId,
+  UiId,
 } from "@veloz-stack/types";
+import chalk from "chalk";
 
 type CreateInput = Partial<ProjectConfig> & { projectName?: string };
 
@@ -72,7 +72,6 @@ export async function gatherInteractive(
     cancelIfNeeded(preset);
     if (preset !== "custom") {
       Object.assign(cfg, PRESETS[preset as keyof typeof PRESETS].config);
-      cfg.projectName = cfg.projectName; // keep user-provided name
     }
     cfg.preset = preset as typeof cfg.preset;
   }
@@ -93,17 +92,11 @@ export async function gatherInteractive(
     cfg.backend = cascaded.backend;
     cfg.runtime = cascaded.runtime;
   }
-  cfg.backend = await pickOne(
-    "Backend",
-    BackendId.options,
-    input.backend ?? cfg.backend,
-    (id) => getBackendDisableReason({ ...cfg, backend: id }, id),
+  cfg.backend = await pickOne("Backend", BackendId.options, input.backend ?? cfg.backend, (id) =>
+    getBackendDisableReason({ ...cfg, backend: id }, id),
   );
-  cfg.runtime = await pickOne(
-    "Runtime",
-    RuntimeId.options,
-    input.runtime ?? cfg.runtime,
-    (id) => getRuntimeDisableReason({ ...cfg, runtime: id }, id),
+  cfg.runtime = await pickOne("Runtime", RuntimeId.options, input.runtime ?? cfg.runtime, (id) =>
+    getRuntimeDisableReason({ ...cfg, runtime: id }, id),
   );
   cfg.api = await pickOne(
     "API",
@@ -113,11 +106,8 @@ export async function gatherInteractive(
     apiLabels,
   );
   cfg.db = await pickOne("Banco de dados", DbId.options, input.db ?? cfg.db, () => null);
-  cfg.orm = await pickOne(
-    "ORM",
-    OrmId.options,
-    input.orm ?? cfg.orm,
-    (id) => getOrmDisableReason({ ...cfg, orm: id }, id),
+  cfg.orm = await pickOne("ORM", OrmId.options, input.orm ?? cfg.orm, (id) =>
+    getOrmDisableReason({ ...cfg, orm: id }, id),
   );
   cfg.dbHosting = await pickOne(
     "Hospedagem do banco",
@@ -132,11 +122,8 @@ export async function gatherInteractive(
     (id) => getAuthDisableReason({ ...cfg, auth: id }, id),
     authLabels,
   );
-  cfg.deploy = await pickOne(
-    "Alvo de deploy",
-    DeployId.options,
-    input.deploy ?? cfg.deploy,
-    (id) => getDeployDisableReason({ ...cfg, deploy: id }, id),
+  cfg.deploy = await pickOne("Alvo de deploy", DeployId.options, input.deploy ?? cfg.deploy, (id) =>
+    getDeployDisableReason({ ...cfg, deploy: id }, id),
   );
   cfg.pm = await pickOne(
     "Gerenciador de pacotes",

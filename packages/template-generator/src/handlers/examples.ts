@@ -38,11 +38,6 @@ function emitPixCheckout(vfs: VirtualFs, config: ProjectConfig): void {
   processTemplatesFromPrefix(vfs, "examples/pix-checkout/common/", "", config);
 
   if (config.frontend === "tanstack-start") {
-    processTemplatesFromPrefix(
-      vfs,
-      "examples/pix-checkout/frontend-tanstack/",
-      "",
-      config,
-    );
+    processTemplatesFromPrefix(vfs, "examples/pix-checkout/frontend-tanstack/", "", config);
   }
 }

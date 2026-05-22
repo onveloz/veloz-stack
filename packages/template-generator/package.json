@@ -23,7 +23,11 @@
     "test": "pnpm gen && vitest run",
     "test:watch": "vitest"
   },
-  "files": ["src", "templates", "scripts"],
+  "files": [
+    "src",
+    "templates",
+    "scripts"
+  ],
   "dependencies": {
     "@veloz-stack/types": "workspace:*",
     "handlebars": "^4.7.8"

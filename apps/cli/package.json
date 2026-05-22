@@ -19,7 +19,9 @@
   "bin": {
     "create-veloz-stack": "./dist/index.mjs"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsx src/index.ts",
@@ -28,7 +30,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@clack/prompts": "^0.9.1",
+    "@clack/prompts": "catalog:",
     "@veloz-stack/template-generator": "workspace:*",
     "@veloz-stack/types": "workspace:*",
     "chalk": "^5.4.1",
@@ -37,7 +39,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "tsdown": "^0.12.0",
+    "tsdown": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

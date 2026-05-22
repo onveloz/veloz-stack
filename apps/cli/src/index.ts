@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { Cli, z } from "incur";
 import {
   ApiId as ApiIdSchema,
   AuthId as AuthIdSchema,
@@ -16,6 +15,7 @@ import {
   RuntimeId as RuntimeIdSchema,
   UiId as UiIdSchema,
 } from "@veloz-stack/types";
+import { Cli, z } from "incur";
 import { runCreate } from "./create.js";
 
 // Re-wrap each enum with incur's own zod instance so schema identity checks
@@ -71,15 +71,15 @@ const cli = Cli.create("create-veloz-stack", {
     auth: AuthId.optional().describe("Autenticação"),
     deploy: DeployId.optional().describe("Alvo de deploy"),
     pm: PackageManagerId.optional().describe("Gerenciador de pacotes"),
-    ui: UiId.optional().describe(
-      "UI: shadcn (Tailwind 4 + componentes prontos) | tailwind | none",
-    ),
+    ui: UiId.optional().describe("UI: shadcn (Tailwind 4 + componentes prontos) | tailwind | none"),
     modules: z.string().optional().describe("Módulos, separados por vírgula"),
     examples: z.string().optional().describe("Exemplos prontos, separados por vírgula"),
     addons: z
       .string()
       .optional()
-      .describe("Ferramentas extras, separadas por vírgula (turborepo, biome, husky, lefthook)"),
+      .describe(
+        "Ferramentas extras, separadas por vírgula (turborepo, biome, lefthook, oxlint — husky apenas legado/Repro CLI)",
+      ),
     lefthookCi: z
       .boolean()
       .optional()

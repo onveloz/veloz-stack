@@ -19,9 +19,9 @@ export const DEFAULT_CONFIG: ProjectConfig = {
   pm: "bun",
   ui: "shadcn",
   examples: [],
-  modules: (Object.values(MODULES)
+  modules: Object.values(MODULES)
     .filter((m) => m.defaultOn)
-    .map((m) => m.id) as ModuleId[]),
+    .map((m) => m.id) as ModuleId[],
   addons: ["turborepo", "biome"],
   oxlintStrict: false,
   lefthookCi: false,

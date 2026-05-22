@@ -30,9 +30,7 @@ export function processTesting(vfs: VirtualFs, config: ProjectConfig): void {
     pkg.devDependencies = {
       ...(pkg.devDependencies ?? {}),
       vitest: version("vitest"),
-      ...(config.frontend !== "none"
-        ? { "@playwright/test": version("@playwright/test") }
-        : {}),
+      ...(config.frontend !== "none" ? { "@playwright/test": version("@playwright/test") } : {}),
     };
     return pkg;
   });

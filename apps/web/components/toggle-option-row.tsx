@@ -38,9 +38,7 @@ export function ToggleOptionRow({
       </div>
       <div className="min-w-0 flex-1">
         <div className="font-medium text-sm">{label}</div>
-        {detail ? (
-          <div className="text-[11px] text-muted-foreground mt-0.5">{detail}</div>
-        ) : null}
+        {detail ? <div className="text-[11px] text-muted-foreground mt-0.5">{detail}</div> : null}
       </div>
     </button>
   );

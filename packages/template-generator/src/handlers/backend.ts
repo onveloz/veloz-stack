@@ -18,8 +18,8 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
     runtime === "workers"
       ? "backend/hono-workers/"
       : runtime === "bun"
-      ? "backend/hono-bun/"
-      : "backend/hono-node/";
+        ? "backend/hono-bun/"
+        : "backend/hono-node/";
   processTemplatesFromPrefix(vfs, prefix, "apps/server/", config);
 
   const isBun = runtime === "bun";
@@ -27,7 +27,7 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
 
   vfs.write(
     "apps/server/package.json",
-    JSON.stringify(
+    `${JSON.stringify(
       {
         name: `@${config.projectName}/server`,
         private: true,
@@ -36,24 +36,20 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
           dev: isWorkers
             ? "wrangler dev"
             : isBun
-            ? "bun run --watch src/index.ts"
-            : "tsx watch src/index.ts",
+              ? "bun run --watch src/index.ts"
+              : "tsx watch src/index.ts",
           start: isWorkers
             ? "wrangler deploy"
             : isBun
-            ? "bun run src/index.ts"
-            : "node --experimental-strip-types src/index.ts",
+              ? "bun run src/index.ts"
+              : "node --experimental-strip-types src/index.ts",
           "check-types": "tsc --noEmit",
         },
         dependencies: {
           hono: version("hono"),
-          ...(isBun || isWorkers
-            ? {}
-            : { "@hono/node-server": version("@hono/node-server") }),
+          ...(isBun || isWorkers ? {} : { "@hono/node-server": version("@hono/node-server") }),
           ...(config.api === "orpc" ? { "@orpc/server": version("@orpc/server") } : {}),
-          ...(config.api !== "none"
-            ? { [`@${config.projectName}/api`]: "workspace:*" }
-            : {}),
+          ...(config.api !== "none" ? { [`@${config.projectName}/api`]: "workspace:*" } : {}),
           ...(config.auth === "better-auth"
             ? { [`@${config.projectName}/auth`]: "workspace:*" }
             : {}),
@@ -72,6 +68,6 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
       },
       null,
       2,
-    ) + "\n",
+    )}\n`,
   );
 }

@@ -1,6 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-// `defineNuxtConfig` is auto-imported by nuxt.
-// eslint-disable-next-line @typescript-eslint/no-use-before-define
+// `defineNuxtConfig` is auto-imported by Nuxt — declared here so the root config type-checks standalone.
 declare function defineNuxtConfig(config: unknown): unknown;
 
 export default defineNuxtConfig({
