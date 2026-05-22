@@ -27,8 +27,6 @@ export default function Home() {
 {{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
   const connected = health.data === "OK";
-{{else}}
-  const health = null;
 {{/unless}}
 
   return (

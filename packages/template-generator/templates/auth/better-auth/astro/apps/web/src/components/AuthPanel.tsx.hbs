@@ -9,10 +9,14 @@ function AuthPanelInner() {
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
 {{#unless (eq api "none")}}
-  const rpcSession = useQuery(orpc.session.queryOptions());
+  const hasSession = !!(session?.user);
+  const rpcSession = useQuery({
+    ...orpc.session.queryOptions(),
+    enabled: hasSession,
+  });
   const me = useQuery({
     ...orpc.me.queryOptions(),
-    enabled: !!(session?.user ?? rpcSession.data?.user),
+    enabled: hasSession || !!rpcSession.data?.user,
   });
 {{/unless}}
 

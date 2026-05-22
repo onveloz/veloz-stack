@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { {{#if (eq auth "better-auth")}}and, {{/if}}eq } from "drizzle-orm";
+import { {{#if (eq auth "better-auth")}}and, {{/if}}eq, sql } from "drizzle-orm";
 import { db, schema } from "@{{projectName}}/db";
 import {
   {{#if (eq auth "better-auth")}}ORPCError, {{/if}}
@@ -38,23 +38,23 @@ export const todoRouter = {
   toggle: procedure
     .input(z.object({ id: z.string().uuid() }))
     .handler(async ({ input{{#if (eq auth "better-auth")}}, context{{/if}} }) => {
-      const rows = await db
-        .select({ done: schema.todos.done })
-        .from(schema.todos)
+      const [updated] = await db
+        .update(schema.todos)
+        .set({
+          done: sql`NOT ${schema.todos.done}`,
+          updatedAt: new Date(),
+        })
         .where(
           {{#if (eq auth "better-auth")}}
           and(eq(schema.todos.id, input.id), eq(schema.todos.userId, context.user.id)),
           {{else}}
           eq(schema.todos.id, input.id),
           {{/if}}
-        );
-      if (rows.length === 0) {
+        )
+        .returning();
+      if (!updated) {
         throw new {{#if (eq auth "better-auth")}}ORPCError("NOT_FOUND"){{else}}Error("Not found"){{/if}};
       }
-      await db
-        .update(schema.todos)
-        .set({ done: !rows[0]!.done })
-        .where(eq(schema.todos.id, input.id));
     }),
 
   remove: procedure

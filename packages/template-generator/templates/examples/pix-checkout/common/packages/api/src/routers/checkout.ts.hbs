@@ -5,6 +5,17 @@ import { {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedur
 
 const procedure = {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedure{{/if}};
 
+const pixChargeCreateSchema = z.object({
+  id: z.string(),
+  brCode: z.string(),
+  brCodeBase64: z.string(),
+});
+
+const pixChargeStatusSchema = z.object({
+  id: z.string(),
+  status: z.string().default("PENDING"),
+});
+
 export const checkoutRouter = {
   /** Create a PIX QR for a given cart amount. Amount is reais — we convert. */
   create: procedure
@@ -27,15 +38,13 @@ export const checkoutRouter = {
           amountCentavos,
           description,
         });
-        const id = (charge as { id?: string }).id;
-        const brCode = (charge as { brCode?: string }).brCode;
-        const brCodeBase64 = (charge as { brCodeBase64?: string }).brCodeBase64;
-        if (!id || !brCode || !brCodeBase64) {
+        const parsed = pixChargeCreateSchema.safeParse(charge);
+        if (!parsed.success) {
           throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Resposta incompleta da API PIX",
           });
         }
-        return { id, brCode, brCodeBase64 };
+        return parsed.data;
       } catch (error) {
         if (error instanceof ORPCError) throw error;
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -50,14 +59,13 @@ export const checkoutRouter = {
     .handler(async ({ input }) => {
       try {
         const charge = await checkPixCharge(input.id);
-        const id = (charge as { id?: string }).id;
-        const status = (charge as { status?: string }).status ?? "PENDING";
-        if (!id) {
+        const parsed = pixChargeStatusSchema.safeParse(charge);
+        if (!parsed.success) {
           throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Resposta incompleta da API PIX",
           });
         }
-        return { id, status };
+        return parsed.data;
       } catch (error) {
         if (error instanceof ORPCError) throw error;
         if (
