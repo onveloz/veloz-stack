@@ -11,7 +11,7 @@ export const checkoutRouter = {
     .input(
       z.object({
         amountReais: z.number().positive().max(999_999),
-        description: z.string().max(200),
+        description: z.string().max({{#if (eq auth "better-auth")}}189{{else}}200{{/if}}),
       }),
     )
     .handler(async ({ input{{#if (eq auth "better-auth")}}, context{{/if}} }) => {
@@ -27,12 +27,17 @@ export const checkoutRouter = {
           amountCentavos,
           description,
         });
-        return {
-          id: (charge as { id?: string }).id,
-          brCode: (charge as { brCode?: string }).brCode,
-          brCodeBase64: (charge as { brCodeBase64?: string }).brCodeBase64,
-        };
-      } catch {
+        const id = (charge as { id?: string }).id;
+        const brCode = (charge as { brCode?: string }).brCode;
+        const brCodeBase64 = (charge as { brCodeBase64?: string }).brCodeBase64;
+        if (!id || !brCode || !brCodeBase64) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Resposta incompleta da API PIX",
+          });
+        }
+        return { id, brCode, brCodeBase64 };
+      } catch (error) {
+        if (error instanceof ORPCError) throw error;
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Falha ao criar cobrança PIX",
         });
@@ -45,12 +50,27 @@ export const checkoutRouter = {
     .handler(async ({ input }) => {
       try {
         const charge = await checkPixCharge(input.id);
-        return {
-          id: (charge as { id?: string }).id,
-          status: (charge as { status?: string }).status ?? "PENDING",
-        };
-      } catch {
-        throw new ORPCError("NOT_FOUND", { message: "Cobrança não encontrada" });
+        const id = (charge as { id?: string }).id;
+        const status = (charge as { status?: string }).status ?? "PENDING";
+        if (!id) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Resposta incompleta da API PIX",
+          });
+        }
+        return { id, status };
+      } catch (error) {
+        if (error instanceof ORPCError) throw error;
+        if (
+          error &&
+          typeof error === "object" &&
+          "status" in error &&
+          (error as { status?: number }).status === 404
+        ) {
+          throw new ORPCError("NOT_FOUND", { message: "Cobrança não encontrada" });
+        }
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Falha ao consultar status da cobrança",
+        });
       }
     }),
 };

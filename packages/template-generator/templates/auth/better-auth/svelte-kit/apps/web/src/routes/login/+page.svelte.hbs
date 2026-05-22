@@ -31,8 +31,11 @@
 
   async function handleSignOut() {
     loading = true;
-    await signOut();
-    loading = false;
+    try {
+      await signOut();
+    } finally {
+      loading = false;
+    }
   }
 
   const user = $derived($session.data?.user ?? null);

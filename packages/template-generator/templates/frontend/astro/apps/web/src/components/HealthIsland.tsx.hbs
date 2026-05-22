@@ -1,9 +1,7 @@
 {{#unless (eq api "none")}}
 import { useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-{{else}}
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-{{/unless}}
 import { useState } from "react";
+{{/unless}}
 {{#unless (eq api "none")}}
 import { orpc } from "../lib/orpc";
 {{/unless}}
@@ -77,10 +75,14 @@ function Inner() {
 }
 
 export default function HealthIsland() {
+{{#unless (eq api "none")}}
   const [qc] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={qc}>
       <Inner />
     </QueryClientProvider>
   );
+{{else}}
+  return <Inner />;
+{{/unless}}
 }

@@ -13,9 +13,8 @@
     {{#unless (eq api "none")}}
     "@{{projectName}}/api": "workspace:*",
     "@orpc/client": "{{version "@orpc/client"}}",
-    "@orpc/server": "{{version "@orpc/server"}}"{{#if (eq auth "better-auth")}},
+    "@orpc/server": "{{version "@orpc/server"}}"{{/unless}}{{#if (eq auth "better-auth")}}{{#unless (eq api "none")}},{{/unless}}
     "better-auth": "{{version "better-auth"}}"{{/if}}
-    {{/unless}}
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "{{version "@sveltejs/adapter-node"}}",

@@ -4,7 +4,8 @@
     "api": {
       "checking": "Verificando API…",
       "connected": "API conectada",
-      "disconnected": "API desconectada"
+      "disconnected": "API desconectada",
+      "noRpc": "Sem camada RPC — apenas frontend"
     },
     "intro": "Seu stack {frontend} + {backend} + {api} tá no ar. Próximo passo: edite esta página em apps/web/app/[locale]/page.tsx ou abra o CLAUDE.md e peça ajuda pro agente.",
     "sections": {

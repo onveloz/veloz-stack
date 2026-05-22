@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { {{#unless (eq api "none")}}onMounted,{{/unless}} ref, computed } from "vue";
+import { ref, computed{{#unless (eq api "none")}}, onMounted{{/unless}} } from "vue";
 import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
 {{#unless (eq api "none")}}
 import { client } from "../composables/useOrpc";
@@ -70,11 +70,14 @@ async function handleSubmit(event: Event) {
 
 async function handleSignOut() {
   loading.value = true;
-  await signOut();
+  try {
+    await signOut();
 {{#unless (eq api "none")}}
-  rpcUserId.value = null;
+    rpcUserId.value = null;
 {{/unless}}
-  loading.value = false;
+  } finally {
+    loading.value = false;
+  }
 }
 
 const user = computed(() => session.value.data?.user ?? null);

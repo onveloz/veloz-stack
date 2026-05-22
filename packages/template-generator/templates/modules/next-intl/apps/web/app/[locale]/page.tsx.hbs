@@ -47,7 +47,7 @@ export default function Home() {
       : t("api.disconnected");
 {{else}}
   const bannerDot = "bg-neutral-500";
-  const bannerLabel = "Sem tipo RPC configurado — frontend apenas";
+  const bannerLabel = t("api.noRpc");
 {{/unless}}
 
   return (

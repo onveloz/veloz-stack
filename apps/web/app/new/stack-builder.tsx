@@ -676,7 +676,11 @@ function OptionChip({
   return (
     <button
       type="button"
-      onClick={onSelect}
+      disabled={needsAdjust}
+      onClick={() => {
+        if (needsAdjust) return;
+        onSelect();
+      }}
       title={needsAdjust ? (disabledReason ?? undefined) : (hint ?? undefined)}
       aria-pressed={active}
       className={
@@ -684,7 +688,7 @@ function OptionChip({
         (active
           ? "border-brand bg-brand-subtle"
           : needsAdjust
-            ? "border-warning/40 bg-warning/5"
+            ? "border-warning/40 bg-warning/5 opacity-50 cursor-not-allowed"
             : brandHint
               ? "border-brand/40 bg-brand/5"
               : "border-border hover:border-border-strong hover:bg-secondary")

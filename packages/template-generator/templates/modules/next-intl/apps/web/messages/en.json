@@ -4,7 +4,8 @@
     "api": {
       "checking": "Checking API…",
       "connected": "API connected",
-      "disconnected": "API disconnected"
+      "disconnected": "API disconnected",
+      "noRpc": "No RPC layer configured — frontend only"
     },
     "intro": "Your {frontend} + {backend} + {api} stack is live. Next step: edit this page at apps/web/app/[locale]/page.tsx or open CLAUDE.md and ask your agent for help.",
     "sections": {

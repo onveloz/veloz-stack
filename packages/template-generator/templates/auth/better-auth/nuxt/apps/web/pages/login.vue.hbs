@@ -39,8 +39,11 @@ async function handleSubmit(event: Event) {
 
 async function handleSignOut() {
   loading.value = true;
-  await signOut();
-  loading.value = false;
+  try {
+    await signOut();
+  } finally {
+    loading.value = false;
+  }
 }
 
 const user = computed(() => session.value.data?.user ?? null);
