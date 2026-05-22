@@ -1,9 +1,13 @@
 import { createAuthClient } from "better-auth/vue";
 
 const config = useRuntimeConfig();
+const serverUrl = config.public.serverUrl;
+if (typeof serverUrl !== "string" || !serverUrl) {
+  throw new Error("Missing or invalid serverUrl in runtime config (public.serverUrl)");
+}
 
 export const authClient = createAuthClient({
-  baseURL: config.public.serverUrl as string,
+  baseURL: serverUrl,
 });
 
 export const { signIn, signOut, signUp, useSession } = authClient;

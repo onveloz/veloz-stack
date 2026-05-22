@@ -11,5 +11,8 @@ test("home page loads", async ({ page }) => {
     await expect(heading.first()).toBeVisible();
   }
 
-  expect(errors).toHaveLength(0);
+  expect(
+    errors,
+    `Page errors occurred: ${errors.map((e) => e.message).join(", ")}`,
+  ).toHaveLength(0);
 });

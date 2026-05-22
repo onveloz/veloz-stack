@@ -53,7 +53,7 @@ function HomeComponent() {
               ? "API conectada"
               : "API desconectada"}
             {{else}}
-            Sem tipo RPC configurado — frontend apenas
+            Sem camada RPC — apenas frontend
             {{/unless}}
           </span>
         </div>
@@ -61,7 +61,6 @@ function HomeComponent() {
         {{#if (eq auth "better-auth")}}
         <AuthPanel />
         {{/if}}
-
         <section className="section">
           <h2>No seu stack</h2>
           <div className="tag-row">

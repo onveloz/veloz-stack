@@ -25,7 +25,9 @@
       const res = await client.session();
       if (res.user) {
         const me = await client.me();
-        rpcUserId = me.user?.id ? String(me.user.id).slice(0, 8) : null;
+        const id = me.user?.id;
+        // Display-only prefix of the user id in the UI.
+        rpcUserId = id != null ? String(id).slice(0, 8) : null;
       } else {
         rpcUserId = null;
       }
