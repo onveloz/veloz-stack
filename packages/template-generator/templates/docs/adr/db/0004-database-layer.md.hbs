@@ -7,7 +7,7 @@ Aceito (escolha do scaffold)
 ## Contexto
 
 Dados de domínio e (quando auth está ativo) tabelas de sessão/usuário vivem em um pacote
-compartilhado do monorepo, consumido pelo backend e pelas procedures oRPC.
+compartilhado do monorepo, consumido pelo backend{{#if (eq api "orpc")}} e pelas procedures oRPC{{else}} e pela camada de API{{/if}}.
 
 ## Decisão
 

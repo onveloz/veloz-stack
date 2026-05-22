@@ -29,4 +29,4 @@ webhooks de terceiros ou requisitos explícitos de HTTP bruto.
 - Schemas de input/output com Zod (ou equivalente já usado nos routers gerados).
 - Erros de auth usam `ORPCError("UNAUTHORIZED")` via middleware, não redirects HTML.
 - Não introduzir tRPC ou camada REST paralela para a mesma superfície sem ADR de supersessão.
-- Endpoints HTTP expostos pelo backend delegam ao router oRPC (padrão do template Hono/Next).
+- Endpoints HTTP expostos pelo backend delegam ao router oRPC (padrão do template {{backend}}).
