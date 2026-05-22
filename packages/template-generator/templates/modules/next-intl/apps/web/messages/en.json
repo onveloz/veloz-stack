@@ -40,5 +40,10 @@
       "velozStack": "Veloz Stack",
       "github": "GitHub"
     }
+  },
+  "Login": {
+    "title": "Sign in",
+    "lede": "Better Auth — use email and password. Then return to",
+    "homeLink": "home"
   }
 }

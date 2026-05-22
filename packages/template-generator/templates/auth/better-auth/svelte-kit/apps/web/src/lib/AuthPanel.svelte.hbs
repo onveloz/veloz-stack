@@ -2,6 +2,7 @@
   {{#unless (eq api "none")}}
   import { onMount } from "svelte";
   {{/unless}}
+  import { derived } from "svelte/store";
   import { signIn, signOut, signUp, useSession } from "$lib/auth-client";
   {{#unless (eq api "none")}}
   import { client } from "$lib/orpc";
@@ -75,7 +76,7 @@
     }
   }
 
-  const user = $derived($session.data?.user ?? null);
+  const user = derived(session, ($s) => $s.data?.user ?? null);
   const sessionLoading = $derived(
     {{#unless (eq api "none")}}
     $session.isPending || rpcLoading

@@ -66,7 +66,12 @@ function scanPackageJsonForCandidates(data: Record<string, unknown>, used: Set<s
 function mutatePackageJsonsToCatalog(vfs: VirtualFs): void {
   for (const [p, raw] of [...vfs.entries()]) {
     if (!p.endsWith("package.json")) continue;
-    const data = JSON.parse(raw) as Record<string, any>;
+    let data: Record<string, unknown>;
+    try {
+      data = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      continue;
+    }
     let changed = false;
 
     for (const blockName of [
@@ -78,11 +83,11 @@ function mutatePackageJsonsToCatalog(vfs: VirtualFs): void {
       const block = data[blockName];
       if (!block || typeof block !== "object") continue;
 
-      for (const [pkg, ver] of Object.entries(block)) {
+      for (const [pkg, ver] of Object.entries(block as Record<string, unknown>)) {
         if (!depInCentralVersions(pkg)) continue;
         if (typeof ver !== "string") continue;
         if (SKIP_CATALOG_LITERAL.test(ver.trim())) continue;
-        block[pkg] = "catalog:";
+        (block as Record<string, string>)[pkg] = "catalog:";
         changed = true;
       }
     }

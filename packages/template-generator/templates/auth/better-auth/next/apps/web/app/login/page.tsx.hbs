@@ -2,17 +2,28 @@
 
 import Link from "next/link";
 import { AuthPanel } from "@/components/AuthPanel";
+{{#if (includes modules "next-intl")}}
+import { useTranslations } from "next-intl";
+{{/if}}
 
 export default function LoginPage() {
+  {{#if (includes modules "next-intl")}}
+  const t = useTranslations("Login");
+  {{/if}}
   return (
     <main className="shell">
       <div className="hero">
         <div className="hero-mark" />
-        <h1>Entrar</h1>
+        <h1>{{#if (includes modules "next-intl")}}{t("title")}{{else}}Entrar{{/if}}</h1>
       </div>
       <p className="lede">
+        {{#if (includes modules "next-intl")}}
+        {t("lede")}{" "}
+        <Link href="/">{t("homeLink")}</Link>.
+        {{else}}
         Better Auth — use email e senha. Depois volte pra{" "}
         <Link href="/">home</Link>.
+        {{/if}}
       </p>
       <AuthPanel />
     </main>

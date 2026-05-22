@@ -56,7 +56,9 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
         },
         devDependencies: {
           typescript: version("typescript"),
-          "@types/node": version("@types/node"),
+          ...(isBun
+            ? { "@types/bun": version("@types/bun") }
+            : { "@types/node": version("@types/node") }),
           ...(!isBun && !isWorkers ? { tsx: version("tsx") } : {}),
           ...(isWorkers
             ? {

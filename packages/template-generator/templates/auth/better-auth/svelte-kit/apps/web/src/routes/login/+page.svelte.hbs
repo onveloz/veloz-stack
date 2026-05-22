@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { derived } from "svelte/store";
   import { signIn, signOut, signUp, useSession } from "$lib/auth-client";
 
   const session = useSession();
@@ -38,7 +39,7 @@
     }
   }
 
-  const user = $derived($session.data?.user ?? null);
+  const user = derived(session, ($s) => $s.data?.user ?? null);
 </script>
 
 <main class="dot-grid">

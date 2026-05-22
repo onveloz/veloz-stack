@@ -13,6 +13,7 @@ export const DEPENDENCY_VERSIONS = {
   tsx: "^4.22.3",
   vitest: "^4.1.7",
   "@types/node": "^20.17.0",
+  "@types/bun": "^1.3.14",
   "@playwright/test": "^1.60.0",
   hono: "^4.12.22",
   "@hono/node-server": "^2.0.3",

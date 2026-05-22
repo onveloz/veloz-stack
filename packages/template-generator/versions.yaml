@@ -11,6 +11,7 @@ packages:
   tsx: "^4.22.3"
   vitest: "^4.1.7"
   "@types/node": "^20.17.0"
+  "@types/bun": "^1.3.14"
 
   # Testing
   "@playwright/test": "^1.60.0"
@@ -142,6 +143,6 @@ repoOnly:
   "@clack/prompts": "^0.9.1"
 
 packageManagers:
-  bun: bun@1.1.42
-  pnpm: pnpm@10.14.0
-  npm: npm@10.9.2
+  bun: bun@1.3.14
+  pnpm: pnpm@11.2.2
+  npm: npm@11.15.0

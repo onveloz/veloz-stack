@@ -8,10 +8,10 @@
 export function packageManagerSpecifier(pm: "bun" | "pnpm" | "npm"): string {
   switch (pm) {
     case "bun":
-      return "bun@1.1.42";
+      return "bun@1.3.14";
     case "pnpm":
-      return "pnpm@10.14.0";
+      return "pnpm@11.2.2";
     case "npm":
-      return "npm@10.9.2";
+      return "npm@11.15.0";
   }
 }
