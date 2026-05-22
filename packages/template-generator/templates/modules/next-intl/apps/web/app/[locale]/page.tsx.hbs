@@ -34,17 +34,23 @@ export default function Home() {
   const t = useTranslations("Home");
 {{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
+  const apiStatus = health.isLoading
+    ? "loading"
+    : health.data === "OK"
+      ? "ok"
+      : "error";
   const bannerDot =
-    health.isLoading
+    apiStatus === "loading"
       ? "bg-yellow-500"
-      : health.data === "OK"
+      : apiStatus === "ok"
         ? "bg-green-500"
         : "bg-red-500";
-  const bannerLabel = health.isLoading
-    ? t("api.checking")
-    : health.data === "OK"
-      ? t("api.connected")
-      : t("api.disconnected");
+  const bannerLabel =
+    apiStatus === "loading"
+      ? t("api.checking")
+      : apiStatus === "ok"
+        ? t("api.connected")
+        : t("api.disconnected");
 {{else}}
   const bannerDot = "bg-neutral-500";
   const bannerLabel = t("api.noRpc");

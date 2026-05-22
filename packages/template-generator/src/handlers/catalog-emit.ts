@@ -116,15 +116,20 @@ function writeBunWorkspacesCatalog(
 ): void {
   if (!vfs.exists("package.json")) return;
 
-  vfs.updateJson<Record<string, any>>("package.json", (pkg) => {
+  vfs.updateJson<Record<string, unknown>>("package.json", (pkg) => {
     const ws = pkg.workspaces;
 
     /** @type {string[]} */
     let packagesPaths: string[];
     if (Array.isArray(ws)) {
       packagesPaths = ws.map(String);
-    } else if (ws && typeof ws === "object" && Array.isArray(ws.packages)) {
-      packagesPaths = ws.packages.map(String);
+    } else if (
+      ws &&
+      typeof ws === "object" &&
+      "packages" in ws &&
+      Array.isArray((ws as { packages?: unknown }).packages)
+    ) {
+      packagesPaths = (ws as { packages: unknown[] }).packages.map(String);
     } else {
       packagesPaths = ["apps/*", "packages/*"];
     }
