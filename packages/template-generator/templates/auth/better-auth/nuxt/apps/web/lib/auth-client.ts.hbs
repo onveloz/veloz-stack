@@ -1,13 +1,39 @@
 import { createAuthClient } from "better-auth/vue";
 
-const config = useRuntimeConfig();
-const serverUrl = config.public.serverUrl;
-if (typeof serverUrl !== "string" || !serverUrl) {
-  throw new Error("Missing or invalid serverUrl in runtime config (public.serverUrl)");
+let authClientInstance: ReturnType<typeof createAuthClient> | undefined;
+
+function getAuthClient() {
+  if (!authClientInstance) {
+    const config = useRuntimeConfig();
+    const serverUrl = config.public.serverUrl;
+    if (typeof serverUrl !== "string" || !serverUrl) {
+      throw new Error("Missing or invalid serverUrl in runtime config (public.serverUrl)");
+    }
+    authClientInstance = createAuthClient({ baseURL: serverUrl });
+  }
+  return authClientInstance;
 }
 
-export const authClient = createAuthClient({
-  baseURL: serverUrl,
+export const signIn = new Proxy({} as ReturnType<typeof createAuthClient>["signIn"], {
+  get(_target, prop) {
+    return Reflect.get(getAuthClient().signIn, prop, getAuthClient().signIn);
+  },
 });
 
-export const { signIn, signOut, signUp, useSession } = authClient;
+export const signOut = new Proxy({} as ReturnType<typeof createAuthClient>["signOut"], {
+  get(_target, prop) {
+    return Reflect.get(getAuthClient().signOut, prop, getAuthClient().signOut);
+  },
+});
+
+export const signUp = new Proxy({} as ReturnType<typeof createAuthClient>["signUp"], {
+  get(_target, prop) {
+    return Reflect.get(getAuthClient().signUp, prop, getAuthClient().signUp);
+  },
+});
+
+export function useSession(
+  ...args: Parameters<ReturnType<typeof createAuthClient>["useSession"]>
+) {
+  return getAuthClient().useSession(...args);
+}

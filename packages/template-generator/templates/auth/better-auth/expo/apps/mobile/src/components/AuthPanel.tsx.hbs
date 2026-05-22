@@ -62,7 +62,13 @@ export function AuthPanel() {
     onSuccess: invalidateAuth,
   });
 
-  const user = session?.user{{#unless (eq api "none")}} ?? rpcSession.data?.user{{/unless}} ?? null;
+  const user = session?.user
+    {{#unless (eq api "none")}}
+    ? session.user
+    : rpcSession.data?.user ?? null
+    {{else}}
+    ?? null
+    {{/unless}};
   const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading || me.isLoading{{/unless}};
 
   return (

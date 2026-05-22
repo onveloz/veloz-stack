@@ -1,6 +1,9 @@
 # Canonical dependency versions for veloz-stack.
 # Edit this file (packages + repoOnly), then run: pnpm sync-versions
 #
+# Pinning: caret (^) ranges allow compatible minor/patch updates when regenerating
+# scaffolds; bump intentionally via versions.yaml + sync-versions, not ad hoc in templates.
+#
 # ├─ packages: emitted to deps.ts → generator-only version() map (scaffold / docs)
 # ├─ repoOnly: workspace-only deps (CLI, template-parser, etc.), not in scaffold map
 # └─ Workspace pnpm catalog: auto-built from merged map for every `"catalog:"` ref in workspace package.json files

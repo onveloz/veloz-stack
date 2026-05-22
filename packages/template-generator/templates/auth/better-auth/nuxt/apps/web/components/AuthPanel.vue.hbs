@@ -27,7 +27,8 @@ async function refreshRpcSession() {
     } else {
       rpcUserId.value = null;
     }
-  } catch {
+  } catch (err) {
+    console.warn("[AuthPanel] Failed to refresh oRPC session:", err);
     rpcUserId.value = null;
   } finally {
     rpcLoading.value = false;
