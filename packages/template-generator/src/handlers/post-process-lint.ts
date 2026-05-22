@@ -33,6 +33,8 @@ export function setLintScripts(pkg: Record<string, any>, config: ProjectConfig):
     dev: `${run} dev`,
     build: `${run} build`,
     "check-types": `${run} check-types`,
+    test: hasTurbo ? `${run} test` : "vitest run",
+    ...(config.frontend !== "none" ? { "test:e2e": "playwright test" } : {}),
     ...(config.db !== "none"
       ? {
           "db:push":
@@ -55,7 +57,6 @@ export function setLintScripts(pkg: Record<string, any>, config: ProjectConfig):
             check: "oxlint . && oxfmt --check .",
           }
         : {}),
-    ...(lefthookAdvanced && hasTurbo ? { test: `${run} test` } : {}),
   };
 }
 
@@ -70,20 +71,20 @@ export function setLintStaged(pkg: Record<string, any>, config: ProjectConfig): 
 
   pkg.devDependencies = {
     ...(pkg.devDependencies ?? {}),
-    ...(hasTurbo ? { turbo: "^2.6.3" } : {}),
-    ...(hasBiome ? { "@biomejs/biome": "^1.9.4" } : {}),
+    ...(hasTurbo ? { turbo: version("turbo") } : {}),
+    ...(hasBiome ? { "@biomejs/biome": version("@biomejs/biome") } : {}),
     ...(hasOxlint
       ? {
           oxlint: version("oxlint"),
           oxfmt: version("oxfmt"),
         }
       : {}),
-    ...(hasHusky ? { husky: "^9.1.7", "lint-staged": "^16.3.2" } : {}),
-    ...(hasLefthook ? { lefthook: "^2.1.6" } : {}),
+    ...(hasHusky ? { husky: version("husky"), "lint-staged": version("lint-staged") } : {}),
+    ...(hasLefthook ? { lefthook: version("lefthook") } : {}),
     ...(lefthookAdvanced
       ? {
-          "@commitlint/cli": "^19.8.0",
-          "@commitlint/config-conventional": "^19.8.0",
+          "@commitlint/cli": version("@commitlint/cli"),
+          "@commitlint/config-conventional": version("@commitlint/config-conventional"),
         }
       : {}),
   };

@@ -920,6 +920,44 @@ describe("module workspace wiring", () => {
   });
 });
 
+describe("testing scaffold", () => {
+  it("emits vitest config, root scripts, and api smoke test by default", () => {
+    const vfs = generate(cfg({}));
+    expect(vfs.read("vitest.config.ts")).toContain("passWithNoTests");
+    expect(vfs.read("packages/api/src/smoke.test.ts")).toContain("scaffold smoke test");
+    const root = JSON.parse(vfs.read("package.json")!);
+    expect(root.scripts.test).toBe("turbo run test");
+    expect(root.scripts["test:e2e"]).toBe("playwright test");
+    expect(root.devDependencies.vitest).toBeDefined();
+    expect(root.devDependencies["@playwright/test"]).toBeDefined();
+    const api = JSON.parse(vfs.read("packages/api/package.json")!);
+    expect(api.scripts.test).toBe("vitest run");
+    expect(api.devDependencies.vitest).toBeDefined();
+  });
+
+  it("omits playwright when frontend is none", () => {
+    const vfs = generate(cfg({ frontend: "none", modules: ["claude"] }));
+    expect(vfs.exists("playwright.config.ts")).toBe(false);
+    expect(vfs.exists("e2e/smoke.spec.ts")).toBe(false);
+    const root = JSON.parse(vfs.read("package.json")!);
+    expect(root.scripts["test:e2e"]).toBeUndefined();
+    expect(root.devDependencies["@playwright/test"]).toBeUndefined();
+  });
+
+  it("uses vitest run at root when turborepo addon is off", () => {
+    const vfs = generate(cfg({ addons: [] }));
+    const root = JSON.parse(vfs.read("package.json")!);
+    expect(root.scripts.test).toBe("vitest run");
+  });
+
+  it("playwright config picks the frontend dev port", () => {
+    const next = generate(cfg({ frontend: "next", backend: "next" }));
+    expect(next.read("playwright.config.ts")).toContain("3000");
+    const ts = generate(cfg({ frontend: "tanstack-start" }));
+    expect(ts.read("playwright.config.ts")).toContain("3001");
+  });
+});
+
 describe("package.json mutations", () => {
   it("apps/server gets workspace deps on api + auth when enabled", () => {
     const vfs = generate(cfg({}));

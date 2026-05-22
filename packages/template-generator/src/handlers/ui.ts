@@ -1,4 +1,5 @@
 import type { ProjectConfig } from "@veloz-stack/types";
+import { version } from "../deps";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
@@ -65,12 +66,12 @@ function addShadcnDeps(vfs: VirtualFs): void {
   vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {
     pkg.dependencies = {
       ...(pkg.dependencies ?? {}),
-      "@radix-ui/react-dialog": "^1.1.6",
-      "@radix-ui/react-slot": "^1.1.2",
-      "class-variance-authority": "^0.7.1",
-      clsx: "^2.1.1",
-      "tailwind-merge": "^2.6.0",
-      "tw-animate-css": "^1.2.3",
+      "@radix-ui/react-dialog": version("@radix-ui/react-dialog"),
+      "@radix-ui/react-slot": version("@radix-ui/react-slot"),
+      "class-variance-authority": version("class-variance-authority"),
+      clsx: version("clsx"),
+      "tailwind-merge": version("tailwind-merge"),
+      "tw-animate-css": version("tw-animate-css"),
     };
     return pkg;
   });

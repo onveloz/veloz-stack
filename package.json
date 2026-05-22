@@ -14,9 +14,9 @@
     "cli:link": "pnpm --filter create-veloz-stack build && pnpm --filter create-veloz-stack link --global"
   },
   "devDependencies": {
-    "@types/node": "^22.13.14",
+    "@types/node": "catalog:",
     "prettier": "^3.3.3",
-    "turbo": "^2.6.3",
+    "turbo": "^2.9.14",
     "typescript": "catalog:"
   },
   "packageManager": "pnpm@10.14.0",

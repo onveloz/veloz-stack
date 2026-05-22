@@ -12,6 +12,7 @@ import { processFrontend } from "./handlers/frontend";
 import { processMobile } from "./handlers/mobile";
 import { processModules } from "./handlers/modules";
 import { postProcess } from "./handlers/post-process";
+import { processTesting } from "./handlers/testing";
 import { processUi } from "./handlers/ui";
 import { writeVelozStackConfigToVfs } from "./veloz-stack-config";
 import { VirtualFs } from "./vfs";
@@ -50,6 +51,7 @@ export function generate(
   processExamples(vfs, config);
   processModules(vfs, config);
   processAddons(vfs, config);
+  processTesting(vfs, config);
   postProcess(vfs, config);
   if (options?.cliVersion) {
     writeVelozStackConfigToVfs(vfs, config, options.cliVersion);

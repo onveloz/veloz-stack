@@ -1,4 +1,5 @@
 import type { ProjectConfig } from "@veloz-stack/types";
+import { version } from "../deps";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
@@ -28,7 +29,7 @@ export function processDesktop(vfs: VirtualFs, config: ProjectConfig): void {
       vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {
         pkg.dependencies = {
           ...(pkg.dependencies ?? {}),
-          "@tauri-apps/api": "^2.4.0",
+          "@tauri-apps/api": version("@tauri-apps/api"),
         };
         return pkg;
       });

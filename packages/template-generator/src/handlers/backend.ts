@@ -63,7 +63,10 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
           "@types/node": version("@types/node"),
           ...(!isBun && !isWorkers ? { tsx: version("tsx") } : {}),
           ...(isWorkers
-            ? { wrangler: "^4.0.0", "@cloudflare/workers-types": "^4.0.0" }
+            ? {
+                wrangler: version("wrangler"),
+                "@cloudflare/workers-types": version("@cloudflare/workers-types"),
+              }
             : {}),
         },
       },
