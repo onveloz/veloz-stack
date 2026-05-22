@@ -30,4 +30,7 @@ export function processAuth(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.frontend === "next") {
     processTemplatesFromPrefix(vfs, "auth/better-auth/next/", "", config);
   }
+  if (config.frontend === "tanstack-start") {
+    processTemplatesFromPrefix(vfs, "auth/better-auth/tanstack-start/", "", config);
+  }
 }

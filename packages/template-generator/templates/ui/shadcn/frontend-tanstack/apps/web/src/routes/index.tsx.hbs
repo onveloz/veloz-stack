@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 
 import { orpc } from "@/utils/orpc";
+{{#if (eq auth "better-auth")}}
+import { AuthPanel } from "@/components/AuthPanel";
+{{/if}}
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -89,6 +92,10 @@ function HomeComponent() {
             <code>apps/web/src/routes/index.tsx</code> ou peça pro Claude.
           </p>
         </div>
+
+        {{#if (eq auth "better-auth")}}
+        <AuthPanel />
+        {{/if}}
 
         {/* shadcn showcase */}
         <Card>

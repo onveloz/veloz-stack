@@ -5,6 +5,7 @@ import { processAuth } from "./handlers/auth";
 import { processBackend } from "./handlers/backend";
 import { processBase } from "./handlers/base";
 import { processDb } from "./handlers/db";
+import { processAdrs } from "./handlers/docs";
 import { processDeploy } from "./handlers/deploy";
 import { processDesktop } from "./handlers/desktop";
 import { processExamples } from "./handlers/examples";
@@ -47,6 +48,7 @@ export function generate(
   processDb(vfs, config);
   processApi(vfs, config);
   processAuth(vfs, config);
+  processAdrs(vfs, config);
   processDeploy(vfs, config);
   processExamples(vfs, config);
   processModules(vfs, config);

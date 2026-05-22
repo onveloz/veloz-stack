@@ -1,0 +1,18 @@
+# Architecture Decision Records
+
+Decisões de arquitetura geradas pelo scaffold Veloz Stack para **{{projectName}}**.
+
+| ADR | Título | Status |
+|-----|--------|--------|
+| [0001](./0001-record-architecture-decisions.md) | Registrar decisões de arquitetura | Aceito |
+{{#if (eq auth "better-auth")}}
+| [0002](./0002-use-better-auth.md) | Usar Better Auth para autenticação | Aceito |
+{{/if}}
+{{#if (eq api "orpc")}}
+| [0003](./0003-use-orpc.md) | Usar oRPC como camada de API tipada | Aceito |
+{{/if}}
+{{#if (and (ne db "none") (ne orm "none"))}}
+| [0004](./0004-database-layer.md) | Camada de dados com {{orm}} · {{db}} | Aceito |
+{{/if}}
+
+O stack completo está em [`veloz-stack.jsonc`](../../veloz-stack.jsonc) na raiz do repositório.

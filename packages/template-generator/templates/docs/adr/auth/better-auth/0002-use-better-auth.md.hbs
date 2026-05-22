@@ -1,0 +1,42 @@
+# ADR 0002: Usar Better Auth para autenticação
+
+## Status
+
+Aceito (escolha do scaffold)
+
+## Contexto
+
+Precisamos de autenticação self-hosted com sessões, email/senha e extensão para OAuth,
+integrada ao ORM/banco já escolhido no monorepo.
+
+Alternativas descartadas neste projeto: Clerk (SaaS), NextAuth/Auth.js (menos alinhado
+ao stack Hono/oRPC), Supabase Auth (acoplamento ao provedor).
+
+## Decisão
+
+- **Better Auth** em `packages/auth/src/index.ts`.
+- Adapter **{{orm}}** apontando para `packages/db` (schema de auth em `packages/db`).
+- Sessão disponível no contexto oRPC via `packages/api/src/context.ts`.
+- Rotas protegidas usam **`protectedProcedure`**, não `publicProcedure`, quando a rota
+  exige usuário autenticado.
+{{#if (eq backend "next")}}
+- Handler Next.js em `apps/web/app/api/auth/[...all]/route.ts` (`toNextJsHandler`).
+- Cliente React em `apps/web/lib/auth-client.ts` e UI em `apps/web/components/AuthPanel.tsx`.
+{{/if}}
+{{#if (eq frontend "tanstack-start")}}
+- Cliente e painel de auth em `apps/web/src/components/AuthPanel.tsx`.
+{{/if}}
+{{#if (eq backend "hono")}}
+- Rotas de auth montadas no servidor Hono (`/api/auth/*`).
+{{/if}}
+
+Variáveis obrigatórias: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `APP_URL` (ver `.env.example`).
+
+## Consequências
+
+- **`db` não pode ser `none`** — Better Auth persiste usuários/sessões no banco.
+- Não adicionar Clerk, NextAuth ou Supabase Auth sem ADR que **superseda** esta.
+- Não implementar JWT/middleware de auth paralelo; use `auth.api.getSession` e o contexto oRPC.
+- OAuth social só entra se o módulo `better-auth-social` estiver ativo e env vars preenchidas.
+- Para detalhes de API e plugins, leia `.claude/skills/` se existir skill de auth; o código
+  gerado em `packages/auth` é a referência de implementação.

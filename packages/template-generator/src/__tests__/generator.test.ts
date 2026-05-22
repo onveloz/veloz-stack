@@ -25,6 +25,51 @@ describe("generate()", () => {
     expect(files).toContain("README.md");
   });
 
+  it("default stack emits architecture decision records", () => {
+    const files = paths(cfg({}));
+
+    expect(files).toContain("docs/adr/README.md");
+    expect(files).toContain("docs/adr/0001-record-architecture-decisions.md");
+    expect(files).toContain("docs/adr/0002-use-better-auth.md");
+    expect(files).toContain("docs/adr/0003-use-orpc.md");
+    expect(files).toContain("docs/adr/0004-database-layer.md");
+
+    const readme = generate(cfg({})).read("docs/adr/README.md")!;
+    expect(readme).toContain("0002-use-better-auth");
+    expect(readme).toContain("0003-use-orpc");
+    expect(readme).toContain("0004-database-layer");
+
+    const authAdr = generate(cfg({})).read("docs/adr/0002-use-better-auth.md")!;
+    expect(authAdr).toContain("protectedProcedure");
+    expect(authAdr).toContain("packages/auth");
+  });
+
+  it("auth none omits Better Auth ADR", () => {
+    const files = paths(cfg({ auth: "none" }));
+
+    expect(files).toContain("docs/adr/0001-record-architecture-decisions.md");
+    expect(files).not.toContain("docs/adr/0002-use-better-auth.md");
+
+    const readme = generate(cfg({ auth: "none" })).read("docs/adr/README.md")!;
+    expect(readme).not.toContain("0002-use-better-auth");
+  });
+
+  it("db none omits database layer ADR", () => {
+    const files = paths(cfg({ db: "none", orm: "none", auth: "none" }));
+
+    expect(files).not.toContain("docs/adr/0004-database-layer.md");
+
+    const readme = generate(cfg({ db: "none", orm: "none", auth: "none" })).read(
+      "docs/adr/README.md",
+    )!;
+    expect(readme).not.toContain("0004-database-layer");
+  });
+
+  it("claude module CLAUDE.md points agents at docs/adr", () => {
+    const claude = generate(cfg({ modules: ["claude"] })).read("CLAUDE.md")!;
+    expect(claude).toContain("docs/adr/");
+  });
+
   it("writes veloz-stack.jsonc when cliVersion is provided", () => {
     const vfs = generate(cfg({ projectName: "demo-app" }), { cliVersion: "0.0.1" });
     expect(vfs.exists("veloz-stack.jsonc")).toBe(true);
@@ -591,6 +636,8 @@ describe("examples: todo", () => {
   it("todo with better-auth uses protectedProcedure", () => {
     const vfs = generate(cfg({ examples: ["todo"] }));
     expect(vfs.read("packages/api/src/routers/todo.ts")).toContain("protectedProcedure");
+    expect(vfs.read("packages/api/src/routers/todo.ts")).toContain("ORPCError");
+    expect(vfs.read("packages/db/src/schema/todo.ts")).toContain("userId");
   });
 
   it("todo with no auth falls back to publicProcedure", () => {
@@ -780,6 +827,36 @@ describe("backend next", () => {
     const client = vfs.read("apps/web/lib/auth-client.ts")!;
     expect(client).toContain("window.location.origin");
     expect(client).not.toContain("VITE_SERVER_URL");
+  });
+
+  it("better-auth + orpc emits session/me routes and auth panel", () => {
+    const vfs = generate(cfg({ auth: "better-auth", api: "orpc" }));
+    const router = vfs.read("packages/api/src/routers/index.ts")!;
+    expect(router).toContain("session:");
+    expect(router).toContain("me:");
+    expect(router).toContain("sessionOutputSchema");
+    expect(router).toContain("context.user");
+    expect(vfs.read("packages/api/src/schemas/user.ts")).toContain("userSchema");
+    expect(vfs.read("apps/web/src/components/AuthPanel.tsx")).toContain("orpc.session");
+    expect(vfs.read("apps/web/src/routes/index.tsx")).toContain("<AuthPanel />");
+  });
+
+  it("better-auth + orpc on next emits AuthPanel under apps/web/components", () => {
+    const vfs = generate(
+      cfg({ frontend: "next", backend: "next", auth: "better-auth", api: "orpc" }),
+    );
+    expect(vfs.read("apps/web/components/AuthPanel.tsx")).toContain("orpc.me");
+    expect(vfs.read("apps/web/app/page.tsx")).toContain("<AuthPanel />");
+  });
+
+  it("auth none omits session/me routes and auth panel", () => {
+    const vfs = generate(cfg({ auth: "none", api: "orpc" }));
+    const router = vfs.read("packages/api/src/routers/index.ts")!;
+    expect(router).not.toContain("session:");
+    expect(router).not.toContain("me:");
+    expect(router).not.toContain('from "zod"');
+    expect(vfs.read("packages/api/src/schemas/user.ts")).toBeUndefined();
+    expect(vfs.read("apps/web/src/components/AuthPanel.tsx")).toBeUndefined();
   });
 
   it("veloz.json omits apps/server and sets web healthCheck when backend next", () => {
