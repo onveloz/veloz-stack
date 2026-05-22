@@ -4,9 +4,12 @@ import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
 const API_SMOKE_TEST = `import { expect, test } from "vitest";
+import { appRouter } from "./routers";
 
-test("scaffold smoke test", () => {
-  expect(true).toBe(true);
+test("API router is defined", () => {
+  expect(appRouter).toBeDefined();
+  expect(typeof appRouter).toBe("object");
+  expect(appRouter.healthCheck).toBeDefined();
 });
 `;
 

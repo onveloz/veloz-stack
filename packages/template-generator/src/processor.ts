@@ -46,6 +46,9 @@ hb.registerHelper("version", (name: unknown) => {
   }
   return DEPENDENCY_VERSIONS[key as DependencyName];
 });
+hb.registerHelper("serverUrl", (backend: unknown) =>
+  backend === "next" ? "http://localhost:3001" : "http://localhost:3000",
+);
 
 export function render(template: string, config: ProjectConfig): string {
   const compiled = hb.compile(template, { noEscape: true });

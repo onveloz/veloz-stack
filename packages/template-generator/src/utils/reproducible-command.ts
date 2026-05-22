@@ -14,8 +14,17 @@ function listFlag(name: string, values: readonly string[]): string[] {
   return [`--${name}`, values.join(",")];
 }
 
+function hasShellMetacharacters(value: string): boolean {
+  if (/[\s"'`$\\]/.test(value)) return true;
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code < 32 || code === 127) return true;
+  }
+  return false;
+}
+
 function shellEscape(value: string): string {
-  if (!/[\s"'`$\\]/.test(value)) return value;
+  if (!hasShellMetacharacters(value)) return value;
   return `"${value.replace(/["\\`$]/g, "\\$&")}"`;
 }
 

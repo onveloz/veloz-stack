@@ -13,6 +13,10 @@ function yamlCatalogKey(pkg: string): string {
   return JSON.stringify(pkg);
 }
 
+function yamlCatalogValue(ver: string): string {
+  return JSON.stringify(ver.trim());
+}
+
 /** After all handlers ran: centralize scaffold dependency versions behind pnpm / Bun catalogs. */
 export function applyCatalogRefs(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.pm === "npm") return;
@@ -104,7 +108,9 @@ function writePnpmWorkspaceYaml(
   const lines = ["packages:", "  - apps/*", "  - packages/*", ""];
   if (entries.length > 0) {
     lines.push("catalog:");
-    for (const [pkg, ver] of entries) lines.push(`  ${yamlCatalogKey(pkg)}: ${ver.trim()}`);
+    for (const [pkg, ver] of entries) {
+      lines.push(`  ${yamlCatalogKey(pkg)}: ${yamlCatalogValue(ver)}`);
+    }
     lines.push("");
   }
   vfs.write("pnpm-workspace.yaml", lines.join("\n"));

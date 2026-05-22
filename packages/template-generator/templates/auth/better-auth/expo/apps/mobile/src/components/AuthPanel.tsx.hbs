@@ -43,9 +43,6 @@ export function AuthPanel() {
   const authAction = useMutation({
     mutationFn: async () => {
       setError(null);
-      if (password.length < 8) {
-        throw new Error("A senha deve ter pelo menos 8 caracteres");
-      }
       if (mode === "sign-up") {
         const res = await signUp.email({ email, password, name });
         if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
@@ -130,7 +127,13 @@ export function AuthPanel() {
             <TouchableOpacity
               style={[styles.btn, styles.btnPrimary]}
               disabled={authAction.isPending}
-              onPress={() => authAction.mutate()}
+              onPress={() => {
+                if (password.length < 8) {
+                  setError("A senha deve ter pelo menos 8 caracteres");
+                  return;
+                }
+                authAction.mutate();
+              }}
             >
               <Text style={[styles.btnText, styles.btnTextPrimary]}>
                 {authAction.isPending

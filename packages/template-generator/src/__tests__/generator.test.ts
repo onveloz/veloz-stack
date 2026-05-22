@@ -1144,7 +1144,7 @@ describe("testing scaffold", () => {
   it("emits vitest config, root scripts, and api smoke test by default", () => {
     const vfs = generate(cfg({}));
     expect(vfs.read("vitest.config.ts")).toContain("passWithNoTests");
-    expect(vfs.read("packages/api/src/smoke.test.ts")).toContain("scaffold smoke test");
+    expect(vfs.read("packages/api/src/smoke.test.ts")).toContain("API router is defined");
     const root = JSON.parse(vfs.read("package.json")!);
     expect(root.scripts.test).toBe("turbo run test");
     expect(root.scripts["test:e2e"]).toBe("playwright test");

@@ -25,6 +25,19 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
   const isBun = runtime === "bun";
   const isWorkers = runtime === "workers";
 
+  let devScript: string;
+  let startScript: string;
+  if (isWorkers) {
+    devScript = "wrangler dev";
+    startScript = "wrangler deploy";
+  } else if (isBun) {
+    devScript = "bun run --watch src/index.ts";
+    startScript = "bun run src/index.ts";
+  } else {
+    devScript = "tsx watch src/index.ts";
+    startScript = "node --experimental-strip-types src/index.ts";
+  }
+
   vfs.write(
     "apps/server/package.json",
     `${JSON.stringify(
@@ -33,16 +46,8 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
         private: true,
         type: "module",
         scripts: {
-          dev: isWorkers
-            ? "wrangler dev"
-            : isBun
-              ? "bun run --watch src/index.ts"
-              : "tsx watch src/index.ts",
-          start: isWorkers
-            ? "wrangler deploy"
-            : isBun
-              ? "bun run src/index.ts"
-              : "node --experimental-strip-types src/index.ts",
+          dev: devScript,
+          start: startScript,
           "check-types": "tsc --noEmit",
         },
         dependencies: {
