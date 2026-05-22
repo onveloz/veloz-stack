@@ -16,6 +16,7 @@
     }
   },
   "scripts": {
+    "sync-versions": "node scripts/sync-versions.mjs",
     "gen": "node scripts/build-templates.mjs",
     "prebuild": "pnpm gen",
     "check-types": "pnpm gen && tsc --noEmit",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "^2.8.3"
   }
 }

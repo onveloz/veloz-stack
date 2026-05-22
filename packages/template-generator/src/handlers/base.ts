@@ -1,5 +1,6 @@
 import type { ProjectConfig } from "@veloz-stack/types";
 import { version } from "../deps";
+import { packageManagerSpecifier } from "../package-manager-pins.generated";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
@@ -22,12 +23,7 @@ export function processBase(vfs: VirtualFs, config: ProjectConfig): void {
         typescript: version("typescript"),
         "@types/node": version("@types/node"),
       },
-      packageManager:
-        config.pm === "bun"
-          ? "bun@1.1.42"
-          : config.pm === "pnpm"
-          ? "pnpm@10.14.0"
-          : "npm@10.9.2",
+      packageManager: packageManagerSpecifier(config.pm),
     }),
     {},
   );

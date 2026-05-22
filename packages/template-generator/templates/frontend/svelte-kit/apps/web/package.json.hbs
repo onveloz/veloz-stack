@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@{{projectName}}/api": "workspace:*",
+    {{#if (eq auth "better-auth")}}
+    "better-auth": "{{version "better-auth"}}",
+    {{/if}}
     "@orpc/client": "{{version "@orpc/client"}}",
     "@orpc/server": "{{version "@orpc/server"}}"
   },

@@ -40,7 +40,8 @@ export function patchAddonsTurborepo(
   addons: readonly AddonId[],
   on: boolean,
 ): AddonId[] {
-  if (on) return addons.includes("turborepo") ? [...addons] : [...addons, "turborepo"];
+  if (on && !addons.includes("turborepo")) return [...addons, "turborepo"];
+  if (on) return [...addons];
   return addons.filter((a) => a !== "turborepo");
 }
 

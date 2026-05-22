@@ -84,7 +84,7 @@ function usePreviewVfs(config: ProjectConfig) {
     return () => {
       cancelled = true;
     };
-  }, [configKey, config]);
+  }, [configKey]);
 
   return { tree, fileCount, loading };
 }

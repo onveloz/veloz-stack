@@ -22,7 +22,12 @@ function emitTodo(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.orm !== "drizzle" || config.db === "none") return;
 
   processTemplatesFromPrefix(vfs, "examples/todo/common/", "", config);
-  processTemplatesFromPrefix(vfs, "examples/todo/drizzle/", "", config);
+  if (config.db === "postgres") {
+    processTemplatesFromPrefix(vfs, "examples/todo/drizzle-pg/", "", config);
+  }
+  if (config.db === "sqlite") {
+    processTemplatesFromPrefix(vfs, "examples/todo/drizzle-sqlite/", "", config);
+  }
 }
 
 function emitPixCheckout(vfs: VirtualFs, config: ProjectConfig): void {

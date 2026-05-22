@@ -25,6 +25,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Version manifest parity
+        run: pnpm sync-versions:check
+
       - name: Build embedded template map
         run: pnpm --filter @veloz-stack/template-generator gen
 

@@ -8,6 +8,13 @@ Guidance for changing the **template generator**, **CLI**, and **stack builder**
 - **Bun** is installed in CI for e2e scaffolds that use `bun create` / Bun workspaces.
 - Generated monorepos may use Bun or pnpm per `--pm`.
 
+## Bumping dependency versions
+
+1. Edit [`packages/template-generator/versions.yaml`](packages/template-generator/versions.yaml): add or change semver ranges under **`packages`** (everything the generator emits through `version()`) or **`repoOnly`** (pnpm catalog entries for workspace-only packages).
+2. Run **`pnpm sync-versions`** — it regenerates `src/deps.ts`, `src/package-manager-pins.generated.ts`, and the root `pnpm-workspace.yaml` **catalog** block from scanned `catalog:` protocol refs.
+3. Run **`pnpm install`** at the repo root so the lockfile matches.
+4. Commit `versions.yaml`, generated files, and `pnpm-lock.yaml` together. CI fails on drift via `pnpm sync-versions:check`.
+
 ## Local verification
 
 From the repository root:
@@ -67,7 +74,7 @@ CLI reviews may show a notice if the GitHub repo is not linked to a CodeRabbit o
 | `includes` and Handlebars helpers | [`packages/template-generator/src/processor.ts`](packages/template-generator/src/processor.ts) |
 | Template merge (`processTemplatesFromPrefix`) | [`packages/template-generator/src/template-utils.ts`](packages/template-generator/src/template-utils.ts) |
 | Per-axis handlers | [`packages/template-generator/src/handlers/`](packages/template-generator/src/handlers/) |
-| Central dependency versions for generated apps | [`packages/template-generator/src/deps.ts`](packages/template-generator/src/deps.ts) |
+| Central dependency versions for generated apps | `versions.yaml` → `pnpm sync-versions` generates [`packages/template-generator/src/deps.ts`](packages/template-generator/src/deps.ts) |
 | Invalid combinations / disable reasons | [`packages/types/src/compatibility.ts`](packages/types/src/compatibility.ts) |
 
 ### Handlebars partials (shared snippets)
@@ -80,7 +87,7 @@ Files under `packages/template-generator/templates/**` named `*.partial.hbs` are
 2. Add `MODULE_PREFIXES[id]` in [`packages/template-generator/src/handlers/modules.ts`](packages/template-generator/src/handlers/modules.ts) pointing at `templates/modules/<id>/`.
 3. If the module adds `packages/*`, map it in `SERVER_WORKSPACE_PACKAGES` and/or `WEB_WORKSPACE_PACKAGES` in [`post-process.ts`](packages/template-generator/src/handlers/post-process.ts) so `apps/server` / `apps/web` get `workspace:*` deps when those packages exist.
 4. Add `appendModuleEnvVars` entries when the module needs documented env vars in `.env.example`.
-5. Add any new **central** npm versions to [`deps.ts`](packages/template-generator/src/deps.ts) if you wire versions through `version()` from handlers; otherwise inline versions in generated `package.json.hbs` (as many existing modules do).
+5. Add any new **central** npm versions to [`packages/template-generator/versions.yaml`](packages/template-generator/versions.yaml) under `packages:` (and `repoOnly:` if needed only by this monorepo), then run `pnpm sync-versions`.
 6. Update [`compatibility.ts`](packages/types/src/compatibility.ts): `getModuleDisableReason` / `validateConfig` for `requires` or runtime constraints (e.g. Cloudflare Workers).
 7. Add coverage in [`generator.test.ts`](packages/template-generator/src/__tests__/generator.test.ts) and, for user-visible stacks, a **single** focused e2e matrix row in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) (avoid matrix explosion).
 8. Update [`apps/web/components/brand-logo.tsx`](apps/web/components/brand-logo.tsx): extend `CONCEPTS` and/or `PNG_IDS` and add `public/logos/<id>.svg` (or png) when the picker should show a real logo.

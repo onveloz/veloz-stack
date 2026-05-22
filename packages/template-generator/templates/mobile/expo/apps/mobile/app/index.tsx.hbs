@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { ScrollView, View, Text, StyleSheet, Linking, TouchableOpacity } from "react-native";
 import { orpc } from "@/lib/orpc";
+{{#if (eq auth "better-auth")}}
+import { AuthPanel } from "@/components/AuthPanel";
+{{/if}}
 
 const STACK: Array<{ label: string; brand?: boolean }> = [
   { label: "{{frontend}}", brand: true },
@@ -41,6 +44,10 @@ export default function Home() {
         <Text style={styles.code}>apps/mobile/app/index.tsx</Text> ou pergunte
         pro Claude.
       </Text>
+
+      {{#if (eq auth "better-auth")}}
+      <AuthPanel />
+      {{/if}}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>NO SEU STACK</Text>

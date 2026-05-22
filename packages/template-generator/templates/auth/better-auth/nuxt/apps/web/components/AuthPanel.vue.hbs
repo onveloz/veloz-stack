@@ -1,0 +1,213 @@
+<script setup lang="ts">
+import { onMounted, ref, computed } from "vue";
+import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
+import { client } from "../composables/useOrpc";
+
+const session = useSession();
+
+const email = ref("demo@example.com");
+const password = ref("password123");
+const name = ref("Demo User");
+const mode = ref<"sign-in" | "sign-up">("sign-in");
+const error = ref<string | null>(null);
+const loading = ref(false);
+const rpcUserId = ref<string | null>(null);
+const rpcLoading = ref(true);
+
+async function refreshRpcSession() {
+  rpcLoading.value = true;
+  try {
+    const res = await client.session();
+    if (res.user) {
+      const me = await client.me();
+      rpcUserId.value = me.user.id.slice(0, 8);
+    } else {
+      rpcUserId.value = null;
+    }
+  } catch {
+    rpcUserId.value = null;
+  } finally {
+    rpcLoading.value = false;
+  }
+}
+
+onMounted(() => {
+  void refreshRpcSession();
+});
+
+async function handleSubmit(event: Event) {
+  event.preventDefault();
+  error.value = null;
+  loading.value = true;
+  try {
+    if (mode.value === "sign-up") {
+      const res = await signUp.email({
+        email: email.value,
+        password: password.value,
+        name: name.value,
+      });
+      if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
+    } else {
+      const res = await signIn.email({
+        email: email.value,
+        password: password.value,
+      });
+      if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
+    }
+    await refreshRpcSession();
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "Erro de autenticação";
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleSignOut() {
+  loading.value = true;
+  await signOut();
+  rpcUserId.value = null;
+  loading.value = false;
+}
+
+const user = computed(() => session.value.data?.user ?? null);
+const sessionLoading = computed(() => session.value.isPending || rpcLoading.value);
+</script>
+
+<template>
+  <section class="section auth-panel">
+    <h2>Autenticação</h2>
+    <p class="auth-lede">
+      Better Auth + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>.
+      <NuxtLink to="/login">Página de login →</NuxtLink>
+    </p>
+
+    <div class="auth-card">
+      <div class="auth-status">
+        <template v-if="sessionLoading">Carregando sessão…</template>
+        <template v-else-if="user">
+          Autenticado como \{{ user.name }} (\{{ user.email }})
+          <div v-if="rpcUserId" class="auth-meta">
+            oRPC <code>me</code>: \{{ rpcUserId }}…
+          </div>
+        </template>
+        <template v-else>Não autenticado</template>
+      </div>
+
+      <button
+        v-if="user"
+        type="button"
+        class="auth-btn"
+        :disabled="loading"
+        @click="handleSignOut"
+      >
+        Sair
+      </button>
+
+      <form v-else class="auth-form" @submit="handleSubmit">
+        <label>
+          Modo
+          <select v-model="mode">
+            <option value="sign-in">Entrar</option>
+            <option value="sign-up">Criar conta</option>
+          </select>
+        </label>
+        <label v-if="mode === 'sign-up'">
+          Nome
+          <input v-model="name" required />
+        </label>
+        <label>
+          Email
+          <input v-model="email" type="email" required />
+        </label>
+        <label>
+          Senha
+          <input v-model="password" type="password" minlength="8" required />
+        </label>
+        <p v-if="error" class="auth-error">\{{ error }}</p>
+        <button type="submit" class="auth-btn auth-btn-primary" :disabled="loading">
+          \{{
+            loading
+              ? "Processando…"
+              : mode === "sign-up"
+                ? "Criar conta"
+                : "Entrar"
+          \}}
+        </button>
+      </form>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.auth-panel {
+  margin-bottom: 48px;
+}
+
+.auth-lede {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
+
+.auth-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.auth-status {
+  font-size: 14px;
+}
+
+.auth-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+  max-width: 28rem;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.auth-form input,
+.auth-form select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.auth-btn {
+  width: fit-content;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.auth-btn-primary {
+  border-color: rgba(255, 77, 0, 0.4);
+  background: rgba(255, 77, 0, 0.1);
+  color: var(--brand);
+}
+
+.auth-error {
+  color: #f87171;
+  font-size: 12px;
+  margin: 0;
+}
+</style>

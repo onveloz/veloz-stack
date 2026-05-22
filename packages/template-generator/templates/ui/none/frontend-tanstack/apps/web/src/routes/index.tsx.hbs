@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { orpc } from "@/utils/orpc";
+{{#if (eq auth "better-auth")}}
+import { AuthPanel } from "@/components/AuthPanel";
+{{/if}}
 
 export const Route = createFileRoute("/")({ component: HomeComponent });
 
@@ -44,6 +47,10 @@ function HomeComponent() {
               : "API desconectada"}
           </span>
         </div>
+
+        {{#if (eq auth "better-auth")}}
+        <AuthPanel />
+        {{/if}}
 
         <section className="section">
           <h2>No seu stack</h2>

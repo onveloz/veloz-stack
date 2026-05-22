@@ -1,0 +1,19 @@
+"use client";
+
+import { AuthPanel } from "@/components/AuthPanel";
+
+export default function LoginPage() {
+  return (
+    <main className="shell">
+      <div className="hero">
+        <div className="hero-mark" />
+        <h1>Entrar</h1>
+      </div>
+      <p className="lede">
+        Better Auth — use email e senha. Depois volte pra{" "}
+        <a href="/">home</a>.
+      </p>
+      <AuthPanel />
+    </main>
+  );
+}

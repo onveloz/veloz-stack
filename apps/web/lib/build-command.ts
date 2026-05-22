@@ -43,7 +43,7 @@ export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | 
   const defaultAddons = [...DEFAULT_CONFIG.addons].sort().join(",");
   const selectedAddons = [...cfg.addons].sort().join(",");
   if (selectedAddons !== defaultAddons) {
-    flags.push(`--addons ${cfg.addons.length ? cfg.addons.join(",") : "''"}`);
+    flags.push(`--addons ${selectedAddons || "''"}`);
   }
   if (cfg.lefthookCi) flags.push("--lefthook-ci");
   if (cfg.lefthookAdvanced) flags.push("--lefthook-advanced");

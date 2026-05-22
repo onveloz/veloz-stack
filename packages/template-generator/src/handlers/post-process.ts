@@ -1,5 +1,6 @@
 import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
 import { version } from "../deps";
+import { applyCatalogRefs } from "./catalog-emit";
 import { applyRootScriptsToPkg } from "./post-process-lint";
 import type { VirtualFs } from "../vfs";
 
@@ -40,11 +41,11 @@ const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
  */
 export function postProcess(vfs: VirtualFs, config: ProjectConfig): void {
   setRootScripts(vfs, config);
-  emitWorkspaceFile(vfs, config);
   wireModuleDependencies(vfs, config);
   wireNextIntlDependency(vfs, config);
   stripNextRootPageForNextIntl(vfs, config);
   appendModuleEnvVars(vfs, config);
+  applyCatalogRefs(vfs, config);
 }
 
 function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
@@ -99,12 +100,6 @@ function wireModuleDependencies(vfs: VirtualFs, config: ProjectConfig): void {
       pkg.dependencies = { ...pkg.dependencies, ...webDeps };
       return pkg;
     });
-  }
-}
-
-function emitWorkspaceFile(vfs: VirtualFs, config: ProjectConfig): void {
-  if (config.pm === "pnpm") {
-    vfs.write("pnpm-workspace.yaml", "packages:\n  - apps/*\n  - packages/*\n");
   }
 }
 

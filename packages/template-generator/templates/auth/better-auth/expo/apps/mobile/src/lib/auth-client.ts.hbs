@@ -1,0 +1,9 @@
+import { createAuthClient } from "better-auth/client";
+
+const serverUrl = process.env.EXPO_PUBLIC_SERVER_URL ?? "http://localhost:3000";
+
+export const authClient = createAuthClient({
+  baseURL: serverUrl,
+});
+
+export const { signIn, signOut, signUp } = authClient;

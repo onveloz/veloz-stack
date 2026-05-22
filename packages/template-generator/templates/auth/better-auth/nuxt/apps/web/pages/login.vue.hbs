@@ -1,0 +1,206 @@
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
+
+const session = useSession();
+
+const email = ref("demo@example.com");
+const password = ref("password123");
+const name = ref("Demo User");
+const mode = ref<"sign-in" | "sign-up">("sign-in");
+const error = ref<string | null>(null);
+const loading = ref(false);
+
+async function handleSubmit(event: Event) {
+  event.preventDefault();
+  error.value = null;
+  loading.value = true;
+  try {
+    if (mode.value === "sign-up") {
+      const res = await signUp.email({
+        email: email.value,
+        password: password.value,
+        name: name.value,
+      });
+      if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
+    } else {
+      const res = await signIn.email({
+        email: email.value,
+        password: password.value,
+      });
+      if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
+    }
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "Erro de autenticação";
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleSignOut() {
+  loading.value = true;
+  await signOut();
+  loading.value = false;
+}
+
+const user = computed(() => session.value.data?.user ?? null);
+const sessionLoading = computed(() => session.value.isPending);
+</script>
+
+<template>
+  <main class="dot-grid">
+    <div class="shell">
+      <div class="hero">
+        <div class="hero-mark" />
+        <h1>Entrar</h1>
+      </div>
+
+      <p class="lede">
+        Better Auth — use email e senha. Depois volte pra
+        <NuxtLink to="/">home</NuxtLink>.
+      </p>
+
+      <section class="section auth-panel">
+        <div class="auth-card">
+          <div class="auth-status">
+            <template v-if="sessionLoading">Carregando sessão…</template>
+            <template v-else-if="user">
+              Autenticado como \{{ user.name }}.
+              <NuxtLink to="/">Ir pra home →</NuxtLink>
+            </template>
+            <template v-else>Faça login ou crie uma conta demo.</template>
+          </div>
+
+          <button
+            v-if="user"
+            type="button"
+            class="auth-btn"
+            :disabled="loading"
+            @click="handleSignOut"
+          >
+            Sair
+          </button>
+
+          <form v-else class="auth-form" @submit="handleSubmit">
+            <label>
+              Modo
+              <select v-model="mode">
+                <option value="sign-in">Entrar</option>
+                <option value="sign-up">Criar conta</option>
+              </select>
+            </label>
+            <label v-if="mode === 'sign-up'">
+              Nome
+              <input v-model="name" required />
+            </label>
+            <label>
+              Email
+              <input v-model="email" type="email" required />
+            </label>
+            <label>
+              Senha
+              <input v-model="password" type="password" minlength="8" required />
+            </label>
+            <p v-if="error" class="auth-error">\{{ error }}</p>
+            <button type="submit" class="auth-btn auth-btn-primary" :disabled="loading">
+              \{{
+                loading
+                  ? "Processando…"
+                  : mode === "sign-up"
+                    ? "Criar conta"
+                    : "Entrar"
+              \}}
+            </button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+</template>
+
+<style scoped>
+.dot-grid {
+  min-height: 100vh;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.shell {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.hero-mark {
+  width: 16px;
+  height: 16px;
+  background: #ff4d00;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.lede {
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 32px;
+}
+
+.auth-card {
+  background: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  max-width: 28rem;
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.auth-form input,
+.auth-form select {
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e5e5e5;
+  padding: 8px 10px;
+}
+
+.auth-btn {
+  width: fit-content;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #e5e5e5;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.auth-btn-primary {
+  border-color: rgba(255, 77, 0, 0.4);
+  background: rgba(255, 77, 0, 0.1);
+  color: #ff4d00;
+}
+
+.auth-error {
+  color: #f87171;
+  font-size: 12px;
+  margin: 0;
+}
+</style>

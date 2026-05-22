@@ -1,0 +1,161 @@
+import { useMutation, useQuery, useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
+import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
+import { orpc } from "../lib/orpc";
+
+function AuthPanelInner() {
+  const queryClient = useQueryClient();
+  const { data: session, isPending: sessionLoading } = useSession();
+  const rpcSession = useQuery(orpc.session.queryOptions());
+  const me = useQuery({
+    ...orpc.me.queryOptions(),
+    enabled: !!session?.user,
+  });
+
+  const [email, setEmail] = useState("demo@example.com");
+  const [password, setPassword] = useState("password123");
+  const [name, setName] = useState("Demo User");
+  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [error, setError] = useState<string | null>(null);
+
+  const invalidateAuth = () => {
+    void queryClient.invalidateQueries({ queryKey: orpc.session.key() });
+    void queryClient.invalidateQueries({ queryKey: orpc.me.key() });
+  };
+
+  const authAction = useMutation({
+    mutationFn: async () => {
+      setError(null);
+      if (mode === "sign-up") {
+        const res = await signUp.email({ email, password, name });
+        if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
+        return;
+      }
+      const res = await signIn.email({ email, password });
+      if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
+    },
+    onSuccess: invalidateAuth,
+    onError: (err: Error) => setError(err.message),
+  });
+
+  const signingOut = useMutation({
+    mutationFn: async () => {
+      await signOut();
+    },
+    onSuccess: invalidateAuth,
+  });
+
+  const user = session?.user ?? rpcSession.data?.user ?? null;
+  const loading = sessionLoading || rpcSession.isLoading;
+
+  return (
+    <section className="auth-panel">
+      <h2>Autenticação</h2>
+      <p className="auth-lede">
+        Better Auth + oRPC — sessão via cookies e rotas <code>session</code> /{" "}
+        <code>me</code>. <a href="/login">Página de login →</a>
+      </p>
+      <div className="auth-card">
+        <div className="auth-status">
+          {loading
+            ? "Carregando sessão…"
+            : user
+              ? `Autenticado como ${user.name} (${user.email})`
+              : "Não autenticado"}
+        </div>
+        {user && me.data?.user && (
+          <div className="auth-meta">
+            oRPC <code>me</code>: {me.data.user.id.slice(0, 8)}…
+          </div>
+        )}
+        {user ? (
+          <button
+            type="button"
+            className="auth-btn"
+            disabled={signingOut.isPending}
+            onClick={() => signingOut.mutate()}
+          >
+            Sair
+          </button>
+        ) : (
+          <form
+            className="auth-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              authAction.mutate();
+            }}
+          >
+            <label>
+              Modo
+              <select
+                value={mode}
+                onChange={(event) =>
+                  setMode(event.target.value as "sign-in" | "sign-up")
+                }
+              >
+                <option value="sign-in">Entrar</option>
+                <option value="sign-up">Criar conta</option>
+              </select>
+            </label>
+            {mode === "sign-up" && (
+              <label>
+                Nome
+                <input value={name} onChange={(e) => setName(e.target.value)} required />
+              </label>
+            )}
+            <label>
+              Email
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Senha
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={8}
+                required
+              />
+            </label>
+            {error && <p className="auth-error">{error}</p>}
+            <button type="submit" className="auth-btn auth-btn-primary" disabled={authAction.isPending}>
+              {authAction.isPending
+                ? "Processando…"
+                : mode === "sign-up"
+                  ? "Criar conta"
+                  : "Entrar"}
+            </button>
+          </form>
+        )}
+      </div>
+      <style>{`
+        .auth-panel { margin-bottom: 48px; }
+        .auth-lede { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin: 0 0 12px; }
+        .auth-card { background: #161616; border: 1px solid rgba(255,255,255,0.1); padding: 16px; display: grid; gap: 12px; }
+        .auth-status { font-size: 14px; }
+        .auth-meta { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .auth-form { display: grid; gap: 12px; max-width: 28rem; }
+        .auth-form label { display: grid; gap: 4px; font-size: 12px; color: rgba(255,255,255,0.6); }
+        .auth-form input, .auth-form select { background: #0f0f0f; border: 1px solid rgba(255,255,255,0.1); color: #e5e5e5; padding: 8px 10px; }
+        .auth-btn { width: fit-content; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: #e5e5e5; padding: 8px 12px; cursor: pointer; }
+        .auth-btn-primary { border-color: rgba(255,77,0,0.4); background: rgba(255,77,0,0.1); color: #ff4d00; }
+        .auth-error { color: #f87171; font-size: 12px; margin: 0; }
+        .auth-panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); margin: 0 0 8px; }
+      `}</style>
+    </section>
+  );
+}
+
+export function AuthPanel() {
+  const [qc] = useState(() => new QueryClient());
+  return (
+    <QueryClientProvider client={qc}>
+      <AuthPanelInner />
+    </QueryClientProvider>
+  );
+}

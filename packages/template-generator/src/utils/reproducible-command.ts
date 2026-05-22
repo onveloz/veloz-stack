@@ -14,6 +14,10 @@ function listFlag(name: string, values: readonly string[]): string[] {
   return [`--${name}`, values.join(",")];
 }
 
+function shellEscape(value: string): string {
+  return /[\s"'`$\\]/.test(value) ? `"${value.replace(/["\\]/g, "\\$&")}"` : value;
+}
+
 /**
  * CLI command that recreates this stack (mirrors create-veloz-stack flags).
  */
@@ -29,7 +33,7 @@ export function buildReproducibleCommand(config: ProjectConfig): string {
 
   const parts = [
     ...create,
-    config.projectName,
+    shellEscape(config.projectName),
     ...flag("preset", config.preset !== d.preset ? config.preset : ""),
     ...flag("frontend", config.frontend !== d.frontend ? config.frontend : ""),
     ...flag("mobile", config.mobile !== d.mobile ? config.mobile : ""),

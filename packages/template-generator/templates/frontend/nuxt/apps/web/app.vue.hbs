@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { client } from "./composables/useOrpc";
+{{#if (eq auth "better-auth")}}
+import AuthPanel from "./components/AuthPanel.vue";
+{{/if}}
 
 const healthStatus = ref<"loading" | "ok" | "error">("loading");
 
@@ -52,6 +55,10 @@ const MODULES: string[] = {{{json modules}}};
         <code>apps/web/app.vue</code> ou abra o <code>CLAUDE.md</code> e peça
         ajuda pro agente.
       </p>
+
+      {{#if (eq auth "better-auth")}}
+      <AuthPanel />
+      {{/if}}
 
       <section class="section">
         <h2>Próximos passos</h2>

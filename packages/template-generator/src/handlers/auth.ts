@@ -33,4 +33,16 @@ export function processAuth(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.frontend === "tanstack-start") {
     processTemplatesFromPrefix(vfs, "auth/better-auth/tanstack-start/", "", config);
   }
+  if (config.frontend === "svelte-kit") {
+    processTemplatesFromPrefix(vfs, "auth/better-auth/svelte-kit/", "", config);
+  }
+  if (config.frontend === "nuxt") {
+    processTemplatesFromPrefix(vfs, "auth/better-auth/nuxt/", "", config);
+  }
+  if (config.frontend === "astro") {
+    processTemplatesFromPrefix(vfs, "auth/better-auth/astro/", "", config);
+  }
+  if (config.mobile === "expo") {
+    processTemplatesFromPrefix(vfs, "auth/better-auth/expo/", "", config);
+  }
 }

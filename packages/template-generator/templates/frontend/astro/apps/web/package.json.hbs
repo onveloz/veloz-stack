@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@{{projectName}}/api": "workspace:*",
+    {{#if (eq auth "better-auth")}}
+    "better-auth": "{{version "better-auth"}}",
+    {{/if}}
     "@astrojs/node": "{{version "@astrojs/node"}}",
     "@astrojs/react": "{{version "@astrojs/react"}}",
     "@orpc/client": "{{version "@orpc/client"}}",

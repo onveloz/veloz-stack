@@ -10,6 +10,8 @@
     "check-types": "turbo check-types",
     "lint": "turbo lint",
     "test": "turbo test",
+    "sync-versions": "pnpm --filter @veloz-stack/template-generator sync-versions",
+    "sync-versions:check": "pnpm --filter @veloz-stack/template-generator exec node scripts/sync-versions.mjs --check",
     "format": "prettier --write .",
     "cli:link": "pnpm --filter create-veloz-stack build && pnpm --filter create-veloz-stack link --global"
   },

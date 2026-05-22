@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { client } from "$lib/orpc";
+  {{#if (eq auth "better-auth")}}
+  import AuthPanel from "$lib/AuthPanel.svelte";
+  {{/if}}
 
   let status = $state<"loading" | "ok" | "error">("loading");
 
@@ -51,6 +54,10 @@
       <code>apps/web/src/routes/+page.svelte</code> ou abra o
       <code>CLAUDE.md</code> e peça ajuda pro agente.
     </p>
+
+    {{#if (eq auth "better-auth")}}
+    <AuthPanel />
+    {{/if}}
 
     <section class="section">
       <h2>Próximos passos</h2>

@@ -19,12 +19,16 @@ import { Input } from "@/components/ui/input";
 export function AuthPanel() {
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionLoading } = useSession();
-  const rpcSession = useQuery(orpc.session.queryOptions());
+  const rpcSession = useQuery({
+    ...orpc.session.queryOptions(),
+    enabled: !session?.user,
+  });
   const me = useQuery({
     ...orpc.me.queryOptions(),
     enabled: !!session?.user,
   });
 
+  // Demo credentials for local development only — replace before shipping.
   const [email, setEmail] = useState("demo@example.com");
   const [password, setPassword] = useState("password123");
   const [name, setName] = useState("Demo User");
@@ -71,7 +75,10 @@ export function AuthPanel() {
         </CardTitle>
         <CardDescription>
           Better Auth + oRPC — sessão via cookies e rotas{" "}
-          <code>session</code> / <code>me</code>.
+          <code>session</code> / <code>me</code>.{" "}
+          <a href="/login" className="underline underline-offset-2">
+            Página de login →
+          </a>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -70,11 +70,11 @@ case "$pm" in
     ;;
   npm)
     echo "   using npm install"
-    npm install --no-audit --no-fund 2>&1 | tail -5
+    install_with_retry "npm install --no-audit --no-fund"
     ;;
   *)
     echo "   using pnpm install"
-    pnpm install --no-frozen-lockfile --ignore-scripts=false 2>&1 | tail -5
+    install_with_retry "pnpm install --no-frozen-lockfile --ignore-scripts=false"
     ;;
 esac
 

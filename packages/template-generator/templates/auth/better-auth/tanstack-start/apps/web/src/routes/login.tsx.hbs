@@ -1,0 +1,24 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { AuthPanel } from "@/components/AuthPanel";
+
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+});
+
+function LoginPage() {
+  return (
+    <main>
+      <div className="shell">
+        <div className="hero">
+          <div className="hero-mark" />
+          <h1>Entrar</h1>
+        </div>
+        <p className="lede">
+          Better Auth — use email e senha. Depois volte pra{" "}
+          <Link to="/">home</Link>.
+        </p>
+        <AuthPanel />
+      </div>
+    </main>
+  );
+}

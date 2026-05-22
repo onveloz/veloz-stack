@@ -31,6 +31,7 @@ const SURPRISE_PRESETS = [
 const SPICE_KEYS = ["deploy", "auth", "api", "pm"] as const;
 
 function pick<T>(arr: readonly T[]): T {
+  if (arr.length === 0) throw new Error("Cannot pick from empty array");
   return arr[Math.floor(Math.random() * arr.length)]!;
 }
 

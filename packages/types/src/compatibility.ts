@@ -39,6 +39,9 @@ export function getRuntimeDisableReason(
   if (id === "workers" && cfg.deploy !== "cloudflare" && cfg.deploy !== "none") {
     return "Runtime Workers só faz deploy no Cloudflare";
   }
+  if (id === "workers" && cfg.auth === "better-auth") {
+    return "Better Auth no Workers exige Hyperdrive/D1 — use runtime Bun ou Node por enquanto";
+  }
   return null;
 }
 
@@ -237,6 +240,11 @@ export function validateConfig(cfg: ProjectConfig): string[] {
   if (cfg.auth === "better-auth" && cfg.db === "none") {
     errors.push(
       "auth: Better Auth precisa de um banco (usa o adapter Drizzle no packages/db)",
+    );
+  }
+  if (cfg.auth === "better-auth" && cfg.runtime === "workers") {
+    errors.push(
+      "auth: Better Auth não está disponível em Cloudflare Workers neste template — use Bun ou Node",
     );
   }
   if (cfg.desktop === "tauri" && cfg.frontend === "none") {

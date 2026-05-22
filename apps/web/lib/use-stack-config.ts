@@ -29,8 +29,11 @@ import {
   ExampleId,
 } from "@veloz-stack/types";
 
-const enumVals = <T extends readonly [string, ...string[]]>(e: { options: T }) =>
-  e.options as unknown as T;
+const enumVals = (schema: { options: readonly string[] }) => {
+  const opts = [...schema.options];
+  if (opts.length < 1) throw new Error("empty enum option list");
+  return opts as [string, ...string[]];
+};
 
 export function useStackConfig() {
   const [state, setState] = useQueryStates(
@@ -52,7 +55,7 @@ export function useStackConfig() {
       deploy: parseAsStringEnum(enumVals(DeployId)).withDefault(DEFAULT_CONFIG.deploy),
       pm: parseAsStringEnum(enumVals(PackageManagerId)).withDefault(DEFAULT_CONFIG.pm),
       ui: parseAsStringEnum(enumVals(UiId)).withDefault(DEFAULT_CONFIG.ui),
-      modules: parseAsArrayOf(parseAsStringEnum([...MODULE_IDS])).withDefault(
+      modules: parseAsArrayOf(parseAsStringEnum(enumVals({ options: MODULE_IDS }))).withDefault(
         DEFAULT_CONFIG.modules,
       ),
       examples: parseAsArrayOf(parseAsStringEnum(enumVals(ExampleId))).withDefault(
@@ -71,24 +74,24 @@ export function useStackConfig() {
   );
 
   const config: ProjectConfig = {
-    projectName: state.name,
-    preset: state.preset,
-    frontend: state.frontend,
-    mobile: state.mobile,
-    desktop: state.desktop,
-    backend: state.backend,
-    runtime: state.runtime,
-    api: state.api,
-    db: state.db,
-    orm: state.orm,
-    dbHosting: state.dbHosting,
-    auth: state.auth,
-    deploy: state.deploy,
-    pm: state.pm,
-    ui: state.ui,
-    modules: state.modules,
-    examples: state.examples,
-    addons: state.addons,
+    projectName: state.name as ProjectConfig["projectName"],
+    preset: state.preset as ProjectConfig["preset"],
+    frontend: state.frontend as ProjectConfig["frontend"],
+    mobile: state.mobile as ProjectConfig["mobile"],
+    desktop: state.desktop as ProjectConfig["desktop"],
+    backend: state.backend as ProjectConfig["backend"],
+    runtime: state.runtime as ProjectConfig["runtime"],
+    api: state.api as ProjectConfig["api"],
+    db: state.db as ProjectConfig["db"],
+    orm: state.orm as ProjectConfig["orm"],
+    dbHosting: state.dbHosting as ProjectConfig["dbHosting"],
+    auth: state.auth as ProjectConfig["auth"],
+    deploy: state.deploy as ProjectConfig["deploy"],
+    pm: state.pm as ProjectConfig["pm"],
+    ui: state.ui as ProjectConfig["ui"],
+    modules: state.modules as ProjectConfig["modules"],
+    examples: state.examples as ProjectConfig["examples"],
+    addons: state.addons as ProjectConfig["addons"],
     oxlintStrict: state.oxlintStrict,
     lefthookCi: state.lefthookCi,
     lefthookAdvanced: state.lefthookAdvanced,

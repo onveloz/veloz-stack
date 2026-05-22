@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import HealthIsland from "../components/HealthIsland";
+{{#if (eq auth "better-auth")}}
+import { AuthPanel } from "../components/AuthPanel";
+{{/if}}
 
 const STACK: Array<{ label: string; brand?: boolean }> = [
   { label: "{{frontend}}", brand: true },
@@ -30,6 +33,10 @@ const MODULES: string[] = {{{json modules}}};
         <code>apps/web/src/pages/index.astro</code> ou abra o
         <code>CLAUDE.md</code> e peça ajuda pro agente.
       </p>
+
+      {{#if (eq auth "better-auth")}}
+      <AuthPanel client:load />
+      {{/if}}
 
       <section class="section">
         <h2>Próximos passos</h2>

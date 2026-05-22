@@ -1,0 +1,10 @@
+import { createAuthClient } from "better-auth/vue";
+
+const serverUrl =
+  import.meta.env.NUXT_PUBLIC_SERVER_URL ?? "http://localhost:3000";
+
+export const authClient = createAuthClient({
+  baseURL: serverUrl,
+});
+
+export const { signIn, signOut, signUp, useSession } = authClient;

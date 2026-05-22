@@ -1,0 +1,59 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { AuthPanel } from "../components/AuthPanel";
+---
+
+<Layout title="Entrar · {{projectName}}">
+  <main class="dot-grid">
+    <div class="shell">
+      <div class="hero">
+        <div class="hero-mark"></div>
+        <h1>Entrar</h1>
+      </div>
+      <p class="lede">
+        Better Auth — use email e senha. Depois volte pra <a href="/">home</a>.
+      </p>
+      <AuthPanel client:load />
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    min-height: 100vh;
+  }
+
+  .dot-grid {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .shell {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 64px 24px;
+  }
+
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 16px;
+  }
+
+  .hero-mark {
+    width: 16px;
+    height: 16px;
+    background: #ff4d00;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  .lede {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 32px;
+  }
+</style>

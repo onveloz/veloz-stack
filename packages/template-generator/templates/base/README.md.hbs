@@ -18,6 +18,16 @@ O arquivo [`veloz-stack.jsonc`](./veloz-stack.jsonc) na raiz registra o stack es
 {{pm}} dev
 ```
 
+{{#if (eq auth "better-auth")}}
+## Autenticação (Better Auth + oRPC)
+
+- Rotas públicas: `session` — retorna `{ user: null | User }`
+- Rotas protegidas: `me` — exige cookie de sessão
+- Demo UI: `<AuthPanel />` na home e `/login` (React) ou equivalente por frontend
+- Next.js SSR: use `getServerOrpc()` em `lib/orpc-server.ts` para prefetch em Server Components
+- Cloudflare Workers: Better Auth **não** é suportado neste template — use runtime Bun ou Node
+{{/if}}
+
 {{#if (eq deploy "veloz")}}
 ## Deploy
 ```sh
