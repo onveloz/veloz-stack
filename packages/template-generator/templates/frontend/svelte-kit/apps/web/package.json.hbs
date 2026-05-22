@@ -10,12 +10,14 @@
     "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
+    {{#unless (eq api "none")}}
     "@{{projectName}}/api": "workspace:*",
-    {{#if (eq auth "better-auth")}}
-    "better-auth": "{{version "better-auth"}}",
-    {{/if}}
     "@orpc/client": "{{version "@orpc/client"}}",
-    "@orpc/server": "{{version "@orpc/server"}}"
+    "@orpc/server": "{{version "@orpc/server"}}",
+    {{/unless}}
+    {{#if (eq auth "better-auth")}}
+    "better-auth": "{{version "better-auth"}}"
+    {{/if}}
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "{{version "@sveltejs/adapter-node"}}",

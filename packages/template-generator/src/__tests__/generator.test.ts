@@ -890,11 +890,12 @@ describe("backend next", () => {
     expect(vfs.read("apps/web/src/components/AuthPanel.tsx")).toBeUndefined();
   });
 
-  it("better-auth schemas use @orpc/zod oz helper", () => {
+  it("better-auth user schemas use zod v4-compatible z helpers", () => {
     const vfs = generate(cfg({ auth: "better-auth", api: "orpc" }));
     const schemas = vfs.read("packages/api/src/schemas/user.ts")!;
-    expect(schemas).toContain('@orpc/zod');
-    expect(schemas).toContain("oz.object");
+    expect(schemas).toContain('from "zod"');
+    expect(schemas).toContain("z.object");
+    expect(schemas).not.toContain("@orpc/zod");
   });
 
   it("better-auth + svelte-kit emits AuthPanel and login route", () => {
@@ -924,7 +925,8 @@ describe("backend next", () => {
     );
     expect(vfs.read("apps/mobile/src/components/AuthPanel.tsx")).toContain("orpc.session");
     expect(vfs.read("apps/mobile/app/index.tsx")).toContain("AuthPanel");
-    expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("better-auth/client");
+    expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("better-auth/react");
+    expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("@better-auth/expo/client");
   });
 
   it("better-auth + next emits orpc-server helper and login route", () => {

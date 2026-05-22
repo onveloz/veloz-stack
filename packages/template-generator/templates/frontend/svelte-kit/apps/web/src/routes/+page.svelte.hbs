@@ -1,12 +1,17 @@
 <script lang="ts">
+  {{#unless (eq api "none")}}
   import { onMount } from "svelte";
   import { client } from "$lib/orpc";
+  {{/unless}}
   {{#if (eq auth "better-auth")}}
   import AuthPanel from "$lib/AuthPanel.svelte";
   {{/if}}
 
-  let status = $state<"loading" | "ok" | "error">("loading");
+  let status = $state<{{#unless (eq api "none")}}"loading" | "ok" | "error"{{else}}"idle"{{/unless}}>(
+    {{#unless (eq api "none")}}"loading"{{else}}"idle"{{/unless}},
+  );
 
+  {{#unless (eq api "none")}}
   onMount(async () => {
     try {
       const res = await client.healthCheck();
@@ -15,13 +20,18 @@
       status = "error";
     }
   });
+  {{/unless}}
 
   const statusLabel = $derived(
+    {{#unless (eq api "none")}}
     status === "loading"
       ? "Verificando API…"
       : status === "ok"
         ? "API conectada"
         : "API desconectada",
+    {{else}}
+    "Sem tipo RPC configurado — frontend apenas",
+    {{/unless}}
   );
 
   const STACK = [
@@ -221,6 +231,9 @@
   }
   .pill-error .pill-dot {
     background: #ef4444;
+  }
+  .pill-idle .pill-dot {
+    background: #737373;
   }
 
   .hero {

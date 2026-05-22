@@ -40,12 +40,46 @@ const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
  * final picture — scripts keyed off the final stack.
  */
 export function postProcess(vfs: VirtualFs, config: ProjectConfig): void {
+  stripOrpcClientWhenApiNone(vfs, config);
   setRootScripts(vfs, config);
   wireModuleDependencies(vfs, config);
   wireNextIntlDependency(vfs, config);
   stripNextRootPageForNextIntl(vfs, config);
   appendModuleEnvVars(vfs, config);
   applyCatalogRefs(vfs, config);
+}
+
+/** No `packages/api` — remove generated oRPC client files and workspace api/orpc deps from package.json. */
+function stripOrpcClientWhenApiNone(vfs: VirtualFs, config: ProjectConfig): void {
+  if (config.api !== "none") return;
+
+  const paths = [
+    "apps/web/lib/orpc.ts",
+    "apps/web/lib/orpc-server.ts",
+    "apps/web/src/utils/orpc.ts",
+    "apps/web/src/lib/orpc.ts",
+    "apps/mobile/src/lib/orpc.ts",
+    "apps/web/composables/useOrpc.ts",
+  ];
+  for (const p of paths) {
+    if (vfs.exists(p)) vfs.remove(p);
+  }
+
+  const projApi = `@${config.projectName}/api`;
+  for (const [path] of vfs.entries()) {
+    if (!path.endsWith("package.json")) continue;
+    vfs.updateJson<Record<string, unknown>>(path, (pkg) => {
+      const deps = pkg.dependencies as Record<string, string> | undefined;
+      if (deps && typeof deps === "object") {
+        const next = { ...deps };
+        for (const k of Object.keys(next)) {
+          if (k === projApi || k.startsWith("@orpc/")) delete next[k];
+        }
+        pkg.dependencies = next;
+      }
+      return pkg;
+    });
+  }
 }
 
 function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {

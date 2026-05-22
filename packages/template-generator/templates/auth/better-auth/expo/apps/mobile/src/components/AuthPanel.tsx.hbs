@@ -1,23 +1,27 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation{{#unless (eq api "none")}}, useQuery{{/unless}}, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-  ScrollView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { signIn, signOut, signUp } from "@/lib/auth-client";
+import { signIn, signOut, signUp, useSession } from "@/lib/auth-client";
+{{#unless (eq api "none")}}
 import { orpc } from "@/lib/orpc";
+{{/unless}}
 
 export function AuthPanel() {
   const queryClient = useQueryClient();
+  const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
+{{#unless (eq api "none")}}
   const rpcSession = useQuery(orpc.session.queryOptions());
   const me = useQuery({
     ...orpc.me.queryOptions(),
-    enabled: !!rpcSession.data?.user,
+    enabled: !!(session?.user ?? rpcSession.data?.user),
   });
+{{/unless}}
 
   const [email, setEmail] = useState("demo@example.com");
   const [password, setPassword] = useState("password123");
@@ -26,8 +30,11 @@ export function AuthPanel() {
   const [error, setError] = useState<string | null>(null);
 
   const invalidateAuth = () => {
+    void refetchSession();
+{{#unless (eq api "none")}}
     void queryClient.invalidateQueries({ queryKey: orpc.session.key() });
     void queryClient.invalidateQueries({ queryKey: orpc.me.key() });
+{{/unless}}
   };
 
   const authAction = useMutation({
@@ -52,14 +59,18 @@ export function AuthPanel() {
     onSuccess: invalidateAuth,
   });
 
-  const user = rpcSession.data?.user ?? null;
-  const loading = rpcSession.isLoading;
+  const user = session?.user{{#unless (eq api "none")}} ?? rpcSession.data?.user{{/unless}} ?? null;
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading{{/unless}};
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>AUTENTICAÇÃO</Text>
       <Text style={styles.lede}>
-        Better Auth + oRPC — sessão via cookies (use LAN IP no device físico).
+        Better Auth{{#unless (eq api "none")}}
+          {" "}+ oRPC — sessão via cookies (use LAN IP no device físico).
+        {{else}}
+          {" "— sessão no app (SecureStore + Better Auth Expo).
+        {{/unless}}
       </Text>
 
       <View style={styles.card}>
@@ -70,11 +81,13 @@ export function AuthPanel() {
               ? `Autenticado como ${user.name}`
               : "Não autenticado"}
         </Text>
+{{#unless (eq api "none")}}
         {user && me.data?.user && (
           <Text style={styles.meta}>
             oRPC me: {me.data.user.id.slice(0, 8)}…
           </Text>
         )}
+{{/unless}}
 
         {user ? (
           <TouchableOpacity

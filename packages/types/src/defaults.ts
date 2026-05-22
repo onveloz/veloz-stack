@@ -1,6 +1,8 @@
 import type { ProjectConfig } from "./index";
 import { MODULES, type ModuleId } from "./modules";
 
+/** Presets kept for compatibility / roadmap; blocked in UI & CLI selections until implemented. */
+export const COMING_SOON_PRESETS = ["mern", "pern"] as const;
 export const DEFAULT_CONFIG: ProjectConfig = {
   projectName: "my-veloz-stack",
   frontend: "tanstack-start",
@@ -47,7 +49,7 @@ export const PRESETS = {
   },
   mern: {
     label: "MERN",
-    description: "Mongo · Express · React (TanStack) · Node",
+    description: "Em breve — Mongo · Express · React · Node",
     config: {
       ...DEFAULT_CONFIG,
       preset: "mern" as const,
@@ -63,7 +65,7 @@ export const PRESETS = {
   },
   pern: {
     label: "PERN",
-    description: "Postgres · Express · React · Node",
+    description: "Em breve — Postgres · Express · React · Node",
     config: {
       ...DEFAULT_CONFIG,
       preset: "pern" as const,

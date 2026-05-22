@@ -4,9 +4,9 @@ import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
 
 const session = useSession();
 
-const email = ref("demo@example.com");
-const password = ref("password123");
-const name = ref("Demo User");
+const email = ref("");
+const password = ref("");
+const name = ref("");
 const mode = ref<"sign-in" | "sign-up">("sign-in");
 const error = ref<string | null>(null);
 const loading = ref(false);

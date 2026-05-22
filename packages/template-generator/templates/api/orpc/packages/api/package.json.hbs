@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@orpc/server": "{{version "@orpc/server"}}",
-    "@orpc/zod": "{{version "@orpc/zod"}}",
     {{#if (eq auth "better-auth")}}
     "@{{projectName}}/auth": "workspace:*",
     {{/if}}
@@ -27,6 +26,7 @@
     "zod": "{{version "zod"}}"
   },
   "devDependencies": {
-    "typescript": "{{version "typescript"}}"
+    "typescript": "{{version "typescript"}}",
+    "@types/node": "{{version "@types/node"}}"
   }
 }

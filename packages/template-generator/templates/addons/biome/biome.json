@@ -7,7 +7,15 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["**/dist", "**/.next", "**/node_modules", "**/.turbo", "**/build", "**/.prisma"]
+    "includes": ["**"],
+    "experimentalScannerIgnores": [
+      "**/dist/**",
+      "**/.next/**",
+      "**/node_modules/**",
+      "**/.turbo/**",
+      "**/build/**",
+      "**/.prisma/**"
+    ]
   },
   "formatter": {
     "enabled": true,

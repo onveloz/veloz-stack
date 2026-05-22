@@ -13,6 +13,7 @@ import {
   UiId,
   getApiDisableReason,
   getBackendDisableReason,
+  getAuthDisableReason,
   getDbHostingDisableReason,
   getDeployDisableReason,
   getFrontendDisableReason,
@@ -46,7 +47,15 @@ export type ConfigChange = {
 
 type StackKey = Extract<
   keyof ProjectConfig,
-  "frontend" | "backend" | "runtime" | "api" | "orm" | "dbHosting" | "deploy" | "ui"
+  | "frontend"
+  | "backend"
+  | "runtime"
+  | "api"
+  | "auth"
+  | "orm"
+  | "dbHosting"
+  | "deploy"
+  | "ui"
 >;
 
 const RESOLVERS: Array<{
@@ -58,6 +67,7 @@ const RESOLVERS: Array<{
   { key: "backend", options: BackendId.options, check: getBackendDisableReason },
   { key: "runtime", options: RuntimeId.options, check: getRuntimeDisableReason },
   { key: "api", options: ApiId.options, check: getApiDisableReason },
+  { key: "auth", options: AuthId.options, check: getAuthDisableReason },
   { key: "orm", options: OrmId.options, check: getOrmDisableReason },
   { key: "dbHosting", options: DbHostingId.options, check: getDbHostingDisableReason },
   { key: "deploy", options: DeployId.options, check: getDeployDisableReason },

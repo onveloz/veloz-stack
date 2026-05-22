@@ -3,9 +3,9 @@
 
   const session = useSession();
 
-  let email = $state("demo@example.com");
-  let password = $state("password123");
-  let name = $state("Demo User");
+  let email = $state("");
+  let password = $state("");
+  let name = $state("");
   let mode = $state<"sign-in" | "sign-up">("sign-in");
   let error = $state<string | null>(null);
   let loading = $state(false);

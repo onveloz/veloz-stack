@@ -1,8 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation{{#unless (eq api "none")}}, useQuery{{/unless}}, useQueryClient } from "@tanstack/react-query";
 import { LogIn, LogOut, UserRound } from "lucide-react";
 import { useState } from "react";
 import { signIn, signOut, signUp, useSession } from "@/lib/auth-client";
+{{#unless (eq api "none")}}
 import { orpc } from "@/lib/orpc";
+{{/unless}}
 {{#if (eq ui "shadcn")}}
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +20,8 @@ import { Input } from "@/components/ui/input";
 
 export function AuthPanel() {
   const queryClient = useQueryClient();
-  const { data: session, isPending: sessionLoading } = useSession();
+  const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
+{{#unless (eq api "none")}}
   const rpcSession = useQuery({
     ...orpc.session.queryOptions(),
     enabled: !session?.user,
@@ -27,6 +30,7 @@ export function AuthPanel() {
     ...orpc.me.queryOptions(),
     enabled: !!session?.user,
   });
+{{/unless}}
 
   // Demo credentials for local development only — replace before shipping.
   const [email, setEmail] = useState("demo@example.com");
@@ -36,8 +40,11 @@ export function AuthPanel() {
   const [error, setError] = useState<string | null>(null);
 
   const invalidateAuth = () => {
+    void refetchSession();
+{{#unless (eq api "none")}}
     void queryClient.invalidateQueries({ queryKey: orpc.session.key() });
     void queryClient.invalidateQueries({ queryKey: orpc.me.key() });
+{{/unless}}
   };
 
   const authAction = useMutation({
@@ -62,8 +69,8 @@ export function AuthPanel() {
     onSuccess: invalidateAuth,
   });
 
-  const user = session?.user ?? rpcSession.data?.user ?? null;
-  const loading = sessionLoading || rpcSession.isLoading;
+  const user = session?.user{{#unless (eq api "none")}} ?? rpcSession.data?.user{{/unless}} ?? null;
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading{{/unless}};
 
   {{#if (eq ui "shadcn")}}
   return (
@@ -74,8 +81,14 @@ export function AuthPanel() {
           Autenticação
         </CardTitle>
         <CardDescription>
-          Better Auth + oRPC — sessão via cookies e rotas{" "}
-          <code>session</code> / <code>me</code>.{" "}
+          Better Auth{{#unless (eq api "none")}}
+          {" "}
+          + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>
+          {{else}}
+          {" "}
+          — sessão no cliente (sem camada RPC no monorepo)
+          {{/unless}}
+          .{" "}
           <a href="/login" className="underline underline-offset-2">
             Página de login →
           </a>
@@ -93,12 +106,14 @@ export function AuthPanel() {
           {user && (
             <div className="text-xs text-muted-foreground space-y-1">
               <div>{user.email}</div>
+{{#unless (eq api "none")}}
               {me.data?.user && (
                 <div>
                   oRPC <code>me</code>:{" "}
                   <Badge variant="outline">{me.data.user.id.slice(0, 8)}…</Badge>
                 </div>
               )}
+{{/unless}}
             </div>
           )}
         </div>
@@ -195,11 +210,13 @@ export function AuthPanel() {
             {user && (
               <div className="text-xs text-white/60 space-y-1">
                 <div>{user.email}</div>
+{{#unless (eq api "none")}}
                 {me.data?.user && (
                   <div>
                     oRPC <code>me</code>: {me.data.user.id.slice(0, 8)}…
                   </div>
                 )}
+{{/unless}}
               </div>
             )}
           </div>

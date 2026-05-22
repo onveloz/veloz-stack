@@ -83,4 +83,12 @@ describe("buildReproducibleCommand", () => {
     expect(cmd).not.toContain("--examples");
     expect(cmd).not.toContain("--addons");
   });
+
+  it("escapes shell metacharacters in project name", () => {
+    const cmd = buildReproducibleCommand({
+      ...DEFAULT_CONFIG,
+      projectName: 'test project$(`rm -rf /`)"\\',
+    });
+    expect(cmd).toContain('"test project\\$(\\`rm -rf /\\`)\\"\\\\"');
+  });
 });

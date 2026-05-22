@@ -4,6 +4,7 @@ import {
   ApiId,
   AuthId,
   BackendId,
+  COMING_SOON_PRESETS,
   DbHostingId,
   DbId,
   DeployId,
@@ -18,6 +19,7 @@ import {
   UiId,
   type ProjectConfig,
   getApiDisableReason,
+  getAuthDisableReason,
   getBackendDisableReason,
   getDbHostingDisableReason,
   getDeployDisableReason,
@@ -59,11 +61,13 @@ export async function gatherInteractive(
     const preset = await p.select({
       message: "Qual modelo pronto?",
       initialValue: seeded.preset,
-      options: (Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((k) => ({
-        value: k,
-        label: PRESETS[k].label,
-        hint: PRESETS[k].description,
-      })),
+      options: (Object.keys(PRESETS) as Array<keyof typeof PRESETS>)
+        .filter((k) => !COMING_SOON_PRESETS.includes(k as (typeof COMING_SOON_PRESETS)[number]))
+        .map((k) => ({
+          value: k,
+          label: PRESETS[k].label,
+          hint: PRESETS[k].description,
+        })),
     });
     cancelIfNeeded(preset);
     if (preset !== "custom") {
@@ -125,7 +129,7 @@ export async function gatherInteractive(
     "Autenticação",
     AuthId.options,
     input.auth ?? cfg.auth,
-    () => null,
+    (id) => getAuthDisableReason({ ...cfg, auth: id }, id),
     authLabels,
   );
   cfg.deploy = await pickOne(

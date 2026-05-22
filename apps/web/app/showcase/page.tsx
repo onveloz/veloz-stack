@@ -48,7 +48,7 @@ export default function ShowcasePage() {
         <div className="grid gap-4 sm:grid-cols-2">
           {SHOWCASE_PROJECTS.map((project) => (
             <article
-              key={project.title}
+              key={project.sourceUrl ?? project.title}
               className="border border-border bg-secondary/20 p-5 flex flex-col gap-3"
             >
               <div className="flex items-start justify-between gap-3">

@@ -15,7 +15,8 @@ function listFlag(name: string, values: readonly string[]): string[] {
 }
 
 function shellEscape(value: string): string {
-  return /[\s"'`$\\]/.test(value) ? `"${value.replace(/["\\]/g, "\\$&")}"` : value;
+  if (!/[\s"'`$\\]/.test(value)) return value;
+  return `"${value.replace(/["\\`$]/g, "\\$&")}"`;
 }
 
 /**

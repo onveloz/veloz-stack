@@ -10,13 +10,15 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    {{#unless (eq api "none")}}
     "@{{projectName}}/api": "workspace:*",
-    {{#if (eq auth "better-auth")}}
-    "@{{projectName}}/auth": "workspace:*",
-    {{/if}}
     "@orpc/client": "{{version "@orpc/client"}}",
     "@orpc/server": "{{version "@orpc/server"}}",
     "@orpc/tanstack-query": "{{version "@orpc/tanstack-query"}}",
+    {{/unless}}
+    {{#if (eq auth "better-auth")}}
+    "@{{projectName}}/auth": "workspace:*",
+    {{/if}}
     {{#if (eq auth "better-auth")}}
     "better-auth": "{{version "better-auth"}}",
     {{/if}}

@@ -11,12 +11,14 @@
     "check-types": "nuxt prepare && nuxt typecheck"
   },
   "dependencies": {
+    {{#unless (eq api "none")}}
     "@{{projectName}}/api": "workspace:*",
+    "@orpc/client": "{{version "@orpc/client"}}",
+    "@orpc/server": "{{version "@orpc/server"}}",
+    {{/unless}}
     {{#if (eq auth "better-auth")}}
     "better-auth": "{{version "better-auth"}}",
     {{/if}}
-    "@orpc/client": "{{version "@orpc/client"}}",
-    "@orpc/server": "{{version "@orpc/server"}}",
     "@tanstack/vue-query": "{{version "@tanstack/vue-query"}}",
     "nuxt": "{{version "nuxt"}}",
     "vue": "{{version "vue"}}"

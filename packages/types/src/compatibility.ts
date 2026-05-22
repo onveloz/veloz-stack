@@ -17,6 +17,9 @@ export function getBackendDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["backend"],
 ): DisableReason {
+  if (id === "express" || id === "fastify" || id === "elysia") {
+    return "Em breve";
+  }
   if (id === "next" && cfg.frontend !== "next") {
     return "Backend Next só funciona com frontend Next.js";
   }
@@ -49,11 +52,19 @@ export function getOrmDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["orm"],
 ): DisableReason {
-  if (cfg.db === "mongodb" && id !== "mongoose" && id !== "prisma" && id !== "none") {
-    return "MongoDB só combina com Mongoose ou Prisma";
+  if (id === "mongoose") {
+    return "Em breve";
   }
-  if (cfg.db !== "mongodb" && id === "mongoose") {
-    return "Mongoose é só pra MongoDB";
+  if (
+    id === "drizzle" &&
+    cfg.db !== "none" &&
+    cfg.db !== "postgres" &&
+    cfg.db !== "sqlite"
+  ) {
+    return "Em breve";
+  }
+  if (cfg.db === "mongodb" && id !== "prisma" && id !== "none") {
+    return "MongoDB só combina com Mongoose ou Prisma";
   }
   if (cfg.db === "none" && id !== "none") {
     return "Nenhum banco selecionado";
@@ -109,6 +120,15 @@ export function getApiDisableReason(
   id: ProjectConfig["api"],
 ): DisableReason {
   if (cfg.backend === "none" && id !== "none") return "Nenhum backend selecionado";
+  if (id === "trpc" || id === "rest") return "Em breve";
+  return null;
+}
+
+export function getAuthDisableReason(
+  _cfg: ProjectConfig,
+  id: ProjectConfig["auth"],
+): DisableReason {
+  if (id === "clerk") return "Em breve";
   return null;
 }
 
@@ -231,6 +251,7 @@ export function validateConfig(cfg: ProjectConfig): string[] {
   pushIf(getBackendDisableReason(cfg, cfg.backend), "backend");
   pushIf(getRuntimeDisableReason(cfg, cfg.runtime), "runtime");
   pushIf(getApiDisableReason(cfg, cfg.api), "api");
+  pushIf(getAuthDisableReason(cfg, cfg.auth), "auth");
   pushIf(getOrmDisableReason(cfg, cfg.orm), "orm");
   pushIf(getDbHostingDisableReason(cfg, cfg.dbHosting), "dbHosting");
   pushIf(getDeployDisableReason(cfg, cfg.deploy), "deploy");

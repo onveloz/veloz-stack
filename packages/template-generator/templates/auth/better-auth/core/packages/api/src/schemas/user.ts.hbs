@@ -1,18 +1,18 @@
-import { oz } from "@orpc/zod";
+import { z } from "zod";
 
 /** Public user fields returned by auth-aware oRPC routes. */
-export const userSchema = oz.object({
-  id: oz.string(),
-  name: oz.string(),
-  email: oz.string(),
-  image: oz.string().nullable(),
+export const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  image: z.string().nullable().optional(),
 });
 
-export const sessionOutputSchema = oz.object({
+export const sessionOutputSchema = z.object({
   user: userSchema.nullable(),
 });
 
-export const meOutputSchema = oz.object({
+export const meOutputSchema = z.object({
   user: userSchema,
 });
 

@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref{{#unless (eq api "none")}}, onMounted{{/unless}}, computed } from "vue";
+{{#unless (eq api "none")}}
 import { client } from "./composables/useOrpc";
+{{/unless}}
 {{#if (eq auth "better-auth")}}
 import AuthPanel from "./components/AuthPanel.vue";
 {{/if}}
 
-const healthStatus = ref<"loading" | "ok" | "error">("loading");
+const healthStatus = ref<{{#unless (eq api "none")}}"loading" | "ok" | "error"{{else}}"idle"{{/unless}}>(
+  {{#unless (eq api "none")}}"loading"{{else}}"idle"{{/unless}},
+);
 
+{{#unless (eq api "none")}}
 onMounted(async () => {
   try {
     const res = await client.healthCheck();
@@ -15,13 +20,18 @@ onMounted(async () => {
     healthStatus.value = "error";
   }
 });
+{{/unless}}
 
 const statusLabel = computed(() =>
+  {{#unless (eq api "none")}}
   healthStatus.value === "loading"
     ? "Verificando API…"
     : healthStatus.value === "ok"
     ? "API conectada"
     : "API desconectada",
+  {{else}}
+  "Sem tipo RPC configurado — frontend apenas",
+  {{/unless}}
 );
 
 const STACK: Array<{ label: string; brand?: boolean }> = [
@@ -222,11 +232,9 @@ main {
 .pill-loading .pill-dot {
   background: #eab308;
 }
-.pill-error .pill-dot {
-  background: #ef4444;
+.pill-idle .pill-dot {
+  background: #737373;
 }
-
-.hero {
   display: flex;
   align-items: center;
   gap: 12px;

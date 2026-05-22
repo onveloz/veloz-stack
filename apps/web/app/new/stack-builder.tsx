@@ -16,6 +16,7 @@ import {
   ApiId,
   AuthId,
   BackendId,
+  COMING_SOON_PRESETS,
   DbHostingId,
   DbId,
   DeployId,
@@ -41,6 +42,7 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
+  getAuthDisableReason,
   type ModuleId,
   type ModuleMeta,
   type ProjectConfig,
@@ -67,6 +69,7 @@ import { buildSurpriseConfig } from "@/lib/randomize-stack";
 import { PreviewPanel } from "./preview-panel";
 import {
   resolveConfig,
+  repairStackConfig,
   resolveEnableModule,
   type ConfigChange,
 } from "@/lib/resolve-config";
@@ -145,21 +148,27 @@ export function StackBuilder() {
 
   function applyPreset(id: keyof typeof PRESETS) {
     const p = PRESETS[id].config;
+    const repaired = repairStackConfig({ ...p });
     void setState({
-      preset: p.preset,
+      preset: repaired.preset,
       basePreset: id,
-      frontend: p.frontend,
-      backend: p.backend,
-      runtime: p.runtime,
-      api: p.api,
-      db: p.db,
-      orm: p.orm,
-      dbHosting: p.dbHosting,
-      auth: p.auth,
-      deploy: p.deploy,
-      pm: p.pm,
-      modules: p.modules,
-      examples: p.examples,
+      frontend: repaired.frontend,
+      backend: repaired.backend,
+      runtime: repaired.runtime,
+      api: repaired.api,
+      db: repaired.db,
+      orm: repaired.orm,
+      dbHosting: repaired.dbHosting,
+      auth: repaired.auth,
+      deploy: repaired.deploy,
+      pm: repaired.pm,
+      modules: repaired.modules,
+      examples: repaired.examples,
+      ui: repaired.ui,
+      addons: repaired.addons,
+      oxlintStrict: repaired.oxlintStrict,
+      lefthookCi: repaired.lefthookCi,
+      lefthookAdvanced: repaired.lefthookAdvanced,
     });
     if (mode === "quick") setStep("brazil");
   }
@@ -391,18 +400,27 @@ export function StackBuilder() {
           {Object.entries(PRESETS).map(([id, p]) => {
             const isActive = config.preset === id;
             const isBase = config.preset === "custom" && basePreset === id && id !== "custom";
+            const comingSoon = COMING_SOON_PRESETS.includes(
+              id as (typeof COMING_SOON_PRESETS)[number],
+            );
             return (
               <button
                 key={id}
                 type="button"
-                onClick={() => applyPreset(id as keyof typeof PRESETS)}
+                disabled={comingSoon}
+                onClick={() => {
+                  if (!comingSoon) applyPreset(id as keyof typeof PRESETS);
+                }}
+                title={comingSoon ? "Em breve" : undefined}
                 className={
                   "shrink-0 text-left px-3 py-2 border min-w-[140px] max-w-[200px] transition-colors " +
-                  (isActive
-                    ? "border-brand bg-brand-subtle"
-                    : isBase
-                      ? "border-brand/50 bg-brand/5"
-                      : "border-border hover:border-border-strong hover:bg-secondary")
+                  (comingSoon
+                    ? "opacity-50 cursor-not-allowed border-border"
+                    : isActive
+                      ? "border-brand bg-brand-subtle"
+                      : isBase
+                        ? "border-brand/50 bg-brand/5"
+                        : "border-border hover:border-border-strong hover:bg-secondary")
                 }
               >
                 <div className="font-medium text-sm text-foreground">{p.label}</div>
@@ -919,7 +937,7 @@ function StepData({
             label={labelsAuth(id)}
             sectionKey="auth"
             active={config.auth === id}
-            disabledReason={null}
+            disabledReason={getAuthDisableReason(config, id)}
             onSelect={() => requestChange("auth", id, labelsAuth(id))}
           />
         ))}

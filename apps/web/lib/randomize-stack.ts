@@ -22,8 +22,6 @@ import {
 
 const SURPRISE_PRESETS = [
   "veloz-br",
-  "mern",
-  "pern",
   "next-native",
   "minimal",
 ] as const satisfies readonly PresetKey[];
@@ -121,8 +119,8 @@ export function buildSurpriseConfig(keep: {
     const key = pick(SPICE_KEYS);
     const resolverOpts: Record<(typeof SPICE_KEYS)[number], readonly string[]> = {
       deploy: ["veloz", "vercel", "fly", "render"],
-      auth: ["better-auth", "clerk", "none"],
-      api: ["orpc", "trpc", "rest"],
+      auth: ["better-auth", "none"],
+      api: ["orpc", "none"],
       pm: ["pnpm", "bun", "npm"],
     };
     const value = pick(resolverOpts[key]);

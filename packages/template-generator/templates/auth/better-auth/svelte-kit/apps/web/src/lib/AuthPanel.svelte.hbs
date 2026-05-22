@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { {{#unless (eq api "none")}}onMount,{{/unless}} } from "svelte";
   import { signIn, signOut, signUp, useSession } from "$lib/auth-client";
+  {{#unless (eq api "none")}}
   import { client } from "$lib/orpc";
+  {{/unless}}
 
   const session = useSession();
 
@@ -11,6 +13,7 @@
   let mode = $state<"sign-in" | "sign-up">("sign-in");
   let error = $state<string | null>(null);
   let loading = $state(false);
+  {{#unless (eq api "none")}}
   let rpcUserId = $state<string | null>(null);
   let rpcLoading = $state(true);
 
@@ -34,6 +37,7 @@
   onMount(() => {
     void refreshRpcSession();
   });
+  {{/unless}}
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
@@ -47,7 +51,9 @@
         const res = await signIn.email({ email, password });
         if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
       }
+{{#unless (eq api "none")}}
       await refreshRpcSession();
+{{/unless}}
     } catch (err) {
       error = err instanceof Error ? err.message : "Erro de autenticação";
     } finally {
@@ -58,18 +64,30 @@
   async function handleSignOut() {
     loading = true;
     await signOut();
+{{#unless (eq api "none")}}
     rpcUserId = null;
+{{/unless}}
     loading = false;
   }
 
   const user = $derived($session.data?.user ?? null);
-  const sessionLoading = $derived($session.isPending || rpcLoading);
+  const sessionLoading = $derived(
+    {{#unless (eq api "none")}}
+    $session.isPending || rpcLoading
+    {{else}}
+    $session.isPending
+    {{/unless}},
+  );
 </script>
 
 <section class="section auth-panel">
   <h2>Autenticação</h2>
   <p class="auth-lede">
-    Better Auth + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>.
+    Better Auth{{#unless (eq api "none")}}
+    + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>.
+    {{else}}
+    — sessão no cliente (sem camada RPC neste projeto).
+    {{/unless}}
     <a href="/login">Página de login →</a>
   </p>
 
@@ -79,9 +97,11 @@
         Carregando sessão…
       {:else if user}
         Autenticado como {user.name} ({user.email})
+{{#unless (eq api "none")}}
         {#if rpcUserId}
           <div class="auth-meta">oRPC <code>me</code>: {rpcUserId}…</div>
         {/if}
+{{/unless}}
       {:else}
         Não autenticado
       {/if}

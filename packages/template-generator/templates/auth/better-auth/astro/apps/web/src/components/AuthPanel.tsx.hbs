@@ -1,16 +1,20 @@
-import { useMutation, useQuery, useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useMutation{{#unless (eq api "none")}}, useQuery{{/unless}}, useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
+{{#unless (eq api "none")}}
 import { orpc } from "../lib/orpc";
+{{/unless}}
 
 function AuthPanelInner() {
   const queryClient = useQueryClient();
-  const { data: session, isPending: sessionLoading } = useSession();
+  const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
+{{#unless (eq api "none")}}
   const rpcSession = useQuery(orpc.session.queryOptions());
   const me = useQuery({
     ...orpc.me.queryOptions(),
     enabled: !!session?.user,
   });
+{{/unless}}
 
   const [email, setEmail] = useState("demo@example.com");
   const [password, setPassword] = useState("password123");
@@ -19,8 +23,11 @@ function AuthPanelInner() {
   const [error, setError] = useState<string | null>(null);
 
   const invalidateAuth = () => {
+    void refetchSession();
+{{#unless (eq api "none")}}
     void queryClient.invalidateQueries({ queryKey: orpc.session.key() });
     void queryClient.invalidateQueries({ queryKey: orpc.me.key() });
+{{/unless}}
   };
 
   const authAction = useMutation({
@@ -45,15 +52,21 @@ function AuthPanelInner() {
     onSuccess: invalidateAuth,
   });
 
-  const user = session?.user ?? rpcSession.data?.user ?? null;
-  const loading = sessionLoading || rpcSession.isLoading;
+  const user = session?.user{{#unless (eq api "none")}} ?? rpcSession.data?.user{{/unless}} ?? null;
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading{{/unless}};
 
   return (
     <section className="auth-panel">
       <h2>Autenticação</h2>
       <p className="auth-lede">
-        Better Auth + oRPC — sessão via cookies e rotas <code>session</code> /{" "}
-        <code>me</code>. <a href="/login">Página de login →</a>
+        Better Auth{{#unless (eq api "none")}}
+        {" "}
+        + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>
+        {{else}}
+        {" "}
+        — sessão no cliente (sem camada RPC no monorepo)
+        {{/unless}}
+        . <a href="/login">Página de login →</a>
       </p>
       <div className="auth-card">
         <div className="auth-status">
@@ -63,11 +76,13 @@ function AuthPanelInner() {
               ? `Autenticado como ${user.name} (${user.email})`
               : "Não autenticado"}
         </div>
+{{#unless (eq api "none")}}
         {user && me.data?.user && (
           <div className="auth-meta">
             oRPC <code>me</code>: {me.data.user.id.slice(0, 8)}…
           </div>
         )}
+{{/unless}}
         {user ? (
           <button
             type="button"

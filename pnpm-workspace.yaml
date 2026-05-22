@@ -3,7 +3,7 @@ packages:
   - packages/*
 
 catalog:
-  "@types/node": ^25.9.1
+  "@types/node": ^20.17.0
   nuqs: ^2.8.9
   tsx: ^4.22.3
   typescript: ^6.0.3

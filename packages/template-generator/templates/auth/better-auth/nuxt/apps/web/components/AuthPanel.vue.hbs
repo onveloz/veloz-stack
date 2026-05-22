@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { {{#unless (eq api "none")}}onMounted,{{/unless}} ref, computed } from "vue";
 import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
+{{#unless (eq api "none")}}
 import { client } from "../composables/useOrpc";
+{{/unless}}
 
 const session = useSession();
 
@@ -11,6 +13,7 @@ const name = ref("Demo User");
 const mode = ref<"sign-in" | "sign-up">("sign-in");
 const error = ref<string | null>(null);
 const loading = ref(false);
+{{#unless (eq api "none")}}
 const rpcUserId = ref<string | null>(null);
 const rpcLoading = ref(true);
 
@@ -34,6 +37,7 @@ async function refreshRpcSession() {
 onMounted(() => {
   void refreshRpcSession();
 });
+{{/unless}}
 
 async function handleSubmit(event: Event) {
   event.preventDefault();
@@ -54,7 +58,9 @@ async function handleSubmit(event: Event) {
       });
       if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
     }
+{{#unless (eq api "none")}}
     await refreshRpcSession();
+{{/unless}}
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Erro de autenticação";
   } finally {
@@ -65,19 +71,31 @@ async function handleSubmit(event: Event) {
 async function handleSignOut() {
   loading.value = true;
   await signOut();
+{{#unless (eq api "none")}}
   rpcUserId.value = null;
+{{/unless}}
   loading.value = false;
 }
 
 const user = computed(() => session.value.data?.user ?? null);
-const sessionLoading = computed(() => session.value.isPending || rpcLoading.value);
+const sessionLoading = computed(() =>
+  {{#unless (eq api "none")}}
+  session.value.isPending || rpcLoading.value
+  {{else}}
+  session.value.isPending
+  {{/unless}},
+);
 </script>
 
 <template>
   <section class="section auth-panel">
     <h2>Autenticação</h2>
     <p class="auth-lede">
-      Better Auth + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>.
+      Better Auth{{#unless (eq api "none")}}
+      + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>.
+      {{else}}
+      — sessão no cliente (sem camada RPC neste projeto).
+      {{/unless}}
       <NuxtLink to="/login">Página de login →</NuxtLink>
     </p>
 
@@ -86,9 +104,11 @@ const sessionLoading = computed(() => session.value.isPending || rpcLoading.valu
         <template v-if="sessionLoading">Carregando sessão…</template>
         <template v-else-if="user">
           Autenticado como \{{ user.name }} (\{{ user.email }})
+          {{#unless (eq api "none")}}
           <div v-if="rpcUserId" class="auth-meta">
             oRPC <code>me</code>: \{{ rpcUserId }}…
           </div>
+          {{/unless}}
         </template>
         <template v-else>Não autenticado</template>
       </div>

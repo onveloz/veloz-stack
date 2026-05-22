@@ -1,8 +1,12 @@
 "use client";
 
+{{#unless (eq api "none")}}
 import { useQuery } from "@tanstack/react-query";
+{{/unless}}
 
+{{#unless (eq api "none")}}
 import { orpc } from "@/lib/orpc";
+{{/unless}}
 {{#if (eq auth "better-auth")}}
 import { AuthPanel } from "@/components/AuthPanel";
 {{/if}}
@@ -20,8 +24,12 @@ const STACK: Array<{ label: string; brand?: boolean }> = [
 const MODULES: string[] = {{{json modules}}};
 
 export default function Home() {
+{{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
   const connected = health.data === "OK";
+{{else}}
+  const health = null;
+{{/unless}}
 
   return (
     <main>
@@ -39,11 +47,15 @@ export default function Home() {
 
         <div className="tag-row tag-row-status">
           <span className="tag brand">
-            {health.isLoading
+            {{#unless (eq api "none")}}
+            {health!.isLoading
               ? "Verificando API…"
               : connected
               ? "API conectada"
               : "API desconectada"}
+            {{else}}
+            Sem tipo RPC configurado — frontend apenas
+            {{/unless}}
           </span>
         </div>
 

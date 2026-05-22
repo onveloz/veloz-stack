@@ -12,13 +12,17 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    {{#unless (eq api "none")}}
     "@{{projectName}}/api": "workspace:*",
-    {{#if (eq auth "better-auth")}}
-    "better-auth": "{{version "better-auth"}}",
-    {{/if}}
     "@orpc/client": "{{version "@orpc/client"}}",
     "@orpc/server": "{{version "@orpc/server"}}",
     "@orpc/tanstack-query": "{{version "@orpc/tanstack-query"}}",
+    {{/unless}}
+    {{#if (eq auth "better-auth")}}
+    "@better-auth/expo": "{{version "@better-auth/expo"}}",
+    "better-auth": "{{version "better-auth"}}",
+    "expo-secure-store": "{{version "expo-secure-store"}}",
+    {{/if}}
     "@tanstack/react-query": "{{version "@tanstack/react-query"}}",
     "expo": "{{version "expo"}}",
     "expo-router": "{{version "expo-router"}}",
