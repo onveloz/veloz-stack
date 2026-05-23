@@ -399,7 +399,7 @@ export function StackBuilder() {
               value={config.projectName}
               onChange={(e) =>
                 void setState({
-                  projectName: e.target.value || "my-veloz-stack",
+                  name: e.target.value || "my-veloz-stack",
                 })
               }
               className="w-full max-w-xs bg-background border border-input h-9 px-3 text-sm font-mono focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30"

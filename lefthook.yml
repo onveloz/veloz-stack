@@ -2,7 +2,9 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,jsx,ts,tsx,mjs,cjs}"
-      exclude: "**/template-generator/templates/**"
+      exclude:
+        - "**/template-generator/templates/**"
+        - "apps/web/**"
       run: pnpm exec oxlint --fix --deny-warnings {staged_files}
     format:
       glob: "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,yml,yaml}"
