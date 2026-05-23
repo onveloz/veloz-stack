@@ -80,6 +80,31 @@ function ProjectToggles({
   );
 }
 
+function presetButtonClassName(
+  comingSoon: boolean,
+  isActive: boolean,
+  isBase: boolean,
+): string {
+  if (comingSoon) {
+    return "opacity-50 cursor-not-allowed border-border";
+  }
+  if (isActive) {
+    return "border-brand bg-brand-subtle";
+  }
+  if (isBase) {
+    return "border-brand/50 bg-brand/5";
+  }
+  return "border-border hover:border-border-strong hover:bg-secondary";
+}
+
+function PresetComingSoonHint({ id }: { id: string }) {
+  return (
+    <span id={`${id}-coming-soon`} className="sr-only">
+      Em breve
+    </span>
+  );
+}
+
 function PresetButton({
   id,
   preset,
@@ -100,27 +125,24 @@ function PresetButton({
   return (
     <button
       type="button"
-      disabled={comingSoon}
+      aria-disabled={comingSoon || undefined}
+      aria-describedby={comingSoon ? `${id}-coming-soon` : undefined}
       onClick={() => {
-        if (!comingSoon && isPresetKey(id)) {
+        if (comingSoon) {
+          return;
+        }
+        if (isPresetKey(id)) {
           onApplyPreset(id);
         }
       }}
       title={comingSoon ? "Em breve" : undefined}
-      className={`shrink-0 text-left px-3 py-2 border min-w-[140px] max-w-[200px] transition-colors ${
-        comingSoon
-          ? "opacity-50 cursor-not-allowed border-border"
-          : isActive
-            ? "border-brand bg-brand-subtle"
-            : isBase
-              ? "border-brand/50 bg-brand/5"
-              : "border-border hover:border-border-strong hover:bg-secondary"
-      }`}
+      className={`shrink-0 text-left px-3 py-2 border min-w-[140px] max-w-[200px] transition-colors ${presetButtonClassName(comingSoon, isActive, isBase)}`}
     >
       <div className="font-medium text-sm text-foreground">{preset.label}</div>
       <div className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">
         {preset.description}
       </div>
+      {comingSoon ? <PresetComingSoonHint id={id} /> : null}
     </button>
   );
 }

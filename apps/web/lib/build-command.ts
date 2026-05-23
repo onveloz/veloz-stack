@@ -40,8 +40,10 @@ function stackFlags(cfg: ProjectConfig): string[] {
 
 function moduleAndExampleFlags(cfg: ProjectConfig): string[] {
   const flags: string[] = [];
-  if (cfg.modules.length > 0) {
-    flags.push(`--modules ${cfg.modules.join(",")}`);
+  const defaultModules = [...DEFAULT_CONFIG.modules].toSorted().join(",");
+  const selectedModules = [...cfg.modules].toSorted().join(",");
+  if (selectedModules !== defaultModules) {
+    flags.push(`--modules ${selectedModules || "''"}`);
   }
   if (cfg.examples.length > 0) {
     flags.push(`--examples ${cfg.examples.join(",")}`);

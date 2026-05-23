@@ -16,7 +16,7 @@ import type { StepId } from "./stack-builder-app-types";
 import { QUICK_STEPS, STEPS } from "./stack-builder-constants";
 
 export function isPresetKey(id: string): id is PresetKey {
-  return id in PRESETS;
+  return Object.hasOwn(PRESETS, id);
 }
 
 export function isComingSoonPreset(id: string): boolean {

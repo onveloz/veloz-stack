@@ -29,13 +29,11 @@ export function ExampleCard({
   return (
     <button
       type="button"
-      aria-disabled={comingSoon || undefined}
-      aria-pressed={active}
+      disabled={comingSoon}
       onClick={() => {
-        if (!comingSoon) {
-          onToggleExample(id);
-        }
+        onToggleExample(id);
       }}
+      aria-pressed={active}
       className={`text-left p-3 border flex gap-3 items-start ${
         comingSoon
           ? "opacity-50 cursor-not-allowed"
