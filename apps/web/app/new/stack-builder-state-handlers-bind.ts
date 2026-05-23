@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProjectConfig } from "@/lib/veloz-stack-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import {
   createApplyPresetHandler,
@@ -23,7 +23,7 @@ import {
 } from "./stack-builder-state-utils";
 import type { BuilderMode } from "./stack-builder-app-types";
 
-type SetState = ReturnType<typeof useStackConfig>["setState"];
+type SetState = StackSetter;
 
 /** @internal Scaffold pipeline step. */
 export function assembleStackBuilderHandlers(

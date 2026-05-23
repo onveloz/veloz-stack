@@ -1,7 +1,7 @@
 "use client";
 
 import type { PresetId, ProjectConfig } from "@/lib/veloz-stack-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import { assembleStackBuilderHandlers } from "./stack-builder-state-handlers-bind";
 import { useStackBuilderCoreState } from "./stack-builder-state-core";
@@ -13,7 +13,7 @@ export type { PendingChange } from "./stack-builder-state-core";
 export function useStackBuilderState(
   config: ProjectConfig,
   basePreset: PresetId,
-  setState: ReturnType<typeof useStackConfig>["setState"],
+  setState: StackSetter,
 ) {
   const core = useStackBuilderCoreState(config, basePreset);
   const handlers = assembleStackBuilderHandlers(config, core, setState);

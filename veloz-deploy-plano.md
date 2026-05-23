@@ -1,6 +1,7 @@
 # Plano de Deploy — Veloz
 
-**Data/hora inicial:** 2026-04-17
+**Data/hora inicial:** 2026-04-17  
+**Última verificação:** 2026-05-23 (apps/web Next.js 16, pnpm 10, Turborepo — sem drift detectado)
 **Framework detectado:** Next.js 16 (App Router; catalog `next: ^16.2.6`)
 **Package manager:** pnpm (v10.14.0)
 **Monorepo:** Turborepo

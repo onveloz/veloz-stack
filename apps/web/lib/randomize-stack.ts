@@ -116,7 +116,6 @@ function fallbackConfig(keep: {
   install: boolean;
 }): ProjectConfig {
   const linter: LinterChoice = "biome";
-  const hook: GitHookChoice = "none";
   const addons = patchAddonsTurborepo(patchAddonsForLinter([], linter), true);
   return repairStackConfig({
     ...structuredClone(DEFAULT_CONFIG),
@@ -131,8 +130,6 @@ function fallbackConfig(keep: {
     oxlintStrict: false,
     lefthookCi: false,
     lefthookAdvanced: false,
-    ...addonFlagsAfterLinter(linter),
-    ...addonFlagsAfterGitHook(hook),
   });
 }
 

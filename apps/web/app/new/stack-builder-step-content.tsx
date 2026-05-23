@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProjectConfig } from "@/lib/veloz-stack-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import { StepBrazil } from "./stack-builder-step-brazil";
 import { StepData } from "./stack-builder-step-data";
@@ -42,7 +42,7 @@ function renderBrazilStep(builder: StackBuilderState, config: ProjectConfig) {
 function renderToolsStep(
   builder: StackBuilderState,
   config: ProjectConfig,
-  setState: ReturnType<typeof useStackConfig>["setState"],
+  setState: StackSetter,
 ) {
   return (
     <StepTools
@@ -75,7 +75,7 @@ export function StackBuilderStepContent({
 }: {
   builder: StackBuilderState;
   config: ProjectConfig;
-  setState: ReturnType<typeof useStackConfig>["setState"];
+  setState: StackSetter;
 }) {
   switch (builder.step) {
     case "platform": {

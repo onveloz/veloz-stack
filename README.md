@@ -54,6 +54,7 @@ Options marked **coming soon (“Em breve”)** are not wired in the generator y
 - [docs/stack-config.md](docs/stack-config.md) — stack axes and config file
 - [docs/deploy-web.md](docs/deploy-web.md) — build and deploy the stack builder site
 - [LICENSE](LICENSE) — MIT
+- [SECURITY.md](SECURITY.md) — report vulnerabilities
 
 ## Develop
 

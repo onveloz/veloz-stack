@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 
 import type { ProjectConfig } from "@/lib/veloz-stack-types";
 import type { GitHookChoice, LinterChoice } from "@/lib/stack-addons-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import { StackAddonPickers } from "@/components/stack-addon-pickers";
 
@@ -86,7 +86,7 @@ function StepToolsAddons({
   onGitHookChange: (choice: GitHookChoice) => void;
   onLinterChange: (choice: LinterChoice) => void;
   onTurborepoChange: (on: boolean) => void;
-  setState: ReturnType<typeof useStackConfig>["setState"];
+  setState: StackSetter;
 }) {
   return (
     <>
@@ -137,7 +137,7 @@ export function StepTools({
   onLinterChange: (choice: LinterChoice) => void;
   onTurborepoChange: (on: boolean) => void;
   onToggleExample: (id: ExampleOption) => void;
-  setState: ReturnType<typeof useStackConfig>["setState"];
+  setState: StackSetter;
 }) {
   return (
     <>

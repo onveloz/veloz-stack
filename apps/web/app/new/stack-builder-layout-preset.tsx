@@ -1,7 +1,7 @@
 "use client";
 
 import type { PresetId, ProjectConfig } from "@/lib/veloz-stack-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import { StackBuilderPresetBar } from "./stack-builder-preset-shell";
 import type { StackBuilderState } from "./stack-builder-state";
@@ -15,7 +15,7 @@ export function StackBuilderLayoutPresetSection({
 }: {
   config: ProjectConfig;
   basePreset: PresetId;
-  setState: ReturnType<typeof useStackConfig>["setState"];
+  setState: StackSetter;
   builder: StackBuilderState;
 }) {
   return (

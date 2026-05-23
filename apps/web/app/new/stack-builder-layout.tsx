@@ -1,7 +1,7 @@
 "use client";
 
 import type { PresetId, ProjectConfig } from "@/lib/veloz-stack-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import { ConfirmCascadeDialog } from "@/components/confirm-dialog";
 
@@ -42,7 +42,7 @@ export function StackBuilderLayout({
 }: {
   config: ProjectConfig;
   basePreset: PresetId;
-  setState: ReturnType<typeof useStackConfig>["setState"];
+  setState: StackSetter;
   builder: StackBuilderState;
 }) {
   return (

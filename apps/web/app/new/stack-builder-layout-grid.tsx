@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProjectConfig } from "@/lib/veloz-stack-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import { StackBuilderStepContent } from "./stack-builder-step-content";
 import {
@@ -20,7 +20,7 @@ export function StackBuilderLayoutGrid({
 }: {
   builder: StackBuilderState;
   config: ProjectConfig;
-  setState: ReturnType<typeof useStackConfig>["setState"];
+  setState: StackSetter;
 }) {
   return (
     <div className="flex-1 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[200px_minmax(0,1fr)_300px] min-h-0">

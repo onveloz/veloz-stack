@@ -89,6 +89,11 @@ function sanitizeProjectName(name: string): string {
   return sanitized || DEFAULT_CONFIG.projectName;
 }
 
+/**
+ * Build a copy-paste CLI command for the current stack config.
+ * Omits flags that match {@link DEFAULT_CONFIG}; emits explicit `--modules ''` when
+ * modules are cleared so the CLI does not re-apply default-on modules.
+ */
 export function buildCommand(
   cfg: ProjectConfig,
   opts?: { pm?: "bun" | "pnpm" | "npm" },

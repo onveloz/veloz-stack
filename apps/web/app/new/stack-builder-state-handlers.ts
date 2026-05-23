@@ -20,12 +20,12 @@ import type {
   PresetKey,
   ProjectConfig,
 } from "@/lib/veloz-stack-types";
-import type { useStackConfig } from "@/lib/use-stack-config";
+import type { StackSetter } from "@/lib/use-stack-config";
 
 import type { BuilderMode, StepId } from "./stack-builder-app-types";
 import type { PendingChange } from "./stack-builder-state-core";
 
-type SetState = ReturnType<typeof useStackConfig>["setState"];
+type SetState = StackSetter;
 
 /** @internal Generated-app type. */
 export interface HandlerContext {
