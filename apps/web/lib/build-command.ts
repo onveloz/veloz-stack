@@ -83,7 +83,10 @@ function toolingFlags(cfg: ProjectConfig): string[] {
 
 function sanitizeProjectName(name: string): string {
   const normalized = name.trim() || DEFAULT_CONFIG.projectName;
-  return normalized.replaceAll(/[^a-zA-Z0-9._-]/g, "-");
+  const sanitized = normalized
+    .replaceAll(/[^a-zA-Z0-9._-]/g, "-")
+    .replaceAll(/^-+/g, "");
+  return sanitized || DEFAULT_CONFIG.projectName;
 }
 
 export function buildCommand(
