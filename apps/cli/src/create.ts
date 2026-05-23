@@ -126,6 +126,7 @@ function resolveTargetDirectory(config: ProjectConfig): string {
   const safeName =
     basename(raw)
       .replaceAll(/[^a-z0-9-_]/gi, "-")
+      .replaceAll(/^-+/g, "")
       .toLowerCase() || "my-veloz-stack";
   config.projectName = safeName;
   if (isAbsolute(raw)) {
@@ -289,6 +290,12 @@ function printSummary(cfg: ProjectConfig, target: string): void {
   writeStdout(chalk.dim(`  → ${target}\n`));
   writeStdout(summaryLine("preset", cfg.preset));
   writeStdout(summaryLine("frontend", cfg.frontend));
+  if (cfg.mobile !== "none") {
+    writeStdout(summaryLine("mobile", cfg.mobile));
+  }
+  if (cfg.desktop !== "none") {
+    writeStdout(summaryLine("desktop", cfg.desktop));
+  }
   writeStdout(summaryLine("backend", cfg.backend));
   writeStdout(summaryLine("runtime", cfg.runtime));
   writeStdout(summaryLine("api", cfg.api));

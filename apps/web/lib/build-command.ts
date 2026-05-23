@@ -3,7 +3,10 @@ import { DEFAULT_CONFIG } from "@veloz-stack/types";
 import type { ProjectConfig } from "@/lib/veloz-stack-types";
 
 const STACK_KEYS = [
+  "preset",
   "frontend",
+  "mobile",
+  "desktop",
   "backend",
   "runtime",
   "api",

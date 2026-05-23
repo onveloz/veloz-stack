@@ -16,7 +16,9 @@ import {
   DbHostingId,
   DbId,
   DeployId,
+  DesktopId,
   FrontendId,
+  MobileId,
   getApiDisableReason,
   getAuthDisableReason,
   getBackendDisableReason,
@@ -159,6 +161,27 @@ async function promptPlatformStack(
     options: RuntimeId.options,
     initial: coalesce(input.runtime, cfg.runtime),
     disabled: (id) => getRuntimeDisableReason({ ...cfg, runtime: id }, id),
+  });
+  await promptExtraPlatforms(cfg, input);
+}
+
+async function promptExtraPlatforms(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  cfg.mobile = await pickOne({
+    message: "Mobile",
+    options: MobileId.options,
+    initial: coalesce(input.mobile, cfg.mobile),
+    disabled: () => null,
+    labels: mobileLabels,
+  });
+  cfg.desktop = await pickOne({
+    message: "Desktop",
+    options: DesktopId.options,
+    initial: coalesce(input.desktop, cfg.desktop),
+    disabled: () => null,
+    labels: desktopLabels,
   });
 }
 
@@ -447,6 +470,20 @@ function uiLabels(id: string): string {
   }
   if (id === "none") {
     return "Nenhum (CSS puro)";
+  }
+  return titleCase(id);
+}
+
+function mobileLabels(id: string): string {
+  if (id === "expo") {
+    return "Expo";
+  }
+  return titleCase(id);
+}
+
+function desktopLabels(id: string): string {
+  if (id === "tauri") {
+    return "Tauri";
   }
   return titleCase(id);
 }
