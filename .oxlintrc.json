@@ -25,8 +25,7 @@
     "node_modules/**",
     ".turbo/**",
     "build/**",
-    "**/template-generator/templates/**",
-    "apps/web/**"
+    "**/template-generator/templates/**"
   ],
   "jsPlugins": ["oxlint-plugin-complexity"],
   "rules": {
@@ -137,6 +136,12 @@
         "typescript/strict-boolean-expressions": "off",
         "typescript/no-unsafe-type-assertion": "off",
         "typescript/prefer-nullish-coalescing": "off"
+      }
+    },
+    {
+      "files": ["apps/web/**/*.{ts,tsx}"],
+      "rules": {
+        "react/jsx-max-depth": "off"
       }
     }
   ]

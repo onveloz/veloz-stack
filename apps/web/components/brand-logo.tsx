@@ -27,6 +27,7 @@ const PNG_IDS = new Set<string>([
   "orpc",
 ]);
 
+/** Vendor or concept logo for stack-builder option chips; falls back to initials when no asset exists. */
 export function BrandLogo({
   id,
   label,
@@ -44,10 +45,9 @@ export function BrandLogo({
     return (
       <span
         aria-hidden
-        className={
-          "inline-flex items-center justify-center text-brand font-heading font-bold shrink-0 " +
-          (className ?? "")
-        }
+        className={`inline-flex items-center justify-center text-brand font-heading font-bold shrink-0 ${
+          className ?? ""
+        }`}
         style={{
           height,
           minWidth: height,
@@ -70,7 +70,9 @@ export function BrandLogo({
       alt={label}
       className={`shrink-0 block ${className ?? ""}`}
       style={{ height, width: "auto" }}
-      onError={() => setErrored(true)}
+      onError={() => {
+        setErrored(true);
+      }}
     />
   );
 }

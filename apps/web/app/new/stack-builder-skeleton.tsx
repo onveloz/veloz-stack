@@ -1,3 +1,7 @@
+const SKELETON_SECTIONS = ["platform", "data", "brazil", "tools"] as const;
+
+const SKELETON_CELLS = ["a", "b", "c", "d", "e", "f"] as const;
+
 export function StackBuilderSkeleton() {
   return (
     <div className="min-h-screen bg-background animate-pulse">
@@ -9,13 +13,13 @@ export function StackBuilderSkeleton() {
           <div className="h-32 bg-secondary rounded" />
         </div>
         <div className="p-6 space-y-6 pb-52">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-3">
+          {SKELETON_SECTIONS.map((sectionId) => (
+            <div key={sectionId} className="space-y-3">
               <div className="h-5 w-32 bg-secondary rounded" />
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {Array.from({ length: 6 }).map((_, j) => (
+                {SKELETON_CELLS.map((cellId) => (
                   <div
-                    key={j}
+                    key={`${sectionId}-${cellId}`}
                     className="h-16 bg-secondary border border-border rounded"
                   />
                 ))}

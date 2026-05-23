@@ -6,10 +6,9 @@
  * falls back to a letter badge at runtime.
  */
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const OUT_DIR = join(__dirname, "..", "public", "logos");
 
 /** id → fuzzy title candidates (tried in order). Use exact svgl `title` when known. */
@@ -101,8 +100,12 @@ const LOGO_MAP = {
 
 function pickRoute(entry) {
   const r = entry.route;
-  if (typeof r === "string") return r;
-  if (r && typeof r === "object") return r.dark ?? r.light;
+  if (typeof r === "string") {
+    return r;
+  }
+  if (r && typeof r === "object") {
+    return r.dark ?? r.light;
+  }
   return null;
 }
 
@@ -111,73 +114,85 @@ function findByCandidates(catalog, candidates) {
     const exact = catalog.find(
       (e) => e.title.toLowerCase() === c.toLowerCase(),
     );
-    if (exact) return exact;
+    if (exact) {
+      return exact;
+    }
   }
   for (const c of candidates) {
     const needle = c.toLowerCase();
     const partial = catalog.find((e) => {
       const t = e.title.toLowerCase();
-      if (t === needle) return true;
+      if (t === needle) {
+        return true;
+      }
       if (
         t.startsWith(`${needle} `) ||
         t.startsWith(`${needle}/`) ||
         t.startsWith(`${needle}.`)
-      )
+      ) {
         return true;
+      }
       // endsWith only for multi-word needles (avoids "Photoshop Express" for "Express")
-      if (needle.includes(" ") && t.endsWith(` ${needle}`)) return true;
+      if (needle.includes(" ") && t.endsWith(` ${needle}`)) {
+        return true;
+      }
       return false;
     });
-    if (partial) return partial;
+    if (partial) {
+      return partial;
+    }
   }
   return null;
 }
 
-async function main() {
+try {
   console.log("Fetching svgl catalog…");
   const res = await fetch("https://api.svgl.app");
-  if (!res.ok) throw new Error(`svgl.app responded ${res.status}`);
+  if (!res.ok) {
+    throw new Error(`svgl.app responded ${res.status}`);
+  }
   const catalog = await res.json();
   console.log(`  got ${catalog.length} logos`);
 
   await mkdir(OUT_DIR, { recursive: true });
 
-  const matched = [];
-  const missing = [];
+  const outcomes = await Promise.all(
+    Object.entries(LOGO_MAP).map(async ([id, candidates]) => {
+      const entry = findByCandidates(catalog, candidates);
+      if (!entry) {
+        return { kind: "missing", id };
+      }
+      const url = pickRoute(entry);
+      if (!url) {
+        return { kind: "missing", id };
+      }
+      const svgRes = await fetch(url);
+      if (!svgRes.ok) {
+        console.warn(`  ${id}: ${url} → ${svgRes.status}`);
+        return { kind: "missing", id };
+      }
+      const svg = await svgRes.text();
+      await writeFile(join(OUT_DIR, `${id}.svg`), svg, "utf8");
+      return { kind: "matched", id, title: entry.title };
+    }),
+  );
 
-  for (const [id, candidates] of Object.entries(LOGO_MAP)) {
-    const entry = findByCandidates(catalog, candidates);
-    if (!entry) {
-      missing.push(id);
-      continue;
-    }
-    const url = pickRoute(entry);
-    if (!url) {
-      missing.push(id);
-      continue;
-    }
-    const svgRes = await fetch(url);
-    if (!svgRes.ok) {
-      console.warn(`  ${id}: ${url} → ${svgRes.status}`);
-      missing.push(id);
-      continue;
-    }
-    const svg = await svgRes.text();
-    await writeFile(join(OUT_DIR, `${id}.svg`), svg, "utf8");
-    matched.push({ id, title: entry.title });
-  }
+  const matched = outcomes.filter((o) => o.kind === "matched");
+  const missing = outcomes.filter((o) => o.kind === "missing").map((o) => o.id);
 
   console.log(`\nMatched ${matched.length}:`);
-  for (const m of matched) console.log(`  ✓ ${m.id.padEnd(20)} → ${m.title}`);
+  for (const m of matched) {
+    console.log(`  ✓ ${m.id.padEnd(20)} → ${m.title}`);
+  }
   if (missing.length > 0) {
     console.log(
       `\nMissing ${missing.length} (will use letter-badge fallback):`,
     );
-    for (const id of missing) console.log(`  · ${id}`);
+    for (const id of missing) {
+      console.log(`  · ${id}`);
+    }
   }
-}
-
-main().catch((err) => {
-  console.error(err);
+} catch (error) {
+  console.error(error);
   process.exit(1);
-});
+}

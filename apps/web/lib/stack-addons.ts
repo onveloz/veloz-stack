@@ -20,14 +20,22 @@ export const LINTER_CHOICES = [
 ] as const satisfies readonly LinterChoice[];
 
 export function getGitHookChoice(addons: readonly AddonId[]): GitHookChoice {
-  if (addons.includes("lefthook")) return "lefthook";
-  if (addons.includes("husky")) return "husky";
+  if (addons.includes("lefthook")) {
+    return "lefthook";
+  }
+  if (addons.includes("husky")) {
+    return "husky";
+  }
   return "none";
 }
 
 export function getLinterChoice(addons: readonly AddonId[]): LinterChoice {
-  if (addons.includes("oxlint")) return "oxlint";
-  if (addons.includes("biome")) return "biome";
+  if (addons.includes("oxlint")) {
+    return "oxlint";
+  }
+  if (addons.includes("biome")) {
+    return "biome";
+  }
   return "none";
 }
 
@@ -36,7 +44,9 @@ export function patchAddonsForGitHook(
   choice: GitHookChoice,
 ): AddonId[] {
   const without = addons.filter((a) => a !== "husky" && a !== "lefthook");
-  if (choice === "none") return without;
+  if (choice === "none") {
+    return without;
+  }
   return [...without, choice];
 }
 
@@ -45,7 +55,9 @@ export function patchAddonsForLinter(
   choice: LinterChoice,
 ): AddonId[] {
   const without = addons.filter((a) => a !== "biome" && a !== "oxlint");
-  if (choice === "none") return without;
+  if (choice === "none") {
+    return without;
+  }
   return [...without, choice];
 }
 
@@ -53,8 +65,12 @@ export function patchAddonsTurborepo(
   addons: readonly AddonId[],
   on: boolean,
 ): AddonId[] {
-  if (on && !addons.includes("turborepo")) return [...addons, "turborepo"];
-  if (on) return [...addons];
+  if (on && !addons.includes("turborepo")) {
+    return [...addons, "turborepo"];
+  }
+  if (on) {
+    return [...addons];
+  }
   return addons.filter((a) => a !== "turborepo");
 }
 

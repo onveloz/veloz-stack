@@ -1,5 +1,6 @@
-import type { ProjectConfig } from "@veloz-stack/types";
 import { DEFAULT_CONFIG } from "@veloz-stack/types";
+
+import type { ProjectConfig } from "@/lib/veloz-stack-types";
 
 const STACK_KEYS = [
   "frontend",
@@ -15,47 +16,87 @@ const STACK_KEYS = [
   "ui",
 ] as const satisfies readonly (keyof ProjectConfig)[];
 
-export function buildCommand(
-  cfg: ProjectConfig,
-  opts?: { pm?: "bun" | "pnpm" | "npm" },
-): string {
-  const runner = opts?.pm ?? cfg.pm;
-  const head =
-    runner === "bun"
-      ? "bun create veloz-stack@latest"
-      : runner === "pnpm"
-        ? "pnpm create veloz-stack@latest"
-        : "npm create veloz-stack@latest --";
+function createHead(runner: ProjectConfig["pm"]): string {
+  if (runner === "bun") {
+    return "bun create veloz-stack@latest";
+  }
+  if (runner === "pnpm") {
+    return "pnpm create veloz-stack@latest";
+  }
+  return "npm create veloz-stack@latest --";
+}
 
+function stackFlags(cfg: ProjectConfig): string[] {
   const flags: string[] = [];
   for (const key of STACK_KEYS) {
     const val = cfg[key];
     const dflt = DEFAULT_CONFIG[key];
-    if (val !== dflt) flags.push(`--${kebab(key)} ${val}`);
+    if (val !== dflt) {
+      flags.push(`--${kebab(key)} ${val}`);
+    }
   }
+  return flags;
+}
+
+function moduleAndExampleFlags(cfg: ProjectConfig): string[] {
+  const flags: string[] = [];
   if (cfg.modules.length > 0) {
     flags.push(`--modules ${cfg.modules.join(",")}`);
   }
   if (cfg.examples.length > 0) {
     flags.push(`--examples ${cfg.examples.join(",")}`);
   }
-  const defaultAddons = [...DEFAULT_CONFIG.addons].sort().join(",");
-  const selectedAddons = [...cfg.addons].sort().join(",");
-  if (selectedAddons !== defaultAddons) {
-    flags.push(`--addons ${selectedAddons || "''"}`);
+  return flags;
+}
+
+function addonFlags(cfg: ProjectConfig): string[] {
+  const defaultAddons = [...DEFAULT_CONFIG.addons].toSorted().join(",");
+  const selectedAddons = [...cfg.addons].toSorted().join(",");
+  if (selectedAddons === defaultAddons) {
+    return [];
   }
-  if (cfg.lefthookCi) flags.push("--lefthook-ci");
-  if (cfg.lefthookAdvanced) flags.push("--lefthook-advanced");
-  if (!cfg.install) flags.push("--no-install");
-  if (!cfg.git) flags.push("--no-git");
-  if (cfg.oxlintStrict) flags.push("--oxlint-strict");
+  return [`--addons ${selectedAddons || "''"}`];
+}
+
+function toolingFlags(cfg: ProjectConfig): string[] {
+  const flags: string[] = [];
+  if (cfg.lefthookCi) {
+    flags.push("--lefthook-ci");
+  }
+  if (cfg.lefthookAdvanced) {
+    flags.push("--lefthook-advanced");
+  }
+  if (!cfg.install) {
+    flags.push("--no-install");
+  }
+  if (!cfg.git) {
+    flags.push("--no-git");
+  }
+  if (cfg.oxlintStrict) {
+    flags.push("--oxlint-strict");
+  }
   flags.push("--yes");
+  return flags;
+}
+
+export function buildCommand(
+  cfg: ProjectConfig,
+  opts?: { pm?: "bun" | "pnpm" | "npm" },
+): string {
+  const runner = opts?.pm ?? cfg.pm;
+  const head = createHead(runner);
+  const flags = [
+    ...stackFlags(cfg),
+    ...moduleAndExampleFlags(cfg),
+    ...addonFlags(cfg),
+    ...toolingFlags(cfg),
+  ];
 
   return `${head} ${cfg.projectName} ${flags.join(" ")}`
-    .replace(/\s+/g, " ")
+    .replaceAll(/\s+/g, " ")
     .trim();
 }
 
 function kebab(s: string): string {
-  return s.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+  return s.replaceAll(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 }

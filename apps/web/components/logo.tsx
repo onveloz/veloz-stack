@@ -1,3 +1,4 @@
+/** Site wordmark used in the marketing layout and stack builder chrome. */
 export function Logo({ className }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className ?? ""}`}>

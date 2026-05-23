@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-/* oxlint-disable-next-line import/no-unassigned-import -- side-effect CSS */
-import "./globals.css";
+
+import globalStyles from "./globals.css";
 
 export const metadata: Metadata = {
   title: "Veloz Stack — Scaffolder TypeScript opinado pro Brasil",
@@ -15,6 +15,8 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+void globalStyles;
 
 export default function RootLayout({
   children,

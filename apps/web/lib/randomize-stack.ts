@@ -2,26 +2,25 @@ import {
   DEFAULT_CONFIG,
   getModuleDisableReason,
   MODULE_IDS,
-  type ModuleId,
   PRESETS,
-  type PresetKey,
-  type ProjectConfig,
 } from "@veloz-stack/types";
-import {
-  isStackConfigValid,
-  repairStackConfig,
-  resolveConfig,
-} from "@/lib/resolve-config";
+import { resolveStackChange } from "@veloz-stack/types/resolve-stack";
+
+import type {
+  ModuleId,
+  PresetKey,
+  ProjectConfig,
+} from "@/lib/veloz-stack-types";
 import {
   addonFlagsAfterGitHook,
   addonFlagsAfterLinter,
-  type GitHookChoice,
   LINTER_CHOICES,
-  type LinterChoice,
   patchAddonsForGitHook,
   patchAddonsForLinter,
   patchAddonsTurborepo,
 } from "@/lib/stack-addons";
+import type { GitHookChoice, LinterChoice } from "@/lib/stack-addons-types";
+import { isStackConfigValid, repairStackConfig } from "@/lib/resolve-config";
 
 const SURPRISE_PRESETS = [
   "veloz-br",
@@ -32,15 +31,27 @@ const SURPRISE_PRESETS = [
 const SPICE_KEYS = ["deploy", "auth", "api", "pm"] as const;
 
 function pick<T>(arr: readonly T[]): T {
-  if (arr.length === 0) throw new Error("Cannot pick from empty array");
-  return arr[Math.floor(Math.random() * arr.length)]!;
+  if (arr.length === 0) {
+    throw new Error("Cannot pick from empty array");
+  }
+  const index = Math.floor(Math.random() * arr.length);
+  const value = arr[index];
+  if (value === undefined) {
+    throw new Error("Cannot pick from empty array");
+  }
+  return value;
 }
 
 function shuffle<T>(arr: readonly T[]): T[] {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j]!, out[i]!];
+    const current = out[i];
+    const swap = out[j];
+    if (current !== undefined && swap !== undefined) {
+      out[i] = swap;
+      out[j] = current;
+    }
   }
   return out;
 }
@@ -71,15 +82,17 @@ function randomAddons(): Pick<
   addons = patchAddonsForLinter(addons, linter);
   const oxlintStrict = linter === "oxlint" && Math.random() < 0.2;
 
-  // Deprecated Husky in product surface — randomized stacks never pick it (CLI/templates still accept it).
   const hook: GitHookChoice = Math.random() < 0.35 ? "lefthook" : "none";
   addons = patchAddonsForGitHook(addons, hook);
 
   let lefthookCi = false;
   let lefthookAdvanced = false;
   if (hook === "lefthook" && Math.random() < 0.45) {
-    if (Math.random() < 0.55) lefthookCi = true;
-    else lefthookAdvanced = true;
+    if (Math.random() < 0.55) {
+      lefthookCi = true;
+    } else {
+      lefthookAdvanced = true;
+    }
   }
 
   return {
@@ -90,6 +103,40 @@ function randomAddons(): Pick<
     ...addonFlagsAfterLinter(linter),
     ...addonFlagsAfterGitHook(hook),
   };
+}
+
+function fallbackConfig(keep: {
+  projectName: string;
+  git: boolean;
+  install: boolean;
+}): ProjectConfig {
+  return repairStackConfig({
+    ...structuredClone(DEFAULT_CONFIG),
+    preset: "custom",
+    projectName: keep.projectName,
+    git: keep.git,
+    install: keep.install,
+    mobile: "none",
+    desktop: "none",
+    examples: [],
+    ...randomAddons(),
+    addons: patchAddonsTurborepo(patchAddonsForLinter([], "biome"), true),
+  });
+}
+
+function maybeSpiceConfig(cfg: ProjectConfig): ProjectConfig {
+  if (Math.random() >= 0.35) {
+    return cfg;
+  }
+  const key = pick(SPICE_KEYS);
+  const resolverOpts: Record<(typeof SPICE_KEYS)[number], readonly string[]> = {
+    deploy: ["veloz", "vercel", "fly", "render"],
+    auth: ["better-auth", "none"],
+    api: ["orpc", "none"],
+    pm: ["pnpm", "bun", "npm"],
+  };
+  const value = pick(resolverOpts[key]);
+  return resolveStackChange(cfg, { key, value }).newCfg;
 }
 
 /**
@@ -117,19 +164,7 @@ export function buildSurpriseConfig(keep: {
   };
 
   cfg = repairStackConfig(cfg);
-
-  if (Math.random() < 0.35) {
-    const key = pick(SPICE_KEYS);
-    const resolverOpts: Record<(typeof SPICE_KEYS)[number], readonly string[]> =
-      {
-        deploy: ["veloz", "vercel", "fly", "render"],
-        auth: ["better-auth", "none"],
-        api: ["orpc", "none"],
-        pm: ["pnpm", "bun", "npm"],
-      };
-    const value = pick(resolverOpts[key]);
-    cfg = resolveConfig(cfg, { key, value }).newCfg;
-  }
+  cfg = maybeSpiceConfig(cfg);
 
   cfg = repairStackConfig({
     ...cfg,
@@ -138,18 +173,7 @@ export function buildSurpriseConfig(keep: {
   });
 
   if (!isStackConfigValid(cfg)) {
-    cfg = repairStackConfig({
-      ...structuredClone(DEFAULT_CONFIG),
-      preset: "custom",
-      projectName: keep.projectName,
-      git: keep.git,
-      install: keep.install,
-      mobile: "none",
-      desktop: "none",
-      examples: [],
-      ...randomAddons(),
-      addons: patchAddonsTurborepo(patchAddonsForLinter([], "biome"), true),
-    });
+    cfg = fallbackConfig(keep);
   }
 
   return cfg;
