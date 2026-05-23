@@ -10,6 +10,7 @@ catalog:
   "@types/react-dom": ^19.2.3
   lefthook: ^2.1.8
   lucide-react: ^1.16.0
+  markdownlint-cli2: ^0.22.1
   next: ^16.2.6
   nuqs: ^2.8.9
   oxfmt: ^0.51.0

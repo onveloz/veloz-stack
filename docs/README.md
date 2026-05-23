@@ -2,7 +2,7 @@
 
 | Doc                                                                                    | Purpose                                                 |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [../README.md](../README.md)                                                           | Project overview and develop commands                   |
+| [../README.md](../README.md)                                                           | Project overview and development commands               |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md)                                               | Contributor workflow, version bumps, checklists         |
 | [../AGENTS.md](../AGENTS.md)                                                           | Monorepo guide for coding agents                        |
 | [ARCHITECTURE.md](ARCHITECTURE.md)                                                     | Monorepo layout, generator pipeline, CI                 |

@@ -17,8 +17,9 @@ if (!apiKey) {
 }
 
 /**
- * Live SDK client. Cast at construction so this wrapper compiles across
+ * Arara SDK client. Cast at construction so this wrapper compiles across
  * `@ararahq/sdk` API revisions (see module README).
+ * Environment is determined by ARARA_KEY prefix (`ara_test_…` or `ara_live_…`).
  */
 export const ararahq = new (NodeSDK as any)({ apiKey });
 

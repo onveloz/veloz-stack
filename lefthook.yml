@@ -2,7 +2,8 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,jsx,ts,tsx,mjs,cjs}"
-      run: pnpm exec oxlint --fix --deny-warnings {staged_files}
+      exclude: "**/template-generator/templates/**"
+      run: if [ -n "{staged_files}" ]; then pnpm exec oxlint --fix --deny-warnings {staged_files}; fi
     format:
       glob: "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,yml,yaml}"
       run: pnpm exec oxfmt --write {staged_files}

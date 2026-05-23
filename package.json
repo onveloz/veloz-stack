@@ -23,7 +23,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "lefthook": "catalog:",
-    "markdownlint-cli2": "^0.22.1",
+    "markdownlint-cli2": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-plugin-complexity": "catalog:",
