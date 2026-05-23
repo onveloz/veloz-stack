@@ -48,6 +48,13 @@ async function handleSignOut() {
 
 const user = computed(() => session.value.data?.user ?? null);
 const sessionLoading = computed(() => session.value.isPending);
+const submitLabel = computed(() =>
+  loading.value
+    ? "Processando…"
+    : mode.value === "sign-up"
+      ? "Criar conta"
+      : "Entrar",
+);
 </script>
 
 <template>
@@ -106,13 +113,7 @@ const sessionLoading = computed(() => session.value.isPending);
             </label>
             <p v-if="error" class="auth-error">\{{ error }}</p>
             <button type="submit" class="auth-btn auth-btn-primary" :disabled="loading">
-              \{{
-                loading
-                  ? "Processando…"
-                  : mode === "sign-up"
-                    ? "Criar conta"
-                    : "Entrar"
-              \}}
+              \{{ submitLabel }}
             </button>
           </form>
         </div>

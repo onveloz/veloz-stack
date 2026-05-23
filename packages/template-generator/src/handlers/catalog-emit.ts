@@ -113,7 +113,16 @@ function writePnpmWorkspaceYaml(
   vfs: VirtualFs,
   entries: readonly (readonly [string, string])[],
 ): void {
-  const lines = ["packages:", "  - apps/*", "  - packages/*", ""];
+  const lines = [
+    "packages:",
+    "  - apps/*",
+    "  - packages/*",
+    "",
+    "allowBuilds:",
+    "  esbuild: true",
+    "  sharp: true",
+    "",
+  ];
   if (entries.length > 0) {
     lines.push("catalog:");
     for (const [pkg, ver] of entries) {

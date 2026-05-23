@@ -106,6 +106,8 @@ describe("generate()", () => {
     expect(rootPkg.devDependencies.typescript).toBe("catalog:");
     const wsYaml = vfs.read("pnpm-workspace.yaml")!;
     expect(wsYaml).toContain("\ncatalog:\n");
+    expect(wsYaml).toContain("allowBuilds:");
+    expect(wsYaml).toContain("esbuild: true");
     expect(wsYaml).toMatch(/"@types\/node":/);
     expect(wsYaml).toMatch(/typescript.*\^6\.0\.3/);
   });
@@ -744,6 +746,7 @@ describe("Prisma", () => {
     expect(vfs.read("packages/db/prisma/schema.prisma")).toContain(
       "postgresql",
     );
+    expect(vfs.read("packages/db/prisma.config.ts")).toContain("defineConfig");
     expect(vfs.read("packages/db/src/index.ts")).toContain("PrismaClient");
     // Drizzle artefacts must NOT ship
     expect(vfs.read("packages/db/drizzle.config.ts")).toBeUndefined();
