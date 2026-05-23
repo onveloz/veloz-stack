@@ -31,7 +31,8 @@ export class VirtualFs {
     initial: Record<string, unknown> = {},
   ): void {
     const existing = this.read(path);
-    const parsed: unknown = existing ? JSON.parse(existing) : initial;
+    const parsed: unknown =
+      existing !== undefined ? JSON.parse(existing) : initial;
     if (!isJsonObject(parsed)) {
       throw new Error(`Expected JSON object at ${path}`);
     }

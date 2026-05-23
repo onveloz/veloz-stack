@@ -7,7 +7,11 @@ import {
   type PresetKey,
   type ProjectConfig,
 } from "@veloz-stack/types";
-import { isStackConfigValid, repairStackConfig, resolveConfig } from "@/lib/resolve-config";
+import {
+  isStackConfigValid,
+  repairStackConfig,
+  resolveConfig,
+} from "@/lib/resolve-config";
 import {
   addonFlagsAfterGitHook,
   addonFlagsAfterLinter,
@@ -46,7 +50,11 @@ function randomCompatibleModules(cfg: ProjectConfig): ModuleId[] {
   const max = Math.min(8, pool.length);
   const count = Math.floor(Math.random() * (max + 1));
   let picked = shuffle(pool).slice(0, count);
-  if (cfg.frontend === "next" && picked.includes("next-intl") && picked.includes("pt-br-i18n")) {
+  if (
+    cfg.frontend === "next" &&
+    picked.includes("next-intl") &&
+    picked.includes("pt-br-i18n")
+  ) {
     picked = picked.filter((m) => m !== "pt-br-i18n");
   }
   return picked;
@@ -56,7 +64,8 @@ function randomAddons(): Pick<
   ProjectConfig,
   "addons" | "oxlintStrict" | "lefthookCi" | "lefthookAdvanced"
 > {
-  let addons: ProjectConfig["addons"] = Math.random() < 0.85 ? ["turborepo"] : [];
+  let addons: ProjectConfig["addons"] =
+    Math.random() < 0.85 ? ["turborepo"] : [];
 
   const linter: LinterChoice = pick(LINTER_CHOICES);
   addons = patchAddonsForLinter(addons, linter);
@@ -111,12 +120,13 @@ export function buildSurpriseConfig(keep: {
 
   if (Math.random() < 0.35) {
     const key = pick(SPICE_KEYS);
-    const resolverOpts: Record<(typeof SPICE_KEYS)[number], readonly string[]> = {
-      deploy: ["veloz", "vercel", "fly", "render"],
-      auth: ["better-auth", "none"],
-      api: ["orpc", "none"],
-      pm: ["pnpm", "bun", "npm"],
-    };
+    const resolverOpts: Record<(typeof SPICE_KEYS)[number], readonly string[]> =
+      {
+        deploy: ["veloz", "vercel", "fly", "render"],
+        auth: ["better-auth", "none"],
+        api: ["orpc", "none"],
+        pm: ["pnpm", "bun", "npm"],
+      };
     const value = pick(resolverOpts[key]);
     cfg = resolveConfig(cfg, { key, value }).newCfg;
   }

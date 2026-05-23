@@ -6,7 +6,7 @@ import { runPlatformHandlers } from "./handlers/pipeline-platform";
 import { postProcess } from "./handlers/post-process";
 import type { VirtualFs } from "./vfs";
 
-/** Run scaffold handlers in dependency order (base → axes → post-process). */
+/** Run scaffold handlers in dependency order (base → platform → data → extras → post-process). */
 export function runGeneratePipeline(
   vfs: VirtualFs,
   config: ProjectConfig,

@@ -14,7 +14,10 @@ export function StackBuilderSkeleton() {
               <div className="h-5 w-32 bg-secondary rounded" />
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {Array.from({ length: 6 }).map((_, j) => (
-                  <div key={j} className="h-16 bg-secondary border border-border rounded" />
+                  <div
+                    key={j}
+                    className="h-16 bg-secondary border border-border rounded"
+                  />
                 ))}
               </div>
             </div>

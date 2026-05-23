@@ -47,7 +47,15 @@ export type ConfigChange = {
 
 type StackKey = Extract<
   keyof ProjectConfig,
-  "frontend" | "backend" | "runtime" | "api" | "auth" | "orm" | "dbHosting" | "deploy" | "ui"
+  | "frontend"
+  | "backend"
+  | "runtime"
+  | "api"
+  | "auth"
+  | "orm"
+  | "dbHosting"
+  | "deploy"
+  | "ui"
 >;
 
 const RESOLVERS: Array<{
@@ -55,13 +63,29 @@ const RESOLVERS: Array<{
   options: readonly string[];
   check: (cfg: ProjectConfig, id: any) => string | null;
 }> = [
-  { key: "frontend", options: FrontendId.options, check: getFrontendDisableReason },
-  { key: "backend", options: BackendId.options, check: getBackendDisableReason },
-  { key: "runtime", options: RuntimeId.options, check: getRuntimeDisableReason },
+  {
+    key: "frontend",
+    options: FrontendId.options,
+    check: getFrontendDisableReason,
+  },
+  {
+    key: "backend",
+    options: BackendId.options,
+    check: getBackendDisableReason,
+  },
+  {
+    key: "runtime",
+    options: RuntimeId.options,
+    check: getRuntimeDisableReason,
+  },
   { key: "api", options: ApiId.options, check: getApiDisableReason },
   { key: "auth", options: AuthId.options, check: getAuthDisableReason },
   { key: "orm", options: OrmId.options, check: getOrmDisableReason },
-  { key: "dbHosting", options: DbHostingId.options, check: getDbHostingDisableReason },
+  {
+    key: "dbHosting",
+    options: DbHostingId.options,
+    check: getDbHostingDisableReason,
+  },
   { key: "deploy", options: DeployId.options, check: getDeployDisableReason },
   { key: "ui", options: UiId.options, check: getUiDisableReason },
 ];
@@ -182,7 +206,9 @@ export function repairStackConfig(cfg: ProjectConfig): ProjectConfig {
       }
     }
 
-    const keptModules = proposed.modules.filter((m) => !getModuleDisableReason(proposed, m));
+    const keptModules = proposed.modules.filter(
+      (m) => !getModuleDisableReason(proposed, m),
+    );
     if (keptModules.length !== proposed.modules.length) {
       proposed.modules = keptModules;
       dirty = true;
@@ -240,7 +266,9 @@ export function resolveEnableModule(
     return {
       newCfg: {
         ...cfg,
-        modules: cfg.modules.includes(moduleId) ? cfg.modules : [...cfg.modules, moduleId],
+        modules: cfg.modules.includes(moduleId)
+          ? cfg.modules
+          : [...cfg.modules, moduleId],
         preset: "custom",
       },
       changes: [],
@@ -280,12 +308,18 @@ export function resolveEnableModule(
   }
 
   if (moduleId === "next-intl" && proposed.frontend !== "next") {
-    const resolved = resolveConfig(proposed, { key: "frontend", value: "next" });
+    const resolved = resolveConfig(proposed, {
+      key: "frontend",
+      value: "next",
+    });
     proposed = resolved.newCfg;
     changes.push(...resolved.changes);
   }
 
-  if ((moduleId === "pino" || moduleId === "opentelemetry") && proposed.runtime === "workers") {
+  if (
+    (moduleId === "pino" || moduleId === "opentelemetry") &&
+    proposed.runtime === "workers"
+  ) {
     changes.push({
       key: "runtime",
       from: "workers",
@@ -299,7 +333,11 @@ export function resolveEnableModule(
     ? proposed.modules
     : [...proposed.modules, moduleId];
 
-  if (moduleId === "next-intl" && proposed.frontend === "next" && modules.includes("pt-br-i18n")) {
+  if (
+    moduleId === "next-intl" &&
+    proposed.frontend === "next" &&
+    modules.includes("pt-br-i18n")
+  ) {
     modules = modules.filter((m) => m !== "pt-br-i18n");
     changes.push({
       key: "modules",
@@ -360,7 +398,11 @@ function satisfyPendingChoice(
   }
 }
 
-function findReason(cfg: ProjectConfig, key: keyof ProjectConfig, value: string): string | null {
+function findReason(
+  cfg: ProjectConfig,
+  key: keyof ProjectConfig,
+  value: string,
+): string | null {
   const r = RESOLVERS.find((x) => x.key === (key as StackKey));
   if (!r) return null;
   return r.check(cfg, value);

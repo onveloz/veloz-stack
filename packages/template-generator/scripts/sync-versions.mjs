@@ -130,13 +130,7 @@ export type DependencyName = keyof typeof DEPENDENCY_VERSIONS;
 
 /** Resolve a catalog dependency name to its pinned range. */
 export function version(name: DependencyName): string {
-  const v = DEPENDENCY_VERSIONS[name];
-  if (!v) {
-    throw new Error(
-      \`Dependency "\${String(name)}" not in central version map. Add it to versions.yaml.\`,
-    );
-  }
-  return v;
+  return DEPENDENCY_VERSIONS[name];
 }
 `;
 }
@@ -161,14 +155,18 @@ function renderPinsTs(pm) {
 /** Corepack-style specifier for bun, pnpm, or npm (from versions.yaml). */
 export function packageManagerSpecifier(pm: "bun" | "pnpm" | "npm"): string {
   switch (pm) {
-    case "bun":
+    case "bun": {
       return ${JSON.stringify(bun)};
-    case "pnpm":
+    }
+    case "pnpm": {
       return ${JSON.stringify(pnpm)};
-    case "npm":
+    }
+    case "npm": {
       return ${JSON.stringify(npm)};
-    default:
-      throw new Error(\`Unknown package manager: \${pm}\`);
+    }
+    default: {
+      throw new Error(\`Unknown package manager: \${String(pm)}\`);
+    }
   }
 }
 `;

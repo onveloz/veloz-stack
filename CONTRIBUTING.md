@@ -81,19 +81,19 @@ CLI reviews may show a notice if the GitHub repo is not linked to a CodeRabbit o
 
 ## Concept map
 
-| Area                                                          | Location                                                                                                                              |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Enums / `ProjectConfig` Zod schema                            | [`packages/types/src/index.ts`](packages/types/src/index.ts)                                                                          |
-| Module registry (`MODULE_IDS`, `MODULES`)                     | [`packages/types/src/modules.ts`](packages/types/src/modules.ts)                                                                      |
-| Generator module wiring (templates, workspace deps, env vars) | [`packages/template-generator/src/module-registry.ts`](packages/template-generator/src/module-registry.ts)                            |
-| Stack cascade / repair logic (web + CLI)                      | [`packages/types/src/resolve-stack.ts`](packages/types/src/resolve-stack.ts)                                                          |
-| Display labels & option hints                                 | [`packages/types/src/labels.ts`](packages/types/src/labels.ts)                                                                        |
-| `includes` and Handlebars helpers                             | [`packages/template-generator/src/processor.ts`](packages/template-generator/src/processor.ts)                                        |
-| Template merge (`processTemplatesFromPrefix`)                 | [`packages/template-generator/src/template-utils.ts`](packages/template-generator/src/template-utils.ts)                              |
+| Area                                                          | Location                                                                                                                                                                                  |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enums / `ProjectConfig` Zod schema                            | [`packages/types/src/index.ts`](packages/types/src/index.ts)                                                                                                                              |
+| Module registry (`MODULE_IDS`, `MODULES`)                     | [`packages/types/src/modules.ts`](packages/types/src/modules.ts)                                                                                                                          |
+| Generator module wiring (templates, workspace deps, env vars) | [`packages/template-generator/src/module-registry.ts`](packages/template-generator/src/module-registry.ts)                                                                                |
+| Stack cascade / repair logic (web + CLI)                      | [`packages/types/src/resolve-stack.ts`](packages/types/src/resolve-stack.ts)                                                                                                              |
+| Display labels & option hints                                 | [`packages/types/src/labels.ts`](packages/types/src/labels.ts)                                                                                                                            |
+| `includes` and Handlebars helpers                             | [`packages/template-generator/src/processor.ts`](packages/template-generator/src/processor.ts)                                                                                            |
+| Template merge (`processTemplatesFromPrefix`)                 | [`packages/template-generator/src/template-utils.ts`](packages/template-generator/src/template-utils.ts)                                                                                  |
 | Per-axis handlers                                             | [`packages/template-generator/src/handlers/`](packages/template-generator/src/handlers/) (orchestrated by [`generate-pipeline.ts`](packages/template-generator/src/generate-pipeline.ts)) |
-| Central dependency versions for generated apps                | `versions.yaml` → `pnpm sync-versions` generates [`packages/template-generator/src/deps.ts`](packages/template-generator/src/deps.ts) |
-| Invalid combinations / disable reasons                        | [`packages/types/src/compatibility.ts`](packages/types/src/compatibility.ts)                                                          |
-| Vendor integration reference (Wave 2 modules)                 | [`docs/vendors.md`](docs/vendors.md)                                                                                                  |
+| Central dependency versions for generated apps                | `versions.yaml` → `pnpm sync-versions` generates [`packages/template-generator/src/deps.ts`](packages/template-generator/src/deps.ts)                                                     |
+| Invalid combinations / disable reasons                        | [`packages/types/src/compatibility.ts`](packages/types/src/compatibility.ts)                                                                                                              |
+| Vendor integration reference (Wave 2 modules)                 | [`docs/vendors.md`](docs/vendors.md)                                                                                                                                                      |
 
 ### Handlebars partials (shared snippets)
 

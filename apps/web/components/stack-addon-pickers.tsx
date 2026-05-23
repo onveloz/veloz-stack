@@ -17,7 +17,10 @@ import {
   type LinterChoice,
 } from "@/lib/stack-addons";
 
-const GIT_HOOK_LABELS: Record<GitHookChoice, { label: string; detail: string }> = {
+const GIT_HOOK_LABELS: Record<
+  GitHookChoice,
+  { label: string; detail: string }
+> = {
   none: { label: "Nenhum", detail: "Sem hooks Git no scaffold" },
   husky: {
     label: ADDON_META.husky.label,
@@ -78,9 +81,14 @@ function ExclusiveChoiceGroup<T extends string>({
     <div className="border border-border p-3 bg-secondary/40 space-y-2">
       <div>
         <p className="text-sm font-medium">{title}</p>
-        {hint ? <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p> : null}
+        {hint ? (
+          <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>
+        ) : null}
       </div>
-      <ul aria-label={title} className="border border-border divide-y divide-border bg-background">
+      <ul
+        aria-label={title}
+        className="border border-border divide-y divide-border bg-background"
+      >
         {choices.map((id) => {
           const active = value === id;
           const meta = labels[id];
@@ -92,8 +100,12 @@ function ExclusiveChoiceGroup<T extends string>({
                 role="radio"
                 aria-checked={active}
                 tabIndex={active ? 0 : -1}
-                onClick={() => onChange(id)}
-                onKeyDown={(e) => onKeyDown(e, id)}
+                onClick={() => {
+                  onChange(id);
+                }}
+                onKeyDown={(e) => {
+                  onKeyDown(e, id);
+                }}
                 className={
                   "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors " +
                   (active ? "bg-brand-subtle" : "hover:bg-secondary")
@@ -106,7 +118,9 @@ function ExclusiveChoiceGroup<T extends string>({
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium">{meta.label}</div>
-                  <div className="text-[11px] text-muted-foreground">{meta.detail}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {meta.detail}
+                  </div>
                 </div>
                 <div
                   className={
@@ -146,7 +160,8 @@ export function StackAddonPickers({
 }) {
   const searchParams = useSearchParams();
   const showLegacyHusky =
-    searchParams.get("showLegacy") === "1" || process.env.NEXT_PUBLIC_SHOW_LEGACY_HUSKY === "true";
+    searchParams.get("showLegacy") === "1" ||
+    process.env.NEXT_PUBLIC_SHOW_LEGACY_HUSKY === "true";
 
   const gitHook = getGitHookChoice(config.addons);
   const linter = getLinterChoice(config.addons);
@@ -196,7 +211,9 @@ export function StackAddonPickers({
 
       {gitHook === "lefthook" ? (
         <div className="border border-border p-3 space-y-1 bg-secondary/40">
-          <p className="text-[11px] text-muted-foreground px-0.5">Nível Lefthook (opcional)</p>
+          <p className="text-[11px] text-muted-foreground px-0.5">
+            Nível Lefthook (opcional)
+          </p>
           <ToggleOptionRow
             label="CI básico"
             detail="Pre-push + workflow mínimo"
@@ -218,16 +235,28 @@ export function StackAddonPickers({
           role="checkbox"
           aria-checked={turborepoOn}
           aria-label={ADDON_META.turborepo.label}
-          onClick={() => onTurborepoChange(!turborepoOn)}
+          onClick={() => {
+            onTurborepoChange(!turborepoOn);
+          }}
           className={
             "w-full flex items-center gap-3 text-left " +
-            (turborepoOn ? "text-foreground" : "text-muted-foreground hover:text-foreground")
+            (turborepoOn
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground")
           }
         >
-          <BrandLogo id="turborepo" label={ADDON_META.turborepo.label} height={22} />
+          <BrandLogo
+            id="turborepo"
+            label={ADDON_META.turborepo.label}
+            height={22}
+          />
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium">{ADDON_META.turborepo.label}</div>
-            <div className="text-[11px] text-muted-foreground">{ADDON_META.turborepo.tagline}</div>
+            <div className="text-sm font-medium">
+              {ADDON_META.turborepo.label}
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              {ADDON_META.turborepo.tagline}
+            </div>
           </div>
           <div
             className={
@@ -235,7 +264,9 @@ export function StackAddonPickers({
               (turborepoOn ? "bg-brand border-brand" : "border-border-strong")
             }
           >
-            {turborepoOn ? <span className="block w-2 h-2 bg-brand-foreground" /> : null}
+            {turborepoOn ? (
+              <span className="block w-2 h-2 bg-brand-foreground" />
+            ) : null}
           </div>
         </button>
       </div>

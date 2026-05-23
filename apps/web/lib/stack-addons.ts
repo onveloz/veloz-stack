@@ -40,27 +40,37 @@ export function patchAddonsForGitHook(
   return [...without, choice];
 }
 
-export function patchAddonsForLinter(addons: readonly AddonId[], choice: LinterChoice): AddonId[] {
+export function patchAddonsForLinter(
+  addons: readonly AddonId[],
+  choice: LinterChoice,
+): AddonId[] {
   const without = addons.filter((a) => a !== "biome" && a !== "oxlint");
   if (choice === "none") return without;
   return [...without, choice];
 }
 
-export function patchAddonsTurborepo(addons: readonly AddonId[], on: boolean): AddonId[] {
+export function patchAddonsTurborepo(
+  addons: readonly AddonId[],
+  on: boolean,
+): AddonId[] {
   if (on && !addons.includes("turborepo")) return [...addons, "turborepo"];
   if (on) return [...addons];
   return addons.filter((a) => a !== "turborepo");
 }
 
 /** Side effects when changing exclusive addon groups (clears dependent flags). */
-export function addonFlagsAfterGitHook(choice: GitHookChoice): Partial<ProjectConfig> {
+export function addonFlagsAfterGitHook(
+  choice: GitHookChoice,
+): Partial<ProjectConfig> {
   if (choice !== "lefthook") {
     return { lefthookCi: false, lefthookAdvanced: false };
   }
   return {};
 }
 
-export function addonFlagsAfterLinter(choice: LinterChoice): Partial<ProjectConfig> {
+export function addonFlagsAfterLinter(
+  choice: LinterChoice,
+): Partial<ProjectConfig> {
   if (choice !== "oxlint") {
     return { oxlintStrict: false };
   }

@@ -126,12 +126,16 @@ export function StackBuilder() {
     apply: () => void;
   } | null>(null);
 
-  const visibleSteps = mode === "quick" ? STEPS.filter((s) => QUICK_STEPS.includes(s.id)) : STEPS;
+  const visibleSteps =
+    mode === "quick" ? STEPS.filter((s) => QUICK_STEPS.includes(s.id)) : STEPS;
   const command = useMemo(() => buildCommand(config), [config]);
   const errors = useMemo(() => validateConfig(config), [config]);
 
   const customizedFromPreset =
-    config.preset === "custom" && basePreset && basePreset !== "custom" && basePreset in PRESETS
+    config.preset === "custom" &&
+    basePreset &&
+    basePreset !== "custom" &&
+    basePreset in PRESETS
       ? PRESETS[basePreset as keyof typeof PRESETS].label
       : null;
 
@@ -182,7 +186,10 @@ export function StackBuilder() {
   function toggleModule(id: ModuleId) {
     const has = config.modules.includes(id);
     if (has) {
-      void setState({ modules: config.modules.filter((m) => m !== id), preset: "custom" });
+      void setState({
+        modules: config.modules.filter((m) => m !== id),
+        preset: "custom",
+      });
       return;
     }
     const { newCfg, changes } = resolveEnableModule(config, id);
@@ -192,7 +199,8 @@ export function StackBuilder() {
     }
     setPending({
       title: `Ativar ${MODULES[id].name}?`,
-      primaryReason: changes[changes.length - 1]?.reason ?? "Ajustes necessários no stack.",
+      primaryReason:
+        changes[changes.length - 1]?.reason ?? "Ajustes necessários no stack.",
       changes,
       apply: () => {
         void setState({
@@ -242,22 +250,31 @@ export function StackBuilder() {
     if (id === "none") return;
     const has = config.examples.includes(id);
     void setState({
-      examples: has ? config.examples.filter((e) => e !== id) : [...config.examples, id],
+      examples: has
+        ? config.examples.filter((e) => e !== id)
+        : [...config.examples, id],
       preset: "custom",
     });
   }
 
-  function requestChange(key: keyof ProjectConfig, value: string, labelForTitle?: string) {
+  function requestChange(
+    key: keyof ProjectConfig,
+    value: string,
+    labelForTitle?: string,
+  ) {
     const current = (config as Record<string, unknown>)[key];
     if (current === value) return;
     const { newCfg, changes } = resolveConfig(config, { key, value });
     if (changes.length <= 1) {
-      void setState({ [key]: value, preset: "custom" } as Parameters<typeof setState>[0]);
+      void setState({ [key]: value, preset: "custom" } as Parameters<
+        typeof setState
+      >[0]);
       return;
     }
     setPending({
       title: `Trocar para ${labelForTitle ?? value}?`,
-      primaryReason: changes[0]?.reason || "Isso vai ajustar outras partes do stack.",
+      primaryReason:
+        changes[0]?.reason || "Isso vai ajustar outras partes do stack.",
       changes,
       apply: () => {
         void setState({
@@ -286,7 +303,17 @@ export function StackBuilder() {
       setStep("brazil");
       return;
     }
-    if (["frontend", "mobile", "desktop", "backend", "runtime", "api", "ui"].includes(key)) {
+    if (
+      [
+        "frontend",
+        "mobile",
+        "desktop",
+        "backend",
+        "runtime",
+        "api",
+        "ui",
+      ].includes(key)
+    ) {
       setStep("platform");
       return;
     }
@@ -318,7 +345,9 @@ export function StackBuilder() {
 
   const stepIndex = visibleSteps.findIndex((s) => s.id === step);
   const progress =
-    visibleSteps.length > 0 ? Math.round(((stepIndex + 1) / visibleSteps.length) * 100) : 0;
+    visibleSteps.length > 0
+      ? Math.round(((stepIndex + 1) / visibleSteps.length) * 100)
+      : 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -351,7 +380,9 @@ export function StackBuilder() {
             ) : (
               <Share2 className="w-3.5 h-3.5" />
             )}
-            <span className="hidden sm:inline">{shareCopied ? "Copiado" : "Compartilhar"}</span>
+            <span className="hidden sm:inline">
+              {shareCopied ? "Copiado" : "Compartilhar"}
+            </span>
           </button>
         </div>
       </header>
@@ -366,7 +397,9 @@ export function StackBuilder() {
             <input
               type="text"
               value={config.projectName}
-              onChange={(e) => void setState({ name: e.target.value || "my-veloz-stack" })}
+              onChange={(e) =>
+                void setState({ name: e.target.value || "my-veloz-stack" })
+              }
               className="w-full max-w-xs bg-background border border-input h-9 px-3 text-sm font-mono focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30"
             />
           </div>
@@ -395,7 +428,10 @@ export function StackBuilder() {
         <div className="max-w-6xl mx-auto mt-4 flex gap-2 overflow-x-auto pb-1">
           {Object.entries(PRESETS).map(([id, p]) => {
             const isActive = config.preset === id;
-            const isBase = config.preset === "custom" && basePreset === id && id !== "custom";
+            const isBase =
+              config.preset === "custom" &&
+              basePreset === id &&
+              id !== "custom";
             const comingSoon = COMING_SOON_PRESETS.includes(
               id as (typeof COMING_SOON_PRESETS)[number],
             );
@@ -419,7 +455,9 @@ export function StackBuilder() {
                         : "border-border hover:border-border-strong hover:bg-secondary")
                 }
               >
-                <div className="font-medium text-sm text-foreground">{p.label}</div>
+                <div className="font-medium text-sm text-foreground">
+                  {p.label}
+                </div>
                 <div className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">
                   {p.description}
                 </div>
@@ -429,7 +467,10 @@ export function StackBuilder() {
         </div>
         {customizedFromPreset ? (
           <p className="max-w-6xl mx-auto mt-2 text-[11px] text-muted-foreground">
-            Baseado em <span className="text-foreground font-medium">{customizedFromPreset}</span>
+            Baseado em{" "}
+            <span className="text-foreground font-medium">
+              {customizedFromPreset}
+            </span>
             {" · "}personalizado
           </p>
         ) : null}
@@ -454,9 +495,13 @@ export function StackBuilder() {
                       : "border-transparent hover:bg-secondary text-foreground")
                   }
                 >
-                  <span className="text-[10px] text-muted-foreground font-mono mr-2">{i + 1}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono mr-2">
+                    {i + 1}
+                  </span>
                   <span className="text-sm font-medium">{s.label}</span>
-                  <div className="text-[10px] text-muted-foreground mt-0.5 pl-5">{s.short}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 pl-5">
+                    {s.short}
+                  </div>
                 </button>
               </li>
             ))}
@@ -502,7 +547,9 @@ export function StackBuilder() {
                 requestChange={requestChange}
               />
             )}
-            {step === "data" && <StepData config={config} requestChange={requestChange} />}
+            {step === "data" && (
+              <StepData config={config} requestChange={requestChange} />
+            )}
             {step === "brazil" && (
               <StepBrazil
                 config={config}
@@ -533,7 +580,11 @@ export function StackBuilder() {
               />
             )}
 
-            <StepFooter visibleSteps={visibleSteps} step={step} onStep={setStep} />
+            <StepFooter
+              visibleSteps={visibleSteps}
+              step={step}
+              onStep={setStep}
+            />
           </div>
         </main>
 
@@ -569,7 +620,13 @@ export function StackBuilder() {
   );
 }
 
-function ModeToggle({ mode, onChange }: { mode: BuilderMode; onChange: (m: BuilderMode) => void }) {
+function ModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: BuilderMode;
+  onChange: (m: BuilderMode) => void;
+}) {
   return (
     <div className="inline-flex border border-border-strong text-[11px]">
       <button
@@ -577,7 +634,9 @@ function ModeToggle({ mode, onChange }: { mode: BuilderMode; onChange: (m: Build
         onClick={() => onChange("quick")}
         className={
           "px-2.5 py-1.5 transition-colors " +
-          (mode === "quick" ? "bg-brand text-brand-foreground" : "hover:bg-secondary")
+          (mode === "quick"
+            ? "bg-brand text-brand-foreground"
+            : "hover:bg-secondary")
         }
       >
         Rápido
@@ -587,7 +646,9 @@ function ModeToggle({ mode, onChange }: { mode: BuilderMode; onChange: (m: Build
         onClick={() => onChange("full")}
         className={
           "px-2.5 py-1.5 border-l border-border-strong transition-colors " +
-          (mode === "full" ? "bg-brand text-brand-foreground" : "hover:bg-secondary")
+          (mode === "full"
+            ? "bg-brand text-brand-foreground"
+            : "hover:bg-secondary")
         }
       >
         Completo
@@ -635,13 +696,21 @@ function StepFooter({
   );
 }
 
-function SectionTitle({ children, hint }: { children: React.ReactNode; hint?: string }) {
+function SectionTitle({
+  children,
+  hint,
+}: {
+  children: React.ReactNode;
+  hint?: string;
+}) {
   return (
     <div className="mb-4">
       <h2 className="font-heading text-xl font-semibold" data-heading>
         {children}
       </h2>
-      {hint ? <p className="text-xs text-muted-foreground mt-1">{hint}</p> : null}
+      {hint ? (
+        <p className="text-xs text-muted-foreground mt-1">{hint}</p>
+      ) : null}
     </div>
   );
 }
@@ -695,11 +764,15 @@ function OptionChip({
       }
     >
       <BrandLogo id={id} label={label} height={20} />
-      <span className={`text-xs font-medium truncate ${active ? "text-brand" : "text-foreground"}`}>
+      <span
+        className={`text-xs font-medium truncate ${active ? "text-brand" : "text-foreground"}`}
+      >
         {label}
       </span>
       {brandHint && !active ? (
-        <span className="text-[8px] font-bold px-1 bg-brand/20 text-brand uppercase">★</span>
+        <span className="text-[8px] font-bold px-1 bg-brand/20 text-brand uppercase">
+          ★
+        </span>
       ) : null}
     </button>
   );
@@ -717,7 +790,9 @@ function ChipRow({
   return (
     <div className="mb-5">
       <SubLabel>{label}</SubLabel>
-      {hint ? <p className="text-[11px] text-muted-foreground mb-2 -mt-1">{hint}</p> : null}
+      {hint ? (
+        <p className="text-[11px] text-muted-foreground mb-2 -mt-1">{hint}</p>
+      ) : null}
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
@@ -732,7 +807,11 @@ function StepPlatform({
   config: ProjectConfig;
   extraPlatforms: boolean;
   onExtraPlatformsChange: (v: boolean) => void;
-  requestChange: (key: keyof ProjectConfig, value: string, label?: string) => void;
+  requestChange: (
+    key: keyof ProjectConfig,
+    value: string,
+    label?: string,
+  ) => void;
 }) {
   const runtimeHint =
     config.frontend === "next" && config.backend === "next"
@@ -865,11 +944,17 @@ function StepData({
   requestChange,
 }: {
   config: ProjectConfig;
-  requestChange: (key: keyof ProjectConfig, value: string, label?: string) => void;
+  requestChange: (
+    key: keyof ProjectConfig,
+    value: string,
+    label?: string,
+  ) => void;
 }) {
   return (
     <>
-      <SectionTitle hint="Persistência, auth e onde o app vai rodar.">Dados & deploy</SectionTitle>
+      <SectionTitle hint="Persistência, auth e onde o app vai rodar.">
+        Dados & deploy
+      </SectionTitle>
 
       <div className="border border-border p-4 bg-secondary/30 mb-5">
         <SubLabel>Banco de dados</SubLabel>
@@ -911,7 +996,9 @@ function StepData({
                   active={config.dbHosting === id}
                   disabledReason={getDbHostingDisableReason(config, id)}
                   brandHint={id === "veloz"}
-                  onSelect={() => requestChange("dbHosting", id, labelsDbHost(id))}
+                  onSelect={() =>
+                    requestChange("dbHosting", id, labelsDbHost(id))
+                  }
                 />
               ))}
             </ChipRow>
@@ -992,7 +1079,9 @@ function ModuleListSection({
     <div className="space-y-3">
       <div>
         <h3 className="font-heading text-base font-semibold">{title}</h3>
-        {hint ? <p className="text-xs text-muted-foreground mt-1">{hint}</p> : null}
+        {hint ? (
+          <p className="text-xs text-muted-foreground mt-1">{hint}</p>
+        ) : null}
       </div>
       {byCategory.map(({ cat, items }) => (
         <div key={cat}>
@@ -1022,22 +1111,30 @@ function ModuleListSection({
                     <BrandLogo id={m.id} label={m.name} height={22} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium truncate">{m.name}</span>
+                        <span className="text-sm font-medium truncate">
+                          {m.name}
+                        </span>
                         {m.brazilian ? (
                           <span className="text-[9px] font-bold px-1 bg-success/20 text-success">
                             BR
                           </span>
                         ) : null}
                       </div>
-                      <div className="text-[11px] text-muted-foreground truncate">{m.tagline}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">
+                        {m.tagline}
+                      </div>
                     </div>
                     <div
                       className={
                         "w-4 h-4 border flex items-center justify-center shrink-0 " +
-                        (active ? "bg-brand border-brand" : "border-border-strong")
+                        (active
+                          ? "bg-brand border-brand"
+                          : "border-border-strong")
                       }
                     >
-                      {active ? <Check className="w-3 h-3 text-brand-foreground" /> : null}
+                      {active ? (
+                        <Check className="w-3 h-3 text-brand-foreground" />
+                      ) : null}
                     </div>
                   </button>
                 </li>
@@ -1076,8 +1173,13 @@ function StepBrazil({
         Módulos & integrações
       </SectionTitle>
       <p className="text-sm text-muted-foreground -mt-2 mb-4">
-        <span className="text-brand font-medium tabular-nums">{config.modules.length}</span> ativos
-        {config.preset === "veloz-br" ? " · preset Veloz BR já inclui o essencial" : ""}
+        <span className="text-brand font-medium tabular-nums">
+          {config.modules.length}
+        </span>{" "}
+        ativos
+        {config.preset === "veloz-br"
+          ? " · preset Veloz BR já inclui o essencial"
+          : ""}
       </p>
 
       <div className="flex flex-col sm:flex-row gap-2 mb-3">
@@ -1164,7 +1266,10 @@ function StepTools({
           onLinterChange={onLinterChange}
           onTurborepoChange={onTurborepoChange}
           onOxlintStrictChange={() =>
-            void setState({ oxlintStrict: !config.oxlintStrict, preset: "custom" })
+            void setState({
+              oxlintStrict: !config.oxlintStrict,
+              preset: "custom",
+            })
           }
           onLefthookCiChange={() =>
             void setState({
@@ -1211,7 +1316,9 @@ function StepTools({
               <Sparkles className="w-4 h-4 text-brand shrink-0 mt-0.5" />
               <div>
                 <div className="text-sm font-medium">{meta.label}</div>
-                <div className="text-[11px] text-muted-foreground">{meta.tagline}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {meta.tagline}
+                </div>
               </div>
             </button>
           );
@@ -1233,7 +1340,11 @@ function StepReview({
   onEdit: (key: string) => void;
 }) {
   const rows: { key: string; label: string; value: string }[] = [
-    { key: "frontend", label: "Frontend", value: labelsFrontend(config.frontend) },
+    {
+      key: "frontend",
+      label: "Frontend",
+      value: labelsFrontend(config.frontend),
+    },
     { key: "backend", label: "Backend", value: labelsBackend(config.backend) },
     { key: "runtime", label: "Runtime", value: titleCase(config.runtime) },
     { key: "api", label: "API", value: labelsApi(config.api) },
@@ -1244,8 +1355,16 @@ function StepReview({
     },
     { key: "auth", label: "Auth", value: labelsAuth(config.auth) },
     { key: "deploy", label: "Deploy", value: labelsDeploy(config.deploy) },
-    { key: "modules", label: "Módulos", value: `${config.modules.length} ativos` },
-    { key: "addons", label: "Ferramentas", value: config.addons.join(", ") || "—" },
+    {
+      key: "modules",
+      label: "Módulos",
+      value: `${config.modules.length} ativos`,
+    },
+    {
+      key: "addons",
+      label: "Ferramentas",
+      value: config.addons.join(", ") || "—",
+    },
   ];
 
   return (
@@ -1264,7 +1383,9 @@ function StepReview({
               className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left hover:bg-secondary text-sm"
             >
               <span className="text-muted-foreground">{r.label}</span>
-              <span className="font-mono text-foreground truncate">{r.value}</span>
+              <span className="font-mono text-foreground truncate">
+                {r.value}
+              </span>
             </button>
           </li>
         ))}

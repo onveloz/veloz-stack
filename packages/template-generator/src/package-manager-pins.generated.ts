@@ -18,7 +18,7 @@ export function packageManagerSpecifier(pm: "bun" | "pnpm" | "npm"): string {
       return "npm@11.15.0";
     }
     default: {
-      throw new Error(`Unknown package manager: ${String(pm satisfies never)}`);
+      throw new Error(`Unknown package manager: ${String(pm)}`);
     }
   }
 }

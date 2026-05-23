@@ -108,7 +108,9 @@ function pickRoute(entry) {
 
 function findByCandidates(catalog, candidates) {
   for (const c of candidates) {
-    const exact = catalog.find((e) => e.title.toLowerCase() === c.toLowerCase());
+    const exact = catalog.find(
+      (e) => e.title.toLowerCase() === c.toLowerCase(),
+    );
     if (exact) return exact;
   }
   for (const c of candidates) {
@@ -116,7 +118,11 @@ function findByCandidates(catalog, candidates) {
     const partial = catalog.find((e) => {
       const t = e.title.toLowerCase();
       if (t === needle) return true;
-      if (t.startsWith(`${needle} `) || t.startsWith(`${needle}/`) || t.startsWith(`${needle}.`))
+      if (
+        t.startsWith(`${needle} `) ||
+        t.startsWith(`${needle}/`) ||
+        t.startsWith(`${needle}.`)
+      )
         return true;
       // endsWith only for multi-word needles (avoids "Photoshop Express" for "Express")
       if (needle.includes(" ") && t.endsWith(` ${needle}`)) return true;
@@ -164,7 +170,9 @@ async function main() {
   console.log(`\nMatched ${matched.length}:`);
   for (const m of matched) console.log(`  ✓ ${m.id.padEnd(20)} → ${m.title}`);
   if (missing.length > 0) {
-    console.log(`\nMissing ${missing.length} (will use letter-badge fallback):`);
+    console.log(
+      `\nMissing ${missing.length} (will use letter-badge fallback):`,
+    );
     for (const id of missing) console.log(`  · ${id}`);
   }
 }

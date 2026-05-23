@@ -12,6 +12,8 @@ export function appendModuleEnvVarsFromRegistry(
     return;
   }
 
-  const existing = vfs.read(".env.example") ?? "";
-  vfs.write(".env.example", `${existing.trimEnd()}\n${additions.join("\n")}\n`);
+  const existing = vfs.read(".env.example");
+  const prefix =
+    existing && existing.trimEnd().length > 0 ? `${existing.trimEnd()}\n` : "";
+  vfs.write(".env.example", `${prefix}${additions.join("\n")}\n`);
 }

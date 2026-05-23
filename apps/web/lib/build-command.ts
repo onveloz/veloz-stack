@@ -15,7 +15,10 @@ const STACK_KEYS = [
   "ui",
 ] as const satisfies readonly (keyof ProjectConfig)[];
 
-export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | "npm" }): string {
+export function buildCommand(
+  cfg: ProjectConfig,
+  opts?: { pm?: "bun" | "pnpm" | "npm" },
+): string {
   const runner = opts?.pm ?? cfg.pm;
   const head =
     runner === "bun"
@@ -48,7 +51,9 @@ export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | 
   if (cfg.oxlintStrict) flags.push("--oxlint-strict");
   flags.push("--yes");
 
-  return `${head} ${cfg.projectName} ${flags.join(" ")}`.replace(/\s+/g, " ").trim();
+  return `${head} ${cfg.projectName} ${flags.join(" ")}`
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function kebab(s: string): string {

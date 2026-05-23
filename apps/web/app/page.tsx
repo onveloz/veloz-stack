@@ -40,7 +40,10 @@ export default function Home() {
       <header className="h-11 border-b border-border flex items-center justify-between px-6">
         <Logo />
         <nav className="flex items-center gap-5 text-xs text-muted-foreground">
-          <a href="https://github.com/onveloz/veloz-stack" className="hover:text-foreground">
+          <a
+            href="https://github.com/onveloz/veloz-stack"
+            className="hover:text-foreground"
+          >
             GitHub
           </a>
           <Link href="/showcase" className="hover:text-foreground">
@@ -74,9 +77,9 @@ export default function Home() {
               <span className="text-brand">na velocidade do Brasil.</span>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 text-balance">
-              Scaffolder full-stack TypeScript opinado. Escolha seus blocos, receba um monorepo
-              pronto pra produção com PIX, LGPD, auth por SMS, skills do Claude, e deploy no Veloz
-              num comando.
+              Scaffolder full-stack TypeScript opinado. Escolha seus blocos,
+              receba um monorepo pronto pra produção com PIX, LGPD, auth por
+              SMS, skills do Claude, e deploy no Veloz num comando.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
@@ -87,7 +90,9 @@ export default function Home() {
                 Montar meu stack <ArrowRight className="w-4 h-4" />
               </Link>
               <div className="flex items-center gap-0 border border-border-strong bg-secondary pl-3 pr-1 h-10">
-                <code className="font-mono text-sm text-foreground">{INSTALL_CMD}</code>
+                <code className="font-mono text-sm text-foreground">
+                  {INSTALL_CMD}
+                </code>
                 <div className="ml-3">
                   <CopyButton value={INSTALL_CMD} />
                 </div>
@@ -119,8 +124,12 @@ export default function Home() {
                 <div className="w-8 h-8 border border-border-strong bg-secondary inline-flex items-center justify-center mb-4">
                   <f.icon className="w-4 h-4 text-brand" />
                 </div>
-                <h3 className="font-heading text-lg font-semibold mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+                <h3 className="font-heading text-lg font-semibold mb-2">
+                  {f.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {f.body}
+                </p>
               </div>
             ))}
           </div>
@@ -132,8 +141,9 @@ export default function Home() {
               Monte seus blocos. Pule o boilerplate.
             </h2>
             <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
-              Cada módulo chega com código, env vars, handlers de webhook e uma skill do Claude — o
-              agente já sabe a integração no instante do scaffold.
+              Cada módulo chega com código, env vars, handlers de webhook e uma
+              skill do Claude — o agente já sabe a integração no instante do
+              scaffold.
             </p>
             <Link
               href="/new"

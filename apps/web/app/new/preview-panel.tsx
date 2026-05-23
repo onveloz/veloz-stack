@@ -1,12 +1,24 @@
 "use client";
 
 import type { ProjectConfig } from "@veloz-stack/types";
-import { ChevronRight, FileCode2, FolderClosed, FolderOpen, Loader2 } from "lucide-react";
+import {
+  ChevronRight,
+  FileCode2,
+  FolderClosed,
+  FolderOpen,
+  Loader2,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type TreeNode =
   | { kind: "file"; name: string; path: string }
-  | { kind: "dir"; name: string; path: string; children: TreeNode[]; startOpen: boolean };
+  | {
+      kind: "dir";
+      name: string;
+      path: string;
+      children: TreeNode[];
+      startOpen: boolean;
+    };
 
 function buildTree(paths: string[]): TreeNode[] {
   const root: TreeNode[] = [];
@@ -100,11 +112,16 @@ export function PreviewPanel({
   const { tree, fileCount, loading } = usePreviewVfs(config);
 
   return (
-    <div className="flex flex-col h-full" style={maxHeight ? { maxHeight } : undefined}>
+    <div
+      className="flex flex-col h-full"
+      style={maxHeight ? { maxHeight } : undefined}
+    >
       <div className="px-4 py-2 border-b border-border flex items-center justify-between bg-secondary/30 shrink-0">
         <div className="flex items-center gap-2">
           <FileCode2 className="w-3.5 h-3.5 text-brand" />
-          <span className="text-[11px] uppercase tracking-wider font-medium">Preview</span>
+          <span className="text-[11px] uppercase tracking-wider font-medium">
+            Preview
+          </span>
         </div>
         <span className="text-[11px] text-muted-foreground tabular-nums">
           {loading ? "…" : `${fileCount} ${fileCount === 1 ? "file" : "files"}`}
@@ -122,7 +139,9 @@ export function PreviewPanel({
               <TreeRow key={n.path} node={n} depth={0} />
             ))}
             {tree.length === 0 && (
-              <div className="text-muted-foreground p-4">No files — everything set to none.</div>
+              <div className="text-muted-foreground p-4">
+                No files — everything set to none.
+              </div>
             )}
           </>
         )}
@@ -151,7 +170,9 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
     <div>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen((v) => !v);
+        }}
         className="flex items-center gap-1 w-full px-1 py-0.5 hover:bg-secondary text-left"
         style={{ paddingLeft: 4 + depth * 12 }}
       >
@@ -165,7 +186,10 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
         )}
         <span className="truncate text-foreground">{node.name}</span>
       </button>
-      {open && node.children.map((c) => <TreeRow key={c.path} node={c} depth={depth + 1} />)}
+      {open &&
+        node.children.map((c) => (
+          <TreeRow key={c.path} node={c} depth={depth + 1} />
+        ))}
     </div>
   );
 }

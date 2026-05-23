@@ -221,7 +221,7 @@ flowchart LR
 | Unit                 | `pnpm --filter @veloz-stack/template-generator test`                                                            | implementer |
 | Monorepo types       | `pnpm -r --parallel check-types`                                                                                | implementer |
 | Local scaffold smoke | `tsx apps/cli/src/index.ts /tmp/v-next --yes --frontend next --backend next --pm pnpm` then typecheck in output | implementer |
-| Plan readiness       | `node ~/.claude/scripts/plan-readiness-check.mjs docs/plans/archive/next-backend-routes.plan.md`                        | autoplan    |
+| Plan readiness       | `node ~/.claude/scripts/plan-readiness-check.mjs docs/plans/archive/next-backend-routes.plan.md`                | autoplan    |
 | CI                   | GitHub Actions on PR                                                                                            | CI          |
 
 ## Rollback

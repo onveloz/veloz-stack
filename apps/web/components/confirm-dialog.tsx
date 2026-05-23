@@ -52,8 +52,12 @@ export function ConfirmCascadeDialog({
               <Triangle className="w-4 h-4 text-warning" fill="currentColor" />
             </div>
             <div>
-              <h3 className="font-heading text-base font-semibold leading-tight">{title}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{primaryReason}</p>
+              <h3 className="font-heading text-base font-semibold leading-tight">
+                {title}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {primaryReason}
+              </p>
             </div>
           </div>
           <button
@@ -75,13 +79,15 @@ export function ConfirmCascadeDialog({
               {cascade.map((c, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs">
                   <div className="flex items-center gap-1.5 font-mono flex-wrap">
-                    <span className="text-muted-foreground">{formatKey(c.key)}:</span>
+                    <span className="text-muted-foreground">
+                      {formatKey(c.key)}:
+                    </span>
                     <span className="text-foreground line-through decoration-destructive/50">
                       {c.from}
                     </span>
                     <ArrowRight className="w-3 h-3 text-muted-foreground" />
                     <span className="text-brand font-semibold">
-                      {c.to === null ? "removido" : c.to}
+                      {c.to ?? "removido"}
                     </span>
                   </div>
                 </li>

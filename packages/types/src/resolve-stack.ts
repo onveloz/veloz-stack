@@ -7,8 +7,13 @@ import {
   validateConfig,
 } from "./compatibility";
 import type { ModuleId, ProjectConfig } from "./index";
-import { assignStackAxisFromString, getStackAxisValue, RESOLVERS } from './resolve-stack-axis';
-import type { StackKey } from './resolve-stack-axis';
+import {
+  assignStackAxisFromString,
+  getStackAxisValue,
+  RESOLVERS,
+} from "./resolve-stack-axis";
+/* oxlint-disable-next-line import/no-duplicate-imports, import/consistent-type-specifier-style -- split type import */
+import type { StackKey } from "./resolve-stack-axis";
 import { findReason, satisfyPendingChoice } from "./resolve-stack-pending";
 import type { ConfigChange } from "./resolve-stack-types";
 

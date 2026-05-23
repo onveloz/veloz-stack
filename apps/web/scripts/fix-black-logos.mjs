@@ -22,8 +22,14 @@ function repaint(svg) {
   let out = svg;
 
   // 1. Repaint explicit black fills/strokes
-  out = out.replace(/fill=("(?:black|#000|#000000|#111111?|#222222?)")/gi, 'fill="#ffffff"');
-  out = out.replace(/stroke=("(?:black|#000|#000000|#111111?|#222222?)")/gi, 'stroke="#ffffff"');
+  out = out.replace(
+    /fill=("(?:black|#000|#000000|#111111?|#222222?)")/gi,
+    'fill="#ffffff"',
+  );
+  out = out.replace(
+    /stroke=("(?:black|#000|#000000|#111111?|#222222?)")/gi,
+    'stroke="#ffffff"',
+  );
 
   // 2. Inject fill on root <svg> if missing
   const svgTag = out.match(/<svg[^>]*>/);
@@ -35,7 +41,9 @@ function repaint(svg) {
 }
 
 function hasGradientPaint(svg) {
-  return /<(?:linear|radial)Gradient/i.test(svg) || /fill="url\s*\(#/i.test(svg);
+  return (
+    /<(?:linear|radial)Gradient/i.test(svg) || /fill="url\s*\(#/i.test(svg)
+  );
 }
 
 function isMostlyColored(svg) {
