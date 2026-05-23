@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { basename, resolve } from "node:path";
+import { basename, dirname, isAbsolute, resolve } from "node:path";
 import { scaffold } from "@veloz-stack/template-generator/scaffold";
 import {
   AddonId,
@@ -122,11 +122,15 @@ function applyUiFallback(input: CreateInput, config: ProjectConfig): void {
 }
 
 function resolveTargetDirectory(config: ProjectConfig): string {
+  const raw = config.projectName.trim();
   const safeName =
-    basename(config.projectName)
+    basename(raw)
       .replaceAll(/[^a-z0-9-_]/gi, "-")
       .toLowerCase() || "my-veloz-stack";
   config.projectName = safeName;
+  if (isAbsolute(raw)) {
+    return resolve(dirname(raw), safeName);
+  }
   return resolve(process.cwd(), safeName);
 }
 
