@@ -1,5 +1,8 @@
 import { MODULES, PRESETS } from "@veloz-stack/types";
-import { resolveStackChange } from "@veloz-stack/types/resolve-stack";
+import {
+  isStackKey,
+  resolveStackChange,
+} from "@veloz-stack/types/resolve-stack";
 
 import { buildSurpriseConfig } from "@/lib/randomize-stack";
 import { repairStackConfig, resolveEnableModule } from "@/lib/resolve-config";
@@ -12,6 +15,7 @@ import {
 } from "@/lib/stack-addons";
 import type { GitHookChoice, LinterChoice } from "@/lib/stack-addons-types";
 import type {
+  ConfigChange,
   ModuleId,
   PresetKey,
   ProjectConfig,
@@ -36,12 +40,16 @@ export interface HandlerContext {
 export function createShareHandler(
   ctx: Pick<HandlerContext, "setShareCopied">,
 ) {
-  return function handleShare() {
-    void navigator.clipboard.writeText(globalThis.location.href);
-    ctx.setShareCopied(true);
-    setTimeout(() => {
+  return async function handleShare() {
+    try {
+      await navigator.clipboard.writeText(globalThis.location.href);
+      ctx.setShareCopied(true);
+      setTimeout(() => {
+        ctx.setShareCopied(false);
+      }, 1500);
+    } catch {
       ctx.setShareCopied(false);
-    }, 1500);
+    }
   };
 }
 
@@ -195,42 +203,72 @@ export function createRequestChangeHandler(
     value: string,
     labelForTitle?: string,
   ) {
-    const current = (ctx.config as Record<string, unknown>)[key];
-    if (current === value) {
-      return;
-    }
-    const { newCfg, changes } = resolveStackChange(ctx.config, { key, value });
-    if (changes.length <= 1) {
-      void ctx.setState({ [key]: value, preset: "custom" } as Parameters<
-        typeof ctx.setState
-      >[0]);
-      return;
-    }
-    ctx.setPending({
-      title: `Trocar para ${labelForTitle ?? value}?`,
-      primaryReason:
-        changes[0]?.reason ?? "Isso vai ajustar outras partes do stack.",
-      changes,
-      apply: () => {
-        void ctx.setState({
-          frontend: newCfg.frontend,
-          backend: newCfg.backend,
-          runtime: newCfg.runtime,
-          api: newCfg.api,
-          db: newCfg.db,
-          orm: newCfg.orm,
-          dbHosting: newCfg.dbHosting,
-          auth: newCfg.auth,
-          deploy: newCfg.deploy,
-          pm: newCfg.pm,
-          ui: newCfg.ui,
-          modules: newCfg.modules,
-          preset: "custom",
-        });
-        ctx.setPending(null);
-      },
-    });
+    applyStackRequestChange(ctx, { key, value, labelForTitle });
   };
+}
+
+function applyResolvedStackChange(
+  ctx: Pick<HandlerContext, "setState" | "setPending">,
+  newCfg: ProjectConfig,
+  meta: { title: string; primaryReason: string; changes: ConfigChange[] },
+) {
+  ctx.setPending({
+    title: meta.title,
+    primaryReason: meta.primaryReason,
+    changes: meta.changes,
+    apply: () => {
+      void ctx.setState({
+        frontend: newCfg.frontend,
+        backend: newCfg.backend,
+        runtime: newCfg.runtime,
+        api: newCfg.api,
+        db: newCfg.db,
+        orm: newCfg.orm,
+        dbHosting: newCfg.dbHosting,
+        auth: newCfg.auth,
+        deploy: newCfg.deploy,
+        pm: newCfg.pm,
+        ui: newCfg.ui,
+        modules: newCfg.modules,
+        preset: "custom",
+      });
+      ctx.setPending(null);
+    },
+  });
+}
+
+function applyStackRequestChange(
+  ctx: Pick<HandlerContext, "config" | "setState" | "setPending">,
+  change: {
+    key: keyof ProjectConfig;
+    value: string;
+    labelForTitle?: string;
+  },
+) {
+  const { key, value, labelForTitle } = change;
+  const current = (ctx.config as Record<string, unknown>)[key];
+  if (current === value) {
+    return;
+  }
+  if (!isStackKey(key)) {
+    void ctx.setState({ [key]: value, preset: "custom" } as Parameters<
+      typeof ctx.setState
+    >[0]);
+    return;
+  }
+  const { newCfg, changes } = resolveStackChange(ctx.config, { key, value });
+  if (changes.length <= 1) {
+    void ctx.setState({ [key]: value, preset: "custom" } as Parameters<
+      typeof ctx.setState
+    >[0]);
+    return;
+  }
+  applyResolvedStackChange(ctx, newCfg, {
+    title: `Trocar para ${labelForTitle ?? value}?`,
+    primaryReason:
+      changes[0]?.reason ?? "Isso vai ajustar outras partes do stack.",
+    changes,
+  });
 }
 
 export function createGoToStepHandler(

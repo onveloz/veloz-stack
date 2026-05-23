@@ -4,7 +4,7 @@ import type { ProjectConfig } from "@veloz-stack/types";
 
 import { DatabaseSection } from "./stack-builder-step-data-db";
 import { AuthDeployPmSection } from "./stack-builder-step-data-rest";
-import type { RequestChange } from "./stack-builder-step-platform-sections";
+import type { RequestChange } from "./stack-builder-app-types";
 import { SectionTitle } from "./stack-builder-ui";
 
 export function StepData({

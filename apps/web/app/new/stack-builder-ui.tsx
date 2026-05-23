@@ -18,6 +18,7 @@ export function ModeToggle({
         onClick={() => {
           onChange("quick");
         }}
+        aria-pressed={mode === "quick"}
         className={`px-2.5 py-1.5 transition-colors ${
           mode === "quick"
             ? "bg-brand text-brand-foreground"
@@ -31,6 +32,7 @@ export function ModeToggle({
         onClick={() => {
           onChange("full");
         }}
+        aria-pressed={mode === "full"}
         className={`px-2.5 py-1.5 border-l border-border-strong transition-colors ${
           mode === "full"
             ? "bg-brand text-brand-foreground"
@@ -53,6 +55,9 @@ export function StepFooter({
   onStep: (s: StepId) => void;
 }) {
   const idx = visibleSteps.findIndex((s) => s.id === step);
+  if (idx === -1) {
+    return null;
+  }
   const prev = visibleSteps[idx - 1];
   const next = visibleSteps[idx + 1];
   if (!prev && !next) {

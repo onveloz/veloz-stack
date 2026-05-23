@@ -16,7 +16,12 @@ import {
   createTurborepoHandler,
 } from "./stack-builder-state-handlers";
 import type { StackBuilderCoreState } from "./stack-builder-state-core";
-import { isComingSoonPreset, isPresetKey } from "./stack-builder-state-utils";
+import {
+  getVisibleSteps,
+  isComingSoonPreset,
+  isPresetKey,
+} from "./stack-builder-state-utils";
+import type { BuilderMode } from "./stack-builder-app-types";
 
 type SetState = ReturnType<typeof useStackConfig>["setState"];
 
@@ -47,7 +52,13 @@ export function assembleStackBuilderHandlers(
     requestChange: createRequestChangeHandler(handlerCtx),
     handleGoToStepForKey: createGoToStepHandler(handlerCtx),
     handleStepChange: core.setStep,
-    handleModeChange: core.setMode,
+    handleModeChange: (mode: BuilderMode) => {
+      core.setMode(mode);
+      const visibleIds = getVisibleSteps(mode).map((s) => s.id);
+      if (!visibleIds.includes(core.step)) {
+        core.setStep(visibleIds[0] ?? "platform");
+      }
+    },
     handleExtraPlatformsChange: core.setExtraPlatforms,
     handleModuleSearchChange: core.setModuleSearch,
     handleModuleFilterChange: core.setModuleFilter,

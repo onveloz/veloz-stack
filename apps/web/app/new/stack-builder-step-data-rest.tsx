@@ -12,7 +12,7 @@ import type { ProjectConfig } from "@/lib/veloz-stack-types";
 
 import { OptionChip } from "./stack-builder-option-chip";
 import { labelsAuth, labelsDeploy, titleCase } from "./stack-builder-labels";
-import type { RequestChange } from "./stack-builder-step-platform-sections";
+import type { RequestChange } from "./stack-builder-app-types";
 import { ChipRow } from "./stack-builder-ui";
 
 function AuthChipRow({

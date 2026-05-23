@@ -62,6 +62,45 @@ function FrontendUiSection({
   );
 }
 
+function ExtraPlatformsDisclosure({
+  extraPlatforms,
+  onExtraPlatformsChange,
+  config,
+  requestChange,
+}: {
+  extraPlatforms: boolean;
+  onExtraPlatformsChange: (v: boolean) => void;
+  config: ProjectConfig;
+  requestChange: RequestChange;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        aria-expanded={extraPlatforms}
+        aria-controls="extra-platforms-panel"
+        onClick={() => {
+          onExtraPlatformsChange(!extraPlatforms);
+        }}
+        className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-3"
+      >
+        <ChevronDown
+          className={`w-4 h-4 transition-transform ${extraPlatforms ? "rotate-180" : ""}`}
+        />
+        Plataformas extras (mobile / desktop)
+      </button>
+      {extraPlatforms ? (
+        <div id="extra-platforms-panel">
+          <ExtraPlatformsSection
+            config={config}
+            requestChange={requestChange}
+          />
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 export function StepPlatform({
   config,
   extraPlatforms,
@@ -92,21 +131,12 @@ export function StepPlatform({
         runtimeHint={runtimeHint}
       />
 
-      <button
-        type="button"
-        onClick={() => {
-          onExtraPlatformsChange(!extraPlatforms);
-        }}
-        className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-3"
-      >
-        <ChevronDown
-          className={`w-4 h-4 transition-transform ${extraPlatforms ? "rotate-180" : ""}`}
-        />
-        Plataformas extras (mobile / desktop)
-      </button>
-      {extraPlatforms ? (
-        <ExtraPlatformsSection config={config} requestChange={requestChange} />
-      ) : null}
+      <ExtraPlatformsDisclosure
+        extraPlatforms={extraPlatforms}
+        onExtraPlatformsChange={onExtraPlatformsChange}
+        config={config}
+        requestChange={requestChange}
+      />
     </>
   );
 }

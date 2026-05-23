@@ -68,30 +68,6 @@ function ConfirmDialogHeader({
   );
 }
 
-function useConfirmDialogKeys(
-  open: boolean,
-  onConfirm: () => void,
-  onCancel: () => void,
-) {
-  useEffect(() => {
-    if (!open) {
-      return () => {};
-    }
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onCancel();
-      }
-      if (event.key === "Enter") {
-        onConfirm();
-      }
-    }
-    globalThis.addEventListener("keydown", onKey);
-    return () => {
-      globalThis.removeEventListener("keydown", onKey);
-    };
-  }, [open, onConfirm, onCancel]);
-}
-
 function useConfirmDialogVisibility(
   open: boolean,
   dialogRef: { current: HTMLDialogElement | null },
@@ -136,7 +112,7 @@ function ConfirmDialogPanel({
   );
 }
 
-/** Modal confirming a stack change that cascades other axis fields (Escape cancels, Enter confirms). */
+/** Modal confirming a stack change that cascades other axis fields (Escape cancels via native dialog). */
 export function ConfirmCascadeDialog({
   open,
   title,
@@ -154,7 +130,6 @@ export function ConfirmCascadeDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  useConfirmDialogKeys(open, onConfirm, onCancel);
   useConfirmDialogVisibility(open, dialogRef);
 
   return (

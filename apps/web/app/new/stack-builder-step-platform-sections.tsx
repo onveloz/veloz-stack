@@ -13,15 +13,10 @@ import {
 
 import type { ProjectConfig } from "@/lib/veloz-stack-types";
 
+import type { RequestChange } from "./stack-builder-app-types";
 import { OptionChip } from "./stack-builder-option-chip";
 import { labelsApi, labelsBackend, titleCase } from "./stack-builder-labels";
 import { ChipRow, SubLabel } from "./stack-builder-ui";
-
-export type RequestChange = (
-  key: keyof ProjectConfig,
-  value: string,
-  label?: string,
-) => void;
 
 function BackendChipRow({
   config,

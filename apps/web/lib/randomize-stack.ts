@@ -20,6 +20,7 @@ import {
   patchAddonsTurborepo,
 } from "@/lib/stack-addons";
 import type { GitHookChoice, LinterChoice } from "@/lib/stack-addons-types";
+import type { StackKey } from "@veloz-stack/types/resolve-stack-axis";
 import { isStackConfigValid, repairStackConfig } from "@/lib/resolve-config";
 
 const SURPRISE_PRESETS = [
@@ -28,7 +29,11 @@ const SURPRISE_PRESETS = [
   "minimal",
 ] as const satisfies readonly PresetKey[];
 
-const SPICE_KEYS = ["deploy", "auth", "api", "pm"] as const;
+const SPICE_KEYS = [
+  "deploy",
+  "auth",
+  "api",
+] as const satisfies readonly StackKey[];
 
 function pick<T>(arr: readonly T[]): T {
   if (arr.length === 0) {
@@ -110,6 +115,9 @@ function fallbackConfig(keep: {
   git: boolean;
   install: boolean;
 }): ProjectConfig {
+  const linter: LinterChoice = "biome";
+  const hook: GitHookChoice = "none";
+  const addons = patchAddonsTurborepo(patchAddonsForLinter([], linter), true);
   return repairStackConfig({
     ...structuredClone(DEFAULT_CONFIG),
     preset: "custom",
@@ -119,8 +127,12 @@ function fallbackConfig(keep: {
     mobile: "none",
     desktop: "none",
     examples: [],
-    ...randomAddons(),
-    addons: patchAddonsTurborepo(patchAddonsForLinter([], "biome"), true),
+    addons,
+    oxlintStrict: false,
+    lefthookCi: false,
+    lefthookAdvanced: false,
+    ...addonFlagsAfterLinter(linter),
+    ...addonFlagsAfterGitHook(hook),
   });
 }
 
@@ -133,7 +145,6 @@ function maybeSpiceConfig(cfg: ProjectConfig): ProjectConfig {
     deploy: ["veloz", "vercel", "fly", "render"],
     auth: ["better-auth", "none"],
     api: ["orpc", "none"],
-    pm: ["pnpm", "bun", "npm"],
   };
   const value = pick(resolverOpts[key]);
   return resolveStackChange(cfg, { key, value }).newCfg;

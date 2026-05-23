@@ -11,7 +11,7 @@ import type { ProjectConfig } from "@/lib/veloz-stack-types";
 
 import { OptionChip } from "./stack-builder-option-chip";
 import { labelsDbHost, titleCase } from "./stack-builder-labels";
-import type { RequestChange } from "./stack-builder-step-platform-sections";
+import type { RequestChange } from "./stack-builder-app-types";
 import { ChipRow, SubLabel } from "./stack-builder-ui";
 
 function OrmHostingRows({

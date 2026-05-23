@@ -24,6 +24,7 @@ function SidebarStepButton({
           ? "border-brand bg-brand-subtle text-brand"
           : "border-transparent hover:bg-secondary text-foreground"
       }`}
+      aria-current={active ? "step" : undefined}
     >
       <span className="text-[10px] text-muted-foreground font-mono mr-2">
         {index + 1}
@@ -104,6 +105,7 @@ export function StackBuilderMobileTabs({
               ? "border-brand text-brand"
               : "border-transparent text-muted-foreground"
           }`}
+          aria-current={step === stepItem.id ? "step" : undefined}
         >
           {stepItem.label}
         </button>

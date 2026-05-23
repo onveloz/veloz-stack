@@ -30,6 +30,7 @@ export function StackBuilderHeader({
         <button
           type="button"
           onClick={onRandomize}
+          aria-label="Surpreender"
           className="inline-flex items-center gap-1.5 text-xs h-8 px-3 border border-border-strong bg-secondary hover:bg-border-strong"
         >
           <Shuffle className="w-3.5 h-3.5" />
@@ -38,6 +39,7 @@ export function StackBuilderHeader({
         <button
           type="button"
           onClick={onShare}
+          aria-label={shareCopied ? "Link copiado" : "Compartilhar link"}
           className="inline-flex items-center gap-1.5 text-xs h-8 px-3 border border-border-strong bg-secondary hover:bg-border-strong"
         >
           {shareCopied ? (

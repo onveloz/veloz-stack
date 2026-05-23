@@ -11,6 +11,20 @@ import { join } from "node:path";
 const __dirname = import.meta.dirname;
 const OUT_DIR = join(__dirname, "..", "public", "logos");
 
+const FETCH_TIMEOUT_MS = 15_000;
+
+async function fetchWithTimeout(url, init) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 /** id → fuzzy title candidates (tried in order). Use exact svgl `title` when known. */
 const LOGO_MAP = {
   // frontend
@@ -147,7 +161,7 @@ function findByCandidates(catalog, candidates) {
 
 try {
   console.log("Fetching svgl catalog…");
-  const res = await fetch("https://api.svgl.app");
+  const res = await fetchWithTimeout("https://api.svgl.app");
   if (!res.ok) {
     throw new Error(`svgl.app responded ${res.status}`);
   }
@@ -166,7 +180,7 @@ try {
       if (!url) {
         return { kind: "missing", id };
       }
-      const svgRes = await fetch(url);
+      const svgRes = await fetchWithTimeout(url);
       if (!svgRes.ok) {
         console.warn(`  ${id}: ${url} → ${svgRes.status}`);
         return { kind: "missing", id };

@@ -29,7 +29,8 @@ export function ExampleCard({
   return (
     <button
       type="button"
-      disabled={comingSoon}
+      aria-disabled={comingSoon || undefined}
+      aria-pressed={active}
       onClick={() => {
         if (!comingSoon) {
           onToggleExample(id);

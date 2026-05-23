@@ -12,7 +12,7 @@ function chipClassName(
     return "inline-flex items-center gap-2 h-9 px-2.5 border text-left transition-colors max-w-full border-brand bg-brand-subtle";
   }
   if (needsAdjust) {
-    return "inline-flex items-center gap-2 h-9 px-2.5 border text-left transition-colors max-w-full border-warning/40 bg-warning/5 opacity-50 cursor-not-allowed";
+    return "inline-flex items-center gap-2 h-9 px-2.5 border text-left transition-colors max-w-full border-warning/40 bg-warning/5 aria-disabled:opacity-50";
   }
   if (brandHint) {
     return "inline-flex items-center gap-2 h-9 px-2.5 border text-left transition-colors max-w-full border-brand/40 bg-brand/5";
@@ -55,7 +55,7 @@ export function OptionChip({
   return (
     <button
       type="button"
-      disabled={needsAdjust}
+      aria-disabled={needsAdjust || undefined}
       onClick={() => {
         if (needsAdjust) {
           return;

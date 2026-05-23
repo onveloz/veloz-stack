@@ -13,6 +13,26 @@ import { StackBuilderLayoutGrid } from "./stack-builder-layout-grid";
 import { StackBuilderLayoutPresetSection } from "./stack-builder-layout-preset";
 import type { StackBuilderState } from "./stack-builder-state";
 
+function StackBuilderConfirmDialog({
+  builder,
+}: {
+  builder: StackBuilderState;
+}) {
+  const { pending, handlePendingClear } = builder;
+  return (
+    <ConfirmCascadeDialog
+      open={pending !== null}
+      title={pending?.title ?? ""}
+      primaryReason={pending?.primaryReason ?? ""}
+      changes={pending?.changes ?? []}
+      onConfirm={() => {
+        pending?.apply();
+      }}
+      onCancel={handlePendingClear}
+    />
+  );
+}
+
 export function StackBuilderLayout({
   config,
   basePreset,
@@ -28,7 +48,9 @@ export function StackBuilderLayout({
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <StackBuilderHeader
         shareCopied={builder.shareCopied}
-        onShare={builder.handleShare}
+        onShare={() => {
+          void builder.handleShare();
+        }}
         onRandomize={builder.handleRandomize}
       />
 
@@ -50,16 +72,7 @@ export function StackBuilderLayout({
         visible={builder.step !== "review"}
       />
 
-      <ConfirmCascadeDialog
-        open={builder.pending !== null}
-        title={builder.pending?.title ?? ""}
-        primaryReason={builder.pending?.primaryReason ?? ""}
-        changes={builder.pending?.changes ?? []}
-        onConfirm={() => {
-          builder.pending?.apply();
-        }}
-        onCancel={builder.handlePendingClear}
-      />
+      <StackBuilderConfirmDialog builder={builder} />
     </div>
   );
 }

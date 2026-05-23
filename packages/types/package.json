@@ -11,7 +11,8 @@
     "./compatibility": "./src/compatibility.ts",
     "./defaults": "./src/defaults.ts",
     "./labels": "./src/labels.ts",
-    "./resolve-stack": "./src/resolve-stack.ts"
+    "./resolve-stack": "./src/resolve-stack.ts",
+    "./resolve-stack-axis": "./src/resolve-stack-axis.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit"

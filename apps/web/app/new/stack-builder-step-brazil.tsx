@@ -68,6 +68,7 @@ export function ModuleRow({
         onToggleModule(module.id);
       }}
       title={needsAdjust ? reason : module.tagline}
+      aria-pressed={active}
       className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
         active
           ? "bg-brand-subtle"
@@ -204,6 +205,7 @@ function ModuleSearchBar({
                 ? "border-brand bg-brand-subtle text-brand"
                 : "border-border hover:bg-secondary"
             }`}
+            aria-pressed={moduleFilter === filter.id}
           >
             {filter.label}
           </button>

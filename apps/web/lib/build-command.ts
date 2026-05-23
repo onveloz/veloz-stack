@@ -92,7 +92,7 @@ export function buildCommand(
     ...toolingFlags(cfg),
   ];
 
-  return `${head} ${cfg.projectName} ${flags.join(" ")}`
+  return `${head} ${cfg.projectName.trim() || DEFAULT_CONFIG.projectName} ${flags.join(" ")}`
     .replaceAll(/\s+/g, " ")
     .trim();
 }

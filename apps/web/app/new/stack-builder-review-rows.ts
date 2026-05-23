@@ -23,7 +23,10 @@ export function buildReviewRows(config: ProjectConfig) {
     {
       key: "db",
       label: "Banco",
-      value: `${titleCase(config.db)}${config.dbHosting !== "none" ? ` · ${labelsDbHost(config.dbHosting)}` : ""}`,
+      value:
+        config.db === "none"
+          ? titleCase(config.db)
+          : `${titleCase(config.db)}${config.dbHosting !== "none" ? ` · ${labelsDbHost(config.dbHosting)}` : ""}`,
     },
     { key: "auth", label: "Auth", value: labelsAuth(config.auth) },
     { key: "deploy", label: "Deploy", value: labelsDeploy(config.deploy) },

@@ -18,6 +18,8 @@ import { findReason, satisfyPendingChoice } from "./resolve-stack-pending";
 import type { ConfigChange } from "./resolve-stack-types";
 
 export type { ConfigChange } from "./resolve-stack-types";
+export type { StackKey } from "./resolve-stack-axis";
+export { isStackKey } from "./resolve-stack-axis";
 export { resolveEnableModule } from "./resolve-stack-modules";
 
 function getConfigStringValue(
@@ -36,7 +38,10 @@ function getConfigStringValue(
 
 function applyPendingValue(
   cfg: ProjectConfig,
-  pending: { key: StackKey; value: string },
+  pending: {
+    key: Parameters<typeof assignStackAxisFromString>[1];
+    value: string;
+  },
 ): ProjectConfig {
   const next = { ...cfg };
   assignStackAxisFromString(next, pending.key, pending.value);
@@ -164,7 +169,10 @@ function collectDroppedModuleChanges(proposed: ProjectConfig): ConfigChange[] {
  */
 export function resolveStackChange(
   cfg: ProjectConfig,
-  pending: { key: StackKey; value: string },
+  pending: {
+    key: Parameters<typeof assignStackAxisFromString>[1];
+    value: string;
+  },
 ): { newCfg: ProjectConfig; changes: ConfigChange[] } {
   const proposed = applyPendingValue(cfg, pending);
   const cascadesBeforePrimary =
