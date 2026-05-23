@@ -134,6 +134,10 @@ export function AuthPanel() {
               style={[styles.btn, styles.btnPrimary]}
               disabled={authAction.isPending}
               onPress={() => {
+                if (mode === "sign-up" && name.trim().length === 0) {
+                  setError("Informe seu nome");
+                  return;
+                }
                 if (password.length < 8) {
                   setError("A senha deve ter pelo menos 8 caracteres");
                   return;
