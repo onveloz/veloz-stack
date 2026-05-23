@@ -172,22 +172,26 @@ try {
 
   const outcomes = await Promise.all(
     Object.entries(LOGO_MAP).map(async ([id, candidates]) => {
-      const entry = findByCandidates(catalog, candidates);
-      if (!entry) {
+      try {
+        const entry = findByCandidates(catalog, candidates);
+        if (!entry) {
+          return { kind: "missing", id };
+        }
+        const url = pickRoute(entry);
+        if (!url) {
+          return { kind: "missing", id };
+        }
+        const svgRes = await fetchWithTimeout(url);
+        if (!svgRes.ok) {
+          console.warn(`  ${id}: ${url} → ${svgRes.status}`);
+          return { kind: "missing", id };
+        }
+        const svg = await svgRes.text();
+        await writeFile(join(OUT_DIR, `${id}.svg`), svg, "utf8");
+        return { kind: "matched", id, title: entry.title };
+      } catch {
         return { kind: "missing", id };
       }
-      const url = pickRoute(entry);
-      if (!url) {
-        return { kind: "missing", id };
-      }
-      const svgRes = await fetchWithTimeout(url);
-      if (!svgRes.ok) {
-        console.warn(`  ${id}: ${url} → ${svgRes.status}`);
-        return { kind: "missing", id };
-      }
-      const svg = await svgRes.text();
-      await writeFile(join(OUT_DIR, `${id}.svg`), svg, "utf8");
-      return { kind: "matched", id, title: entry.title };
     }),
   );
 

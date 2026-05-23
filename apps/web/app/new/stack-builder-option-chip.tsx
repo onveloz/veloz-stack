@@ -31,6 +31,55 @@ function chipTitle(
   return hint ?? undefined;
 }
 
+function OptionChipDisabledReason({
+  id,
+  disabledReason,
+}: {
+  id: string;
+  disabledReason: string;
+}) {
+  return (
+    <span id={`${id}-disabled-reason`} className="sr-only">
+      {disabledReason}
+    </span>
+  );
+}
+
+function OptionChipLabel({
+  id,
+  label,
+  active,
+  showBrandBadge,
+  needsAdjust,
+  disabledReason,
+}: {
+  id: string;
+  label: string;
+  active: boolean;
+  showBrandBadge: boolean;
+  needsAdjust: boolean;
+  disabledReason: string | null;
+}) {
+  return (
+    <>
+      <BrandLogo id={id} label={label} height={20} />
+      <span
+        className={`text-xs font-medium truncate ${active ? "text-brand" : "text-foreground"}`}
+      >
+        {label}
+      </span>
+      {showBrandBadge ? (
+        <span className="text-[8px] font-bold px-1 bg-brand/20 text-brand uppercase">
+          ★
+        </span>
+      ) : null}
+      {needsAdjust && disabledReason ? (
+        <OptionChipDisabledReason id={id} disabledReason={disabledReason} />
+      ) : null}
+    </>
+  );
+}
+
 export function OptionChip({
   id,
   label,
@@ -64,19 +113,19 @@ export function OptionChip({
       }}
       title={chipTitle(needsAdjust, disabledReason, hint)}
       aria-pressed={active}
+      aria-describedby={
+        needsAdjust && disabledReason ? `${id}-disabled-reason` : undefined
+      }
       className={chipClassName(active, needsAdjust, Boolean(brandHint))}
     >
-      <BrandLogo id={id} label={label} height={20} />
-      <span
-        className={`text-xs font-medium truncate ${active ? "text-brand" : "text-foreground"}`}
-      >
-        {label}
-      </span>
-      {showBrandBadge ? (
-        <span className="text-[8px] font-bold px-1 bg-brand/20 text-brand uppercase">
-          ★
-        </span>
-      ) : null}
+      <OptionChipLabel
+        id={id}
+        label={label}
+        active={active}
+        showBrandBadge={showBrandBadge}
+        needsAdjust={needsAdjust}
+        disabledReason={disabledReason}
+      />
     </button>
   );
 }

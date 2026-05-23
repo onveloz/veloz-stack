@@ -1,7 +1,7 @@
 "use client";
 
 import { validateConfig } from "@veloz-stack/types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { buildCommand } from "@/lib/build-command";
 import type {
@@ -49,6 +49,8 @@ export function useStackBuilderCoreState(
   );
   const progress = getStepProgress(visibleSteps, step);
 
+  useClampStepToVisibleSteps(visibleSteps, step, setStep);
+
   return {
     step,
     setStep,
@@ -74,3 +76,15 @@ export function useStackBuilderCoreState(
 }
 
 export type StackBuilderCoreState = ReturnType<typeof useStackBuilderCoreState>;
+
+function useClampStepToVisibleSteps(
+  visibleSteps: ReturnType<typeof getVisibleSteps>,
+  step: StepId,
+  setStep: (step: StepId) => void,
+) {
+  useEffect(() => {
+    if (!visibleSteps.some((item) => item.id === step)) {
+      setStep(visibleSteps[0]?.id ?? "platform");
+    }
+  }, [visibleSteps, step, setStep]);
+}

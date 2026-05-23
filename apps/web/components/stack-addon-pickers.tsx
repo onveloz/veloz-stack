@@ -47,12 +47,15 @@ const LINTER_LABELS: Record<LinterChoice, { label: string; detail: string }> = {
   },
 };
 
-function useGitHookChoices(gitHook: GitHookChoice) {
+function useShowLegacyHusky() {
   const searchParams = useSearchParams();
-  const showLegacyHusky =
+  return (
     searchParams.get("showLegacy") === "1" ||
-    process.env.NEXT_PUBLIC_SHOW_LEGACY_HUSKY === "true";
+    process.env.NEXT_PUBLIC_SHOW_LEGACY_HUSKY === "true"
+  );
+}
 
+function useGitHookChoices(gitHook: GitHookChoice, showLegacyHusky: boolean) {
   return useMemo((): readonly GitHookChoice[] => {
     if (showLegacyHusky) {
       return GIT_HOOK_CHOICES;
@@ -102,6 +105,7 @@ function GitHookPicker({
   config,
   gitHook,
   gitHookChoices,
+  showLegacyHusky,
   onGitHookChange,
   onLefthookCiChange,
   onLefthookAdvancedChange,
@@ -109,14 +113,11 @@ function GitHookPicker({
   config: ProjectConfig;
   gitHook: GitHookChoice;
   gitHookChoices: readonly GitHookChoice[];
+  showLegacyHusky: boolean;
   onGitHookChange: (choice: GitHookChoice) => void;
   onLefthookCiChange: () => void;
   onLefthookAdvancedChange: () => void;
 }) {
-  const searchParams = useSearchParams();
-  const showLegacyHusky =
-    searchParams.get("showLegacy") === "1" ||
-    process.env.NEXT_PUBLIC_SHOW_LEGACY_HUSKY === "true";
   const gitHooksHint = showLegacyHusky
     ? "Escolha um — Husky e Lefthook são gerenciadores alternativos."
     : "Lefthook é a opção recomendada. Husky fica só com ?showLegacy=1 ou NEXT_PUBLIC_SHOW_LEGACY_HUSKY (legado).";
@@ -164,7 +165,8 @@ export function StackAddonPickers({
   const gitHook = getGitHookChoice(config.addons);
   const linter = getLinterChoice(config.addons);
   const turborepoOn = config.addons.includes("turborepo");
-  const gitHookChoices = useGitHookChoices(gitHook);
+  const showLegacyHusky = useShowLegacyHusky();
+  const gitHookChoices = useGitHookChoices(gitHook, showLegacyHusky);
 
   return (
     <div className="space-y-4">
@@ -178,6 +180,7 @@ export function StackAddonPickers({
         config={config}
         gitHook={gitHook}
         gitHookChoices={gitHookChoices}
+        showLegacyHusky={showLegacyHusky}
         onGitHookChange={onGitHookChange}
         onLefthookCiChange={onLefthookCiChange}
         onLefthookAdvancedChange={onLefthookAdvancedChange}
