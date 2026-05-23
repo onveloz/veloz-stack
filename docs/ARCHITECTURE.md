@@ -61,8 +61,8 @@ Implicit rules (e.g. Next frontend defaulting to `backend: next`) live in `apply
 
 ## CI and quality gates
 
-- **Unit job** — `sync-versions:check`, `pnpm gen`, typecheck, oxlint + oxfmt, unit tests
-- **E2E matrix** — `scripts/e2e-combo.sh` scaffolds each combo, installs, typechecks
+- **Unit job** — `sync-versions:check`, `pnpm gen`, then typecheck in two steps (avoids a race when `template-generator` regenerates `templates.generated.ts` during parallel `check-types`): `pnpm --filter @veloz-stack/template-generator exec tsc --noEmit`, then `pnpm -r --parallel --filter '!@veloz-stack/template-generator' check-types`; oxlint + oxfmt; unit tests; `pnpm docs:lint` and `pnpm docs:links`
+- **E2E matrix** — `scripts/e2e-combo.sh` scaffolds each combo, copies `.env.example` → `.env` when present, installs, typechecks
 - **Docs** — markdownlint + internal link check (see root `package.json` `docs:*` scripts)
 
 ## Related docs

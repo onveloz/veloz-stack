@@ -58,6 +58,7 @@ function OrmHostingRows({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function DatabaseSection({
   config,
   requestChange,

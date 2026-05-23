@@ -1,3 +1,4 @@
+/** @internal Generated-app type. */
 export type {
   FrontendId,
   ProjectConfig,

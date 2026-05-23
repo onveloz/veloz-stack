@@ -6,8 +6,10 @@ import type { useStackConfig } from "@/lib/use-stack-config";
 import { assembleStackBuilderHandlers } from "./stack-builder-state-handlers-bind";
 import { useStackBuilderCoreState } from "./stack-builder-state-core";
 
+/** @internal Generated-app type. */
 export type { PendingChange } from "./stack-builder-state-core";
 
+/** @internal Scaffold pipeline step. */
 export function useStackBuilderState(
   config: ProjectConfig,
   basePreset: PresetId,
@@ -19,4 +21,5 @@ export function useStackBuilderState(
   return { ...core, ...handlers };
 }
 
+/** @internal Generated-app type. */
 export type StackBuilderState = ReturnType<typeof useStackBuilderState>;

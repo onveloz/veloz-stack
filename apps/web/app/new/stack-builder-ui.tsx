@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 import type { BuilderMode, STEPS, StepId } from "./stack-builder-constants";
 
+/** @internal Scaffold pipeline step. */
 export function ModeToggle({
   mode,
   onChange,
@@ -45,6 +46,7 @@ export function ModeToggle({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StepFooter({
   visibleSteps,
   step,
@@ -93,6 +95,7 @@ export function StepFooter({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function SectionTitle({
   children,
   hint,
@@ -112,6 +115,7 @@ export function SectionTitle({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function SubLabel({ children }: { children: ReactNode }) {
   return (
     <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
@@ -120,6 +124,7 @@ export function SubLabel({ children }: { children: ReactNode }) {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ChipRow({
   label,
   hint,

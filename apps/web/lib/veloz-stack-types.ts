@@ -1,3 +1,4 @@
+/** @internal Generated-app type. */
 export type {
   ApiId,
   AuthId,
@@ -20,4 +21,5 @@ export type {
   UiId,
 } from "@veloz-stack/types";
 
+/** @internal Generated-app type. */
 export type { ConfigChange } from "@veloz-stack/types/resolve-stack";

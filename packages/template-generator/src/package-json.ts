@@ -14,10 +14,12 @@ export interface PackageJson extends Record<string, unknown> {
   "lint-staged"?: Record<string, string[]>;
 }
 
+/** @internal Scaffold pipeline step. */
 export function isJsonObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** @internal Scaffold pipeline step. */
 export function asPackageJson(data: Record<string, unknown>): PackageJson {
   return data;
 }

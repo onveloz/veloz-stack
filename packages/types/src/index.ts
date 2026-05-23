@@ -204,8 +204,10 @@ export {
   LEAVE_NEXT_RUNTIME_CASCADE_REASON,
   validateConfig,
 } from "./compatibility";
+/** @internal Generated-app type. */
 export type { DisableReason, ExplicitStackFields } from "./compatibility";
 export { COMING_SOON_PRESETS, DEFAULT_CONFIG, PRESETS } from "./defaults";
+/** @internal Generated-app type. */
 export type { PresetKey } from "./defaults";
 export {
   ADDON_META,
@@ -227,6 +229,7 @@ export {
   MODULE_IDS,
   MODULES,
 } from "./modules";
+/** @internal Generated-app type. */
 export type { ModuleCategory, ModuleMeta } from "./modules";
 export {
   VELOZ_STACK_CONFIG_FILENAME,

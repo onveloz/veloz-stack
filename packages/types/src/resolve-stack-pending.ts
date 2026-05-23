@@ -56,6 +56,7 @@ function tryCandidateResolver(
   return false;
 }
 
+/** @internal Scaffold pipeline step. */
 export function satisfyPendingChoice(
   proposed: ProjectConfig,
   pending: { key: keyof ProjectConfig; value: string },
@@ -87,6 +88,7 @@ export function satisfyPendingChoice(
   }
 }
 
+/** @internal Scaffold pipeline step. */
 export function findReason(
   cfg: ProjectConfig,
   key: keyof ProjectConfig,

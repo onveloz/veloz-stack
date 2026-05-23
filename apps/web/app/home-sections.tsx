@@ -4,8 +4,10 @@ import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { HeroShader } from "@/components/hero-shader";
 
+/** @internal Scaffold export. */
 export const INSTALL_CMD = "bun create veloz-stack@latest";
 
+/** @internal Scaffold export. */
 export const STACK_CHIPS: { label: string; tone?: "brand" }[] = [
   { label: "Bun" },
   { label: "Hono" },
@@ -16,6 +18,7 @@ export const STACK_CHIPS: { label: string; tone?: "brand" }[] = [
   { label: "Postgres" },
 ];
 
+/** @internal Scaffold export. */
 export const FEATURES = [
   {
     icon: Zap,
@@ -34,6 +37,7 @@ export const FEATURES = [
   },
 ];
 
+/** @internal Scaffold pipeline step. */
 export function HomeHeroBadge() {
   return (
     <div className="inline-flex items-center gap-1.5 text-[11px] font-medium border border-border-strong px-2 py-1 mb-8">
@@ -45,6 +49,7 @@ export function HomeHeroBadge() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function HomeHeroCopy() {
   return (
     <>
@@ -62,6 +67,7 @@ export function HomeHeroCopy() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function HomeHeroActions() {
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
@@ -81,6 +87,7 @@ export function HomeHeroActions() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function HomeHeroChips() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 pt-6">
@@ -100,6 +107,7 @@ export function HomeHeroChips() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function HomeHero() {
   return (
     <section className="relative border-b border-border overflow-hidden">
@@ -114,6 +122,7 @@ export function HomeHero() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function HomeFeatures() {
   return (
     <section className="border-b border-border">
@@ -136,6 +145,7 @@ export function HomeFeatures() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function HomeCta() {
   return (
     <section>

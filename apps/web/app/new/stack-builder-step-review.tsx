@@ -70,6 +70,7 @@ function ReviewCommandBlock({ command }: { command: string }) {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StepReview({
   config,
   command,
@@ -114,6 +115,7 @@ export function StepReview({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function SummaryPanel({
   config,
   onJump,

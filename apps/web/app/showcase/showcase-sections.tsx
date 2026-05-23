@@ -6,6 +6,7 @@ import { SHOWCASE_SUBMIT_URL } from "@/lib/showcase";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
+/** @internal Scaffold pipeline step. */
 export function ShowcaseHeader() {
   return (
     <header className="h-11 border-b border-border flex items-center justify-between px-6">
@@ -31,6 +32,7 @@ export function ShowcaseHeader() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ShowcaseIntro() {
   return (
     <>
@@ -54,6 +56,7 @@ export function ShowcaseIntro() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ShowcaseSubmitSection() {
   return (
     <section className="mt-14 border border-border border-dashed p-6 text-center">
@@ -78,6 +81,7 @@ export function ShowcaseSubmitSection() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ShowcaseFooter() {
   return (
     <footer className="border-t border-border">

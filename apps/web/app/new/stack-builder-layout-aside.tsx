@@ -6,6 +6,7 @@ import { PreviewPanel } from "./preview-panel";
 import { SummaryPanel } from "./stack-builder-step-review";
 import type { StackBuilderState } from "./stack-builder-state";
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderLayoutAside({
   config,
   builder,

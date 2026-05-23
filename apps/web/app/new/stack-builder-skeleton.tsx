@@ -2,6 +2,7 @@ const SKELETON_SECTIONS = ["platform", "data", "brazil", "tools"] as const;
 
 const SKELETON_CELLS = ["a", "b", "c", "d", "e", "f"] as const;
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderSkeleton() {
   return (
     <div className="min-h-screen bg-background animate-pulse">

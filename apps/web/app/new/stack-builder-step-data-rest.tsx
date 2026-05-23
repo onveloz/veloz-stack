@@ -97,6 +97,7 @@ function PackageManagerChipRow({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function AuthDeployPmSection({
   config,
   requestChange,

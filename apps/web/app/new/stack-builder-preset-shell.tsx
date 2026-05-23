@@ -20,6 +20,7 @@ function CustomizedPresetNote({ label }: { label: string }) {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderPresetBar({
   config,
   basePreset,

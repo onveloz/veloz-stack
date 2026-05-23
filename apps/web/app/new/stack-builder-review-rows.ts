@@ -10,6 +10,7 @@ import {
   titleCase,
 } from "./stack-builder-labels";
 
+/** @internal Scaffold pipeline step. */
 export function buildReviewRows(config: ProjectConfig) {
   return [
     {

@@ -27,7 +27,8 @@ pnpm sync-versions          # after editing versions.yaml
 pnpm lint                    # oxlint + oxfmt
 pnpm docs:lint              # markdownlint on canonical docs
 pnpm docs:links             # relative link check across repo markdown
-pnpm -r --parallel check-types
+pnpm --filter @veloz-stack/template-generator exec tsc --noEmit
+pnpm -r --parallel --filter '!@veloz-stack/template-generator' check-types
 pnpm --filter @veloz-stack/template-generator test
 ```
 

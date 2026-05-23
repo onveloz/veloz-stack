@@ -4,6 +4,7 @@ import type { ShowcaseProject } from "@/lib/showcase";
 
 import { ShowcaseGitHubIcon } from "./showcase-github-icon";
 
+/** @internal Scaffold pipeline step. */
 export function ShowcaseProjectCard({ project }: { project: ShowcaseProject }) {
   return (
     <article className="border border-border bg-secondary/20 p-5 flex flex-col gap-3">

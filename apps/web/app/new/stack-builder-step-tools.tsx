@@ -14,6 +14,7 @@ import { SectionTitle, SubLabel } from "./stack-builder-ui";
 
 type ExampleOption = Exclude<(typeof ExampleId.options)[number], "none">;
 
+/** @internal Scaffold pipeline step. */
 export function ExampleCard({
   id,
   active,
@@ -122,6 +123,7 @@ function StepToolsAddons({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StepTools({
   config,
   onGitHookChange,

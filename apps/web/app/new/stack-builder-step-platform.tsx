@@ -101,6 +101,7 @@ function ExtraPlatformsDisclosure({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StepPlatform({
   config,
   extraPlatforms,

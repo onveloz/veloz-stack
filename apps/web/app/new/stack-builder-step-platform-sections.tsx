@@ -98,6 +98,7 @@ function ApiStyleChipRow({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ApiLayerSection({
   config,
   requestChange,
@@ -121,6 +122,7 @@ export function ApiLayerSection({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ExtraPlatformsSection({
   config,
   requestChange,

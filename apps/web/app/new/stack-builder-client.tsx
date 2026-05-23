@@ -11,6 +11,7 @@ const StackBuilder = dynamic(
   },
 );
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderClient() {
   return <StackBuilder />;
 }

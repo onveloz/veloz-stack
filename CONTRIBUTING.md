@@ -28,7 +28,8 @@ pnpm lint
 pnpm docs:lint
 pnpm docs:links
 pnpm --filter @veloz-stack/template-generator gen # whenever templates/*.hbs change
-pnpm -r --parallel check-types
+pnpm --filter @veloz-stack/template-generator exec tsc --noEmit
+pnpm -r --parallel --filter '!@veloz-stack/template-generator' check-types
 pnpm --filter @veloz-stack/template-generator test
 ```
 
@@ -40,7 +41,7 @@ Optional one-off helper to prepend stub JSDoc on exports missing docs (review di
 node scripts/bulk-export-tsdoc.mjs packages/template-generator/src --dry-run
 ```
 
-`packages/template-generator/src/templates.generated.ts` is **gitignored**; it is produced by `gen` (see `packages/template-generator/scripts/build-templates.mjs`). Always run **`gen`** before typecheck or tests so embedded templates match `templates/` on disk.
+`packages/template-generator/src/templates.generated.ts` is **gitignored**; it is produced by `gen` (see `packages/template-generator/scripts/build-templates.mjs`). Always run **`gen`** before typecheck or tests so embedded templates match `templates/` on disk. Run **template-generator `tsc` first**, then parallel `check-types` on the other packages — same as CI — so `prebuild`/`gen` does not race with a workspace-wide typecheck.
 
 ## Pre-PR: CodeRabbit CLI
 
@@ -127,7 +128,7 @@ Do **not** add imperative file generation in post-process; new output belongs in
 2. Add templates under `packages/template-generator/templates/addons/<id>/`.
 3. Register processing in [`addons.ts`](packages/template-generator/src/handlers/addons.ts).
 4. Update post-process (and [`post-process-lint.ts`](packages/template-generator/src/handlers/post-process-lint.ts) when touching lint/format): root `package.json` scripts — prefer **Lefthook**/`lint-staged` patterns from the scaffold; **Husky** remains supported as a legacy addon.
-5. Wire CLI flags in [`apps/cli`](apps/cli) and the web UI in [`stack-builder.tsx`](apps/web/app/new/stack-builder.tsx) / [`use-stack-config.ts`](apps/web/lib/use-stack-config.ts) / [`build-command.ts`](apps/web/lib/build-command.ts) as needed.
+5. Wire CLI flags in [`apps/cli`](apps/cli) and the web stack builder: entry [`stack-builder.tsx`](apps/web/app/new/stack-builder.tsx), state in [`stack-builder-state.ts`](apps/web/app/new/stack-builder-state.ts) / [`stack-builder-state-handlers.ts`](apps/web/app/new/stack-builder-state-handlers.ts), layout in [`stack-builder-layout.tsx`](apps/web/app/new/stack-builder-layout.tsx), step modules under [`stack-builder-step-*.tsx`](apps/web/app/new/), plus [`use-stack-config.ts`](apps/web/lib/use-stack-config.ts) and [`build-command.ts`](apps/web/lib/build-command.ts).
 
 ## Generated projects: Biome vs oxlint
 

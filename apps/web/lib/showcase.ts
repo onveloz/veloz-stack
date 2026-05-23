@@ -10,6 +10,7 @@ const ShowcaseProjectSchema = z.object({
   tags: z.array(z.string()),
 });
 
+/** @internal Generated-app type. */
 export type ShowcaseProject = z.infer<typeof ShowcaseProjectSchema>;
 
 const parsed = z.array(ShowcaseProjectSchema).safeParse(showcaseData);
@@ -18,7 +19,9 @@ if (!parsed.success) {
   throw new Error("Failed to parse showcase data");
 }
 
+/** @internal Scaffold export. */
 export const SHOWCASE_PROJECTS = parsed.data;
 
+/** @internal Scaffold export. */
 export const SHOWCASE_SUBMIT_URL =
   "https://github.com/onveloz/veloz-stack/issues/new?template=showcase.yml";

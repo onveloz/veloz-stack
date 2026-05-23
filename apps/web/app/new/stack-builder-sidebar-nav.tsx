@@ -37,6 +37,7 @@ function SidebarStepButton({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderSidebar({
   visibleSteps,
   step,
@@ -82,6 +83,7 @@ export function StackBuilderSidebar({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderMobileTabs({
   visibleSteps,
   step,

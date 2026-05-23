@@ -25,6 +25,7 @@ import type { BuilderMode } from "./stack-builder-app-types";
 
 type SetState = ReturnType<typeof useStackConfig>["setState"];
 
+/** @internal Scaffold pipeline step. */
 export function assembleStackBuilderHandlers(
   config: ProjectConfig,
   core: StackBuilderCoreState,

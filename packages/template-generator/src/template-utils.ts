@@ -3,6 +3,7 @@ import { render } from "./processor";
 import { EMBEDDED_TEMPLATES } from "./templates.generated";
 import type { VirtualFs } from "./vfs";
 
+/** @internal Generated-app type. */
 export interface ProcessTemplatesArgs {
   vfs: VirtualFs;
   sourcePrefix: string;

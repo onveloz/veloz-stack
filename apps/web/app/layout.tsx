@@ -4,6 +4,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 // oxlint-disable-next-line import/no-unassigned-import -- side-effect global styles
 import "./globals.css";
 
+/** @internal Scaffold export. */
 export const metadata: Metadata = {
   title: "Veloz Stack — Scaffolder TypeScript opinado pro Brasil",
   description:

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { Logo } from "@/components/logo";
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderHeader({
   shareCopied,
   onShare,
@@ -56,6 +57,7 @@ export function StackBuilderHeader({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderCommandBar({
   command,
   visible,

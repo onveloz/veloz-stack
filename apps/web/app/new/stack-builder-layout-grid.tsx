@@ -12,6 +12,7 @@ import { StackBuilderLayoutAside } from "./stack-builder-layout-aside";
 import type { StackBuilderState } from "./stack-builder-state";
 import { StepFooter } from "./stack-builder-ui";
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderLayoutGrid({
   builder,
   config,

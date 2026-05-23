@@ -6,6 +6,7 @@ import type { useStackConfig } from "@/lib/use-stack-config";
 import { StackBuilderPresetBar } from "./stack-builder-preset-shell";
 import type { StackBuilderState } from "./stack-builder-state";
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderLayoutPresetSection({
   config,
   basePreset,

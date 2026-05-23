@@ -56,5 +56,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
+/** shadcn/ui primitive copied into generated apps. */
 export { buttonVariants };
+
 

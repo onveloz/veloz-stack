@@ -16,6 +16,7 @@ import {
   patchAddonsForLinter,
 } from "@/lib/stack-addons";
 
+/** @internal Generated-app type. */
 export type { ConfigChange };
 
 /** @deprecated Use `resolveStackChange` from `@veloz-stack/types/resolve-stack`. */
@@ -27,6 +28,7 @@ export const formatKey = formatConfigChangeKey;
 /** @deprecated Use `isStackConfigValid` from `@veloz-stack/types/resolve-stack`. */
 export const isValid = isStackConfigValid;
 
+/** @internal Scaffold pipeline step. */
 export function repairStackConfig(
   config: Parameters<typeof repairStackConfigCore>[0],
 ) {

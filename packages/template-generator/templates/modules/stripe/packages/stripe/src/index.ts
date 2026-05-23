@@ -12,10 +12,12 @@ if (!secret) {
   throw new Error("STRIPE_SECRET is required (sk_live_... or sk_test_...)");
 }
 
+/** @internal Scaffold export. */
 export const stripe = new Stripe(secret, {
   apiVersion: "2025-01-27.acacia",
 });
 
+/** @internal Generated-app type. */
 export type BrPaymentMethod = "card" | "boleto" | "pix";
 
 /**
@@ -41,3 +43,4 @@ export function createBrPaymentIntent(input: {
     metadata: input.metadata,
   });
 }
+

@@ -7,6 +7,7 @@ import { AuthDeployPmSection } from "./stack-builder-step-data-rest";
 import type { RequestChange } from "./stack-builder-app-types";
 import { SectionTitle } from "./stack-builder-ui";
 
+/** @internal Scaffold pipeline step. */
 export function StepData({
   config,
   requestChange,

@@ -5,6 +5,7 @@ import { processDb } from "./db";
 import { processDeploy } from "./deploy";
 import type { VirtualFs } from "../vfs";
 
+/** @internal Scaffold pipeline step. */
 export function runDataHandlers(vfs: VirtualFs, config: ProjectConfig): void {
   processApi(vfs, config);
   processDb(vfs, config);

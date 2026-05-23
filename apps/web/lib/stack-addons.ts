@@ -1,8 +1,11 @@
 import type { AddonId, ProjectConfig } from "@veloz-stack/types";
 
+/** @internal Generated-app type. */
 export type GitHookChoice = "none" | "husky" | "lefthook";
+/** @internal Generated-app type. */
 export type LinterChoice = "none" | "biome" | "oxlint";
 
+/** @internal Scaffold export. */
 export const GIT_HOOK_CHOICES = [
   "none",
   "husky",
@@ -13,12 +16,14 @@ export const GIT_HOOK_CHOICES_DEFAULT_UI = [
   "none",
   "lefthook",
 ] as const satisfies readonly GitHookChoice[];
+/** @internal Scaffold export. */
 export const LINTER_CHOICES = [
   "none",
   "biome",
   "oxlint",
 ] as const satisfies readonly LinterChoice[];
 
+/** @internal Scaffold pipeline step. */
 export function getGitHookChoice(addons: readonly AddonId[]): GitHookChoice {
   if (addons.includes("lefthook")) {
     return "lefthook";
@@ -29,6 +34,7 @@ export function getGitHookChoice(addons: readonly AddonId[]): GitHookChoice {
   return "none";
 }
 
+/** @internal Scaffold pipeline step. */
 export function getLinterChoice(addons: readonly AddonId[]): LinterChoice {
   if (addons.includes("oxlint")) {
     return "oxlint";
@@ -39,6 +45,7 @@ export function getLinterChoice(addons: readonly AddonId[]): LinterChoice {
   return "none";
 }
 
+/** @internal Scaffold pipeline step. */
 export function patchAddonsForGitHook(
   addons: readonly AddonId[],
   choice: GitHookChoice,
@@ -50,6 +57,7 @@ export function patchAddonsForGitHook(
   return [...without, choice];
 }
 
+/** @internal Scaffold pipeline step. */
 export function patchAddonsForLinter(
   addons: readonly AddonId[],
   choice: LinterChoice,
@@ -61,6 +69,7 @@ export function patchAddonsForLinter(
   return [...without, choice];
 }
 
+/** @internal Scaffold pipeline step. */
 export function patchAddonsTurborepo(
   addons: readonly AddonId[],
   on: boolean,
@@ -84,6 +93,7 @@ export function addonFlagsAfterGitHook(
   return {};
 }
 
+/** @internal Scaffold pipeline step. */
 export function addonFlagsAfterLinter(
   choice: LinterChoice,
 ): Partial<ProjectConfig> {

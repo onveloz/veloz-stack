@@ -4,6 +4,7 @@ import { processFrontend } from "./frontend";
 import { processUi } from "./ui";
 import type { VirtualFs } from "../vfs";
 
+/** @internal Scaffold pipeline step. */
 export function runBaseStackHandlers(
   vfs: VirtualFs,
   config: ProjectConfig,

@@ -1,6 +1,9 @@
+/** @internal Generated-app type. */
 export type StepId = "platform" | "data" | "brazil" | "tools" | "review";
+/** @internal Generated-app type. */
 export type BuilderMode = "quick" | "full";
 
+/** @internal Scaffold export. */
 export const STEPS: { id: StepId; label: string; short: string }[] = [
   { id: "platform", label: "Plataforma", short: "App & API" },
   { id: "data", label: "Dados & deploy", short: "DB · auth" },
@@ -9,8 +12,10 @@ export const STEPS: { id: StepId; label: string; short: string }[] = [
   { id: "review", label: "Revisar", short: "Comando" },
 ];
 
+/** @internal Scaffold export. */
 export const QUICK_STEPS: StepId[] = ["platform", "brazil", "tools", "review"];
 
+/** @internal Scaffold export. */
 export const MODULE_FILTERS = [
   { id: "all", label: "Todos" },
   { id: "payments", label: "PIX" },

@@ -8,6 +8,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 
+/** @internal Scaffold pipeline step. */
 export function verifyPagarmeWebhook(
   authorizationHeader: string | null | undefined,
   user = process.env.PAGARME_WEBHOOK_USER,
@@ -35,3 +36,4 @@ function equal(a: string, b: string): boolean {
   if (bufA.length !== bufB.length) return false;
   return timingSafeEqual(bufA, bufB);
 }
+

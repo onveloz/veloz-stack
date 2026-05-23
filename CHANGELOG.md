@@ -10,15 +10,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Root documentation: `LICENSE`, `SECURITY.md`, `AGENTS.md`, workspace READMEs, `docs/README.md`.
 - Documentation health pass: marked `backend: "next"` plan as done; refreshed deploy runbook for Next.js 16.
+- `docs/deploy-web.md` — English build/deploy reference for `apps/web`.
 
 ### Changed
 
 - Monorepo lint/format: **Biome → oxlint + oxfmt** (root config, Lefthook, CI); README/CONTRIBUTING/ARCHITECTURE updated.
-- `CONTRIBUTING.md`: Node version wording aligned with CI vs local `engines`; link to `docs/vendors.md`; docs gates and `bulk-export-tsdoc` helper.
-- `docs/ARCHITECTURE.md`: accurate `runGeneratePipeline()` stages; ADR policy for monorepo vs generated apps.
-- `packages/types/README.md`: document `./labels` and `./resolve-stack` exports.
+- `CONTRIBUTING.md`: Node version wording aligned with CI vs local `engines`; link to `docs/vendors.md`; docs gates and `bulk-export-tsdoc` helper; stack-builder module map after UI refactor.
+- `docs/ARCHITECTURE.md`: accurate `runGeneratePipeline()` stages; ADR policy for monorepo vs generated apps; CI typecheck split documented.
+- `packages/types/README.md`: document `./labels`, `./resolve-stack`, and `./resolve-stack-axis` exports.
 - `packages/types`: replace `@see`-only type-alias JSDoc with inferred-type descriptions.
-- `AGENTS.md`: document `pnpm docs:lint` and `pnpm docs:links`.
+- `AGENTS.md`: document `pnpm docs:lint`, `pnpm docs:links`, and split typecheck (avoid `templates.generated.ts` race).
+- `packages/template-generator/README.md`: document split typecheck after `gen`.
+- CI/scaffold: Prisma 7 `prisma.config.ts` templates; pnpm 11 `allowBuilds` in generated workspaces; Nuxt auth client fixes; e2e `.env` bootstrap.
+
+### Fixed
+
+- CI e2e matrix: invalid deploy/cloudflare combo guard; Bun version pin; parallel typecheck race in unit job.
 
 ## Recent history (main)
 

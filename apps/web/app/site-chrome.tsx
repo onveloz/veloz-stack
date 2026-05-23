@@ -5,6 +5,7 @@ import { Logo } from "@/components/logo";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
+/** @internal Scaffold pipeline step. */
 export function SiteHeader() {
   return (
     <header className="h-[var(--site-header-height)] border-b border-border flex items-center justify-between px-6">
@@ -36,6 +37,7 @@ export function SiteHeader() {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">

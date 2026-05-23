@@ -4,6 +4,7 @@ import { processDesktop } from "./desktop";
 import { processMobile } from "./mobile";
 import type { VirtualFs } from "../vfs";
 
+/** @internal Scaffold pipeline step. */
 export function runPlatformHandlers(
   vfs: VirtualFs,
   config: ProjectConfig,

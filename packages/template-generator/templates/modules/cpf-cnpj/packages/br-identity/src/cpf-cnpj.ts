@@ -7,6 +7,7 @@ function stripDigits(s: string): string {
   return s.replace(/\D/g, "");
 }
 
+/** @internal Scaffold pipeline step. */
 export function isValidCpf(input: string): boolean {
   const d = stripDigits(input);
   if (d.length !== 11 || /^(\d)\1+$/.test(d)) return false;
@@ -21,6 +22,7 @@ export function isValidCpf(input: string): boolean {
   return true;
 }
 
+/** @internal Scaffold pipeline step. */
 export function isValidCnpj(input: string): boolean {
   const d = stripDigits(input);
   if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
@@ -40,12 +42,15 @@ export function isValidCnpj(input: string): boolean {
   return check(factors1, 12, digits[12]!) && check(factors2, 13, digits[13]!);
 }
 
+/** @internal Scaffold pipeline step. */
 export function formatCpf(input: string): string {
   const d = stripDigits(input).padStart(11, "0").slice(0, 11);
   return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
 }
 
+/** @internal Scaffold pipeline step. */
 export function formatCnpj(input: string): string {
   const d = stripDigits(input).padStart(14, "0").slice(0, 14);
   return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12, 14)}`;
 }
+

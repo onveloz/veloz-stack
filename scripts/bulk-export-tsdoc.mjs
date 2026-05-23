@@ -37,7 +37,7 @@ function hasDocAbove(lines, idx) {
 }
 
 function kindFromExport(line) {
-  if (/^export\s+function\s/.test(line)) {
+  if (/^export\s+(async\s+)?function\s/.test(line)) {
     return "function";
   }
   if (/^export\s+(const|let)\s/.test(line)) {
@@ -49,6 +49,9 @@ function kindFromExport(line) {
   if (/^export\s+type\s/.test(line)) {
     return "type";
   }
+  if (/^export\s+\{/.test(line)) {
+    return "const";
+  }
   return null;
 }
 
@@ -58,7 +61,8 @@ function walk(dir, out = []) {
     if (
       ent.name === "node_modules" ||
       ent.name === "dist" ||
-      ent.name === ".turbo"
+      ent.name === ".turbo" ||
+      ent.name === ".next"
     ) {
       continue;
     }

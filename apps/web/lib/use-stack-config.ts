@@ -5,6 +5,7 @@ import { useQueryStates } from "nuqs";
 
 import { stackConfigParsers } from "./use-stack-config-parsers";
 
+/** @internal Scaffold pipeline step. */
 export function useStackConfig() {
   const [state, setState] = useQueryStates(stackConfigParsers, {
     history: "replace",
@@ -44,4 +45,5 @@ export function useStackConfig() {
   };
 }
 
+/** @internal Generated-app type. */
 export type StackSetter = ReturnType<typeof useStackConfig>["setState"];

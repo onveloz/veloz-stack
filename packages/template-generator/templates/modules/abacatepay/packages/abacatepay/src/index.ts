@@ -13,6 +13,7 @@ if (!key) {
 
 const abacate = AbacatePay(key);
 
+/** @internal Generated-app type. */
 export type PixChargeInput = {
   /** Integer centavos. R$ 29,90 = 2990. */
   amountCentavos: number;
@@ -40,6 +41,7 @@ function unwrap<T extends object>(res: T | { error: string }): T {
   return res as T;
 }
 
+/** @internal Scaffold pipeline step. */
 export async function createPixCharge(input: PixChargeInput) {
   if (!Number.isInteger(input.amountCentavos)) {
     throw new Error("amountCentavos must be an integer — you likely passed reais");
@@ -60,6 +62,7 @@ export async function createPixCharge(input: PixChargeInput) {
   return unwrap(res as any);
 }
 
+/** @internal Scaffold pipeline step. */
 export async function checkPixCharge(id: string) {
   const res = await abacate.pixQrCode.check({ id });
   return unwrap(res as any);
@@ -71,4 +74,7 @@ export async function simulatePixPayment(id: string) {
   return unwrap(res as any);
 }
 
+/** @internal Scaffold export. */
 export { abacate };
+
+

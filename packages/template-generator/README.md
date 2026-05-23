@@ -8,7 +8,14 @@ Handlebars templates and handlers that emit generated project files.
 pnpm --filter @veloz-stack/template-generator gen
 ```
 
-Produces `src/templates.generated.ts` (gitignored). CI and local `check-types` / `test` expect it to exist.
+Produces `src/templates.generated.ts` (gitignored). CI and local `test` expect it to exist.
+
+After `gen`, typecheck **template-generator first**, then the rest of the workspace (parallel `check-types` on all packages can race with `prebuild`/`gen`):
+
+```bash
+pnpm --filter @veloz-stack/template-generator exec tsc --noEmit
+pnpm -r --parallel --filter '!@veloz-stack/template-generator' check-types
+```
 
 ## Versions
 

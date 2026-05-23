@@ -33,6 +33,7 @@ function StackBuilderConfirmDialog({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderLayout({
   config,
   basePreset,

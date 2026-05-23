@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+/** @internal Scaffold export. */
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -16,6 +17,7 @@ export const user = sqliteTable("user", {
     .notNull(),
 });
 
+/** @internal Scaffold export. */
 export const session = sqliteTable("session", {
   id: text("id").primaryKey(),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
@@ -33,6 +35,7 @@ export const session = sqliteTable("session", {
     .references(() => user.id, { onDelete: "cascade" }),
 });
 
+/** @internal Scaffold export. */
 export const account = sqliteTable("account", {
   id: text("id").primaryKey(),
   accountId: text("account_id").notNull(),
@@ -55,6 +58,7 @@ export const account = sqliteTable("account", {
     .notNull(),
 });
 
+/** @internal Scaffold export. */
 export const verification = sqliteTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
@@ -69,15 +73,19 @@ export const verification = sqliteTable("verification", {
     .notNull(),
 });
 
+/** @internal Scaffold export. */
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
 }));
 
+/** @internal Scaffold export. */
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, { fields: [session.userId], references: [user.id] }),
 }));
 
+/** @internal Scaffold export. */
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, { fields: [account.userId], references: [user.id] }),
 }));
+

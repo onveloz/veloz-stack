@@ -8,6 +8,7 @@ import {
 } from "./showcase-sections";
 import { ShowcaseProjectCard } from "./showcase-project-card";
 
+/** @internal Scaffold export. */
 export const metadata = {
   title: "Showcase — Veloz Stack",
   description:

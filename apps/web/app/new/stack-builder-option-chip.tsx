@@ -86,6 +86,7 @@ function OptionChipLabel({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function OptionChip({
   id,
   label,

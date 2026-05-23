@@ -8,6 +8,7 @@
 | [ARCHITECTURE.md](ARCHITECTURE.md)                                                     | Monorepo layout, generator pipeline, CI                 |
 | [stack-config.md](stack-config.md)                                                     | `ProjectConfig` / `veloz-stack.config.json` reference   |
 | [vendors.md](vendors.md)                                                               | Payment/SMS/analytics vendor notes for template modules |
+| [deploy-web.md](deploy-web.md)                                                         | Build and deploy notes for `apps/web`                   |
 | [plans/archive/next-backend-routes.plan.md](plans/archive/next-backend-routes.plan.md) | **Done** — design history for `backend: next`           |
 
 Operational (Portuguese): [../veloz-deploy-plano.md](../veloz-deploy-plano.md) — Veloz deploy notes for `apps/web`.

@@ -35,6 +35,7 @@ function enumOptions(schema: {
   return [first, ...rest];
 }
 
+/** @internal Scaffold export. */
 export const stackConfigParsers = {
   name: parseAsString.withDefault(DEFAULT_CONFIG.projectName),
   preset: parseAsStringEnum(enumOptions(PresetId)).withDefault(

@@ -27,6 +27,7 @@ import type { PendingChange } from "./stack-builder-state-core";
 
 type SetState = ReturnType<typeof useStackConfig>["setState"];
 
+/** @internal Generated-app type. */
 export interface HandlerContext {
   config: ProjectConfig;
   mode: BuilderMode;
@@ -37,6 +38,7 @@ export interface HandlerContext {
   setShareCopied: (copied: boolean) => void;
 }
 
+/** @internal Scaffold pipeline step. */
 export function createShareHandler(
   ctx: Pick<HandlerContext, "setShareCopied">,
 ) {
@@ -53,6 +55,7 @@ export function createShareHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createApplyPresetHandler(
   ctx: Pick<HandlerContext, "config" | "mode" | "setState" | "setStep">,
 ) {
@@ -86,6 +89,7 @@ export function createApplyPresetHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createRandomizeHandler(
   ctx: Pick<HandlerContext, "config" | "setState" | "setStep">,
 ) {
@@ -100,6 +104,7 @@ export function createRandomizeHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createToggleModuleHandler(
   ctx: Pick<HandlerContext, "config" | "setState" | "setPending">,
 ) {
@@ -143,6 +148,7 @@ export function createToggleModuleHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createGitHookHandler(
   ctx: Pick<HandlerContext, "config" | "setState">,
 ) {
@@ -155,6 +161,7 @@ export function createGitHookHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createLinterHandler(
   ctx: Pick<HandlerContext, "config" | "setState">,
 ) {
@@ -167,6 +174,7 @@ export function createLinterHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createTurborepoHandler(
   ctx: Pick<HandlerContext, "config" | "setState">,
 ) {
@@ -178,6 +186,7 @@ export function createTurborepoHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createToggleExampleHandler(
   ctx: Pick<HandlerContext, "config" | "setState">,
 ) {
@@ -195,6 +204,7 @@ export function createToggleExampleHandler(
   };
 }
 
+/** @internal Scaffold pipeline step. */
 export function createRequestChangeHandler(
   ctx: Pick<HandlerContext, "config" | "setState" | "setPending">,
 ) {
@@ -271,6 +281,7 @@ function applyStackRequestChange(
   });
 }
 
+/** @internal Scaffold pipeline step. */
 export function createGoToStepHandler(
   ctx: Pick<HandlerContext, "setStep" | "setMode">,
 ) {

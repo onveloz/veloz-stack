@@ -10,6 +10,7 @@ Canonical Zod schemas and stack compatibility rules for the CLI, web builder, an
 - `./defaults` — presets
 - `./labels` — display labels and option hints for the stack builder
 - `./resolve-stack` — `resolveStackChange`, `repairStackConfigCore`, cascade change types
+- `./resolve-stack-axis` — per-axis cascade helpers used by the stack builder
 
 ## Check types
 

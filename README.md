@@ -52,6 +52,7 @@ Options marked **coming soon (“Em breve”)** are not wired in the generator y
 - [docs/README.md](docs/README.md) — documentation index
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how the monorepo and generator fit together
 - [docs/stack-config.md](docs/stack-config.md) — stack axes and config file
+- [docs/deploy-web.md](docs/deploy-web.md) — build and deploy the stack builder site
 - [LICENSE](LICENSE) — MIT
 
 ## Develop

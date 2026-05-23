@@ -12,6 +12,7 @@ export type ConsentCategories = {
 
 const KEY = "lgpd:consent";
 
+/** @internal Scaffold pipeline step. */
 export function getConsent(): ConsentCategories | null {
   if (typeof localStorage === "undefined") return null;
   const raw = localStorage.getItem(KEY);
@@ -23,6 +24,7 @@ export function getConsent(): ConsentCategories | null {
   }
 }
 
+/** @internal Scaffold pipeline step. */
 export function setConsent(c: Omit<ConsentCategories, "necessary">): void {
   if (typeof localStorage === "undefined") return;
   const full: ConsentCategories = { necessary: true, ...c };
@@ -30,13 +32,16 @@ export function setConsent(c: Omit<ConsentCategories, "necessary">): void {
   window.dispatchEvent(new CustomEvent("lgpd:consent-changed", { detail: full }));
 }
 
+/** @internal Scaffold pipeline step. */
 export function hasAccepted(category: keyof ConsentCategories): boolean {
   const c = getConsent();
   return c ? c[category] === true : false;
 }
 
+/** @internal Scaffold pipeline step. */
 export function revokeAll(): void {
   if (typeof localStorage === "undefined") return;
   localStorage.removeItem(KEY);
   window.dispatchEvent(new CustomEvent("lgpd:consent-changed", { detail: null }));
 }
+

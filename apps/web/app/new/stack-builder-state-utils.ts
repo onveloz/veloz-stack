@@ -15,20 +15,24 @@ import type {
 import type { StepId } from "./stack-builder-app-types";
 import { QUICK_STEPS, STEPS } from "./stack-builder-constants";
 
+/** @internal Scaffold pipeline step. */
 export function isPresetKey(id: string): id is PresetKey {
   return Object.hasOwn(PRESETS, id);
 }
 
+/** @internal Scaffold pipeline step. */
 export function isComingSoonPreset(id: string): boolean {
   return (COMING_SOON_PRESETS as readonly string[]).includes(id);
 }
 
+/** @internal Scaffold pipeline step. */
 export function getVisibleSteps(mode: "quick" | "full") {
   return mode === "quick"
     ? STEPS.filter((stepItem) => QUICK_STEPS.includes(stepItem.id))
     : STEPS;
 }
 
+/** @internal Scaffold pipeline step. */
 export function getCustomizedFromPreset(
   config: ProjectConfig,
   basePreset: PresetId,
@@ -43,6 +47,7 @@ export function getCustomizedFromPreset(
   return PRESETS[basePreset].label;
 }
 
+/** @internal Scaffold pipeline step. */
 export function filterModules(
   moduleSearch: string,
   moduleFilter: string,
@@ -65,6 +70,7 @@ export function filterModules(
   });
 }
 
+/** @internal Scaffold pipeline step. */
 export function getStepProgress(
   visibleSteps: typeof STEPS,
   step: StepId,

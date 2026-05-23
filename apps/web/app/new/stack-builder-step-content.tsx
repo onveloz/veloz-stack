@@ -67,6 +67,7 @@ function renderReviewStep(builder: StackBuilderState, config: ProjectConfig) {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderStepContent({
   builder,
   config,

@@ -148,6 +148,7 @@ function PresetButton({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderPresetFields({
   config,
   mode,
@@ -182,6 +183,7 @@ export function StackBuilderPresetFields({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StackBuilderPresetButtons({
   config,
   basePreset,

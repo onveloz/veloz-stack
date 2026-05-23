@@ -1,3 +1,4 @@
+/** @internal Scaffold pipeline step. */
 export function ShowcaseGitHubIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 98 96" aria-hidden className={className}>

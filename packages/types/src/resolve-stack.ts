@@ -15,7 +15,9 @@ import {
 import { findReason, satisfyPendingChoice } from "./resolve-stack-pending";
 import type { ConfigChange } from "./resolve-stack-types";
 
+/** @internal Generated-app type. */
 export type { ConfigChange } from "./resolve-stack-types";
+/** @internal Generated-app type. */
 export type { StackKey } from "./resolve-stack-axis";
 export { isStackKey } from "./resolve-stack-axis";
 export { resolveEnableModule } from "./resolve-stack-modules";

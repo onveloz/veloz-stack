@@ -24,10 +24,12 @@ function h(): HimetricaWindow["himetrica"] | null {
   return (window as HimetricaWindow).himetrica ?? null;
 }
 
+/** @internal Scaffold pipeline step. */
 export function track(event: string, props?: Record<string, unknown>): void {
   h()?.track(event, props);
 }
 
+/** @internal Scaffold pipeline step. */
 export function identify(user: {
   userId: string;
   name?: string;
@@ -40,3 +42,4 @@ export function identify(user: {
 export function reset(): void {
   h()?.reset();
 }
+

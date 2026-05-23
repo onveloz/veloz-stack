@@ -18,6 +18,7 @@ import {
   getVisibleSteps,
 } from "./stack-builder-state-utils";
 
+/** @internal Generated-app type. */
 export interface PendingChange {
   title: string;
   primaryReason: string;
@@ -25,6 +26,7 @@ export interface PendingChange {
   apply: () => void;
 }
 
+/** @internal Scaffold pipeline step. */
 export function useStackBuilderCoreState(
   config: ProjectConfig,
   basePreset: PresetId,
@@ -75,6 +77,7 @@ export function useStackBuilderCoreState(
   };
 }
 
+/** @internal Generated-app type. */
 export type StackBuilderCoreState = ReturnType<typeof useStackBuilderCoreState>;
 
 function useClampStepToVisibleSteps(

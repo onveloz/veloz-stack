@@ -48,6 +48,7 @@ function ModuleRowCheckbox({ active }: { active: boolean }) {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ModuleRow({
   module,
   config,
@@ -123,6 +124,7 @@ function ModuleCategoryList({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function ModuleListSection({
   title,
   hint,
@@ -277,6 +279,7 @@ function StepBrazilLists({
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function StepBrazil({
   config,
   modules,

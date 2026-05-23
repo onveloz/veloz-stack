@@ -121,6 +121,7 @@ function usePreviewVfs(config: ProjectConfig) {
   return { tree, fileCount, loading };
 }
 
+/** @internal Scaffold pipeline step. */
 export function PreviewPanel({
   config,
   maxHeight,

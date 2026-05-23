@@ -12,4 +12,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
+/** @internal Scaffold export. */
 export const routeTree: any = undefined as any;
+

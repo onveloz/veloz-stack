@@ -11,6 +11,7 @@ if (!apiKey) {
   throw new Error("ANTHROPIC_API_KEY is required. Get a key at console.anthropic.com.");
 }
 
+/** @internal Scaffold export. */
 export const claude = new Anthropic({ apiKey });
 
 /** Current recommended models. Override with env to pin. */
@@ -20,6 +21,7 @@ export const MODELS = {
   strongest: process.env.CLAUDE_STRONGEST_MODEL ?? "claude-opus-4-7",
 } as const;
 
+/** @internal Generated-app type. */
 export type ChatMessage = {
   role: "user" | "assistant";
   content: string;
@@ -46,3 +48,4 @@ export async function chat(
     .map((b) => b.text)
     .join("\n");
 }
+
