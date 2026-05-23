@@ -60,7 +60,9 @@ function honoDevDependencies(
     typescript: version("typescript"),
     ...(isBun
       ? { "@types/bun": version("@types/bun") }
-      : { "@types/node": version("@types/node") }),
+      : isWorkers
+        ? {}
+        : { "@types/node": version("@types/node") }),
     ...(!isBun && !isWorkers ? { tsx: version("tsx") } : {}),
     ...(isWorkers
       ? {

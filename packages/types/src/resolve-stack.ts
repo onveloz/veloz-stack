@@ -7,11 +7,8 @@ import {
   validateConfig,
 } from "./compatibility";
 import type { ModuleId, ProjectConfig } from "./index";
-import {
-  assignStackAxisFromString,
-  getStackAxisValue,
-  RESOLVERS,
-} from "./resolve-stack-axis";
+import { assignStackAxisFromString, getStackAxisValue, RESOLVERS } from './resolve-stack-axis';
+import type { StackKey } from './resolve-stack-axis';
 import { findReason, satisfyPendingChoice } from "./resolve-stack-pending";
 import type { ConfigChange } from "./resolve-stack-types";
 
@@ -34,9 +31,11 @@ function getConfigStringValue(
 
 function applyPendingValue(
   cfg: ProjectConfig,
-  pending: { key: keyof ProjectConfig; value: string },
+  pending: { key: StackKey; value: string },
 ): ProjectConfig {
-  return { ...cfg, [pending.key]: pending.value };
+  const next = { ...cfg };
+  assignStackAxisFromString(next, pending.key, pending.value);
+  return next;
 }
 
 function collectFrontendCascadeChanges(
@@ -160,7 +159,7 @@ function collectDroppedModuleChanges(proposed: ProjectConfig): ConfigChange[] {
  */
 export function resolveStackChange(
   cfg: ProjectConfig,
-  pending: { key: keyof ProjectConfig; value: string },
+  pending: { key: StackKey; value: string },
 ): { newCfg: ProjectConfig; changes: ConfigChange[] } {
   const proposed = applyPendingValue(cfg, pending);
   const cascadesBeforePrimary =

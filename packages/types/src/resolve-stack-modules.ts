@@ -138,6 +138,11 @@ export function resolveEnableModule(
   cfg: ProjectConfig,
   moduleId: ModuleId,
 ): { newCfg: ProjectConfig; changes: ConfigChange[] } {
+  const meta = MODULES[moduleId];
+  if (meta.comingSoon) {
+    return { newCfg: cfg, changes: [] };
+  }
+
   const block = getModuleDisableReason(cfg, moduleId);
   if (!block) {
     return {
@@ -154,7 +159,6 @@ export function resolveEnableModule(
 
   let proposed = { ...cfg };
   const changes: ConfigChange[] = [];
-  const meta = MODULES[moduleId];
   const ctx: ModuleEnsureContext = { proposed, changes, moduleId, block };
 
   if (meta.requires?.auth) {

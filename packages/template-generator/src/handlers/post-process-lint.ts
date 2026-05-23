@@ -27,11 +27,11 @@ function dbScripts(config: ProjectConfig): Record<string, string> {
   const push =
     pm === "pnpm"
       ? "pnpm -F @*/db db:push"
-      : `${pm} --cwd packages/db run db:push`;
+      : `${pm} --prefix packages/db run db:push`;
   const studio =
     pm === "pnpm"
       ? "pnpm -F @*/db db:studio"
-      : `${pm} --cwd packages/db run db:studio`;
+      : `${pm} --prefix packages/db run db:studio`;
   return { "db:push": push, "db:studio": studio };
 }
 

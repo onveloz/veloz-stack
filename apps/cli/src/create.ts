@@ -122,11 +122,12 @@ function applyUiFallback(input: CreateInput, config: ProjectConfig): void {
 }
 
 function resolveTargetDirectory(config: ProjectConfig): string {
-  const target = resolve(process.cwd(), config.projectName);
-  config.projectName = basename(target)
-    .replaceAll(/[^a-z0-9-_]/gi, "-")
-    .toLowerCase();
-  return target;
+  const safeName =
+    basename(config.projectName)
+      .replaceAll(/[^a-z0-9-_]/gi, "-")
+      .toLowerCase() || "my-veloz-stack";
+  config.projectName = safeName;
+  return resolve(process.cwd(), safeName);
 }
 
 function printValidationErrors(errors: string[]): void {

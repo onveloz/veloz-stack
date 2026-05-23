@@ -60,7 +60,10 @@ export function getRuntimeDisableReason(
 }
 
 function getDrizzleOrmDisableReason(cfg: ProjectConfig): DisableReason {
-  if (cfg.db === "none" || cfg.db === "postgres" || cfg.db === "sqlite") {
+  if (cfg.db === "none") {
+    return "Nenhum banco selecionado";
+  }
+  if (cfg.db === "postgres" || cfg.db === "sqlite") {
     return null;
   }
   return "Em breve";
