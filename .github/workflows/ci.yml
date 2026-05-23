@@ -32,7 +32,9 @@ jobs:
         run: pnpm --filter @veloz-stack/template-generator gen
 
       - name: Type-check all workspaces
-        run: pnpm -r --parallel check-types
+        run: |
+          pnpm --filter @veloz-stack/template-generator exec tsc --noEmit
+          pnpm -r --parallel --filter '!@veloz-stack/template-generator' check-types
 
       - name: Lint (oxlint + oxfmt)
         run: pnpm lint
