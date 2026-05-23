@@ -1,12 +1,14 @@
 # Vendor reference — source-of-truth for Wave 2 SKILL.md + SDK wrappers
 
 Each module in `packages/types/src/modules.ts` maps to a vendor below. When we generate code we emit:
+
 1. A typed SDK wrapper (`packages/vendors/<id>/index.ts`)
 2. A Claude skill (`.claude/skills/<id>/SKILL.md`) generated from this data
 3. Env var additions (`.env.example`)
 4. Webhook handler stub when applicable
 
 ## AbacatePay (`abacatepay`)
+
 - Auth: `Authorization: Bearer <token>`. Keys at app.abacatepay.com/api
 - Base URL: `https://api.abacatepay.com/v1` (prod; dev behavior via `ara_test_`-style key + `/pixQrCode/simulate-payment`)
 - SDK: `abacatepay-nodejs-sdk` (official, TS/ESM). Official MCP at `abacatepay/abacatepay-mcp`
@@ -16,6 +18,7 @@ Each module in `packages/types/src/modules.ts` maps to a vendor below. When we g
 - Gotchas: v1 legacy, v2 current — payload shapes differ. Never mix dev & live keys.
 
 ## Arara (`ararahq-sms`, `ararahq-wa`)
+
 - Auth: `Authorization: Bearer ara_live_...` / `ara_test_...`
 - Base URL: `https://new-api.ararahq.com/api/v2/`
 - SDK: `@ararahq/sdk` (MIT, official)
@@ -24,21 +27,25 @@ Each module in `packages/types/src/modules.ts` maps to a vendor below. When we g
 - Gotchas: template vs freeform (24h window rule), `ara_test_` vs `ara_live_` billing separation
 
 ## Himetrica (`himetrica`)
+
 - Auth: public `data-api-key` (`hm_...`) for web tracker. Server API header NOT FOUND on public docs
 - Tracker: `https://cdn.himetrica.com/tracker.js` (`<script data-api-key>`)
 - Methods: `window.himetrica.track/identify/reset`. Integrations with Stripe, GSC, Shopify, RevenueCat, AbacatePay. Built-in MCP with 11 tools
 - Gotchas: client-only tracker, always `reset()` on logout, Stripe requires restricted key
 
 ## CaramoSec (`caramelosec`)
+
 - **NOT FOUND.** Pre-launch landing only. Emit placeholder SKILL.md stub, no SDK wrapper until docs published
 
 ## Veloz (`deploy: veloz` + db hosting)
+
 - Auth: `veloz login` (browser) or `VELOZ_API_KEY=veloz_...`
 - No public REST SDK. Programmatic surface = `onveloz` CLI + MCP server (`mcp__veloz__deploy/db_create/env_set/domains_add/logs_search/...`)
 - Quickstart: `npm i -g onveloz && veloz login && veloz init && veloz deploy`
 - Gotchas: commit `veloz.json`; monorepos need per-app deploy selection; scaffold SKILL.md around CLI + MCP, not imagined REST
 
 ## Asaas (`asaas`)
+
 - Auth: `access_token: $aact_prod_...` / `$aact_hmlg_...` (header name is `access_token` — **not** Bearer)
 - Base URL: prod `https://api.asaas.com/v3`, sandbox `https://api-sandbox.asaas.com/v3`
 - SDK: no first-party; wrap `fetch` directly
@@ -48,6 +55,7 @@ Each module in `packages/types/src/modules.ts` maps to a vendor below. When we g
 - Gotchas: customer must pre-exist with CPF/CNPJ; sandbox ≠ prod data
 
 ## Pagar.me v5 (`pagarme`)
+
 - Auth: HTTP Basic, username = `sk_...`, empty password → `Authorization: Basic base64("sk_xxx:")`
 - Base URL: `https://api.pagar.me/core/v5` (test/prod by key prefix)
 - SDK: first-party `pagarme-core-api-*` (multi-language); current actively-maintained TS SDK NOT FOUND — wrap fetch
@@ -57,6 +65,7 @@ Each module in `packages/types/src/modules.ts` maps to a vendor below. When we g
 - Gotchas: trailing colon in Basic auth string, v4/v5 coexist in docs
 
 ## Mercado Pago (`mercadopago`)
+
 - Auth: `Authorization: Bearer <TOKEN>` (`TEST-...` or live)
 - Base URL: `https://api.mercadopago.com`
 - SDK: `mercadopago` (official, actively maintained); `@mercadopago/sdk-react` for Bricks
@@ -66,12 +75,14 @@ Each module in `packages/types/src/modules.ts` maps to a vendor below. When we g
 - Gotchas: `idempotencyKey` required on `Payment.create`; HMAC template must include trailing `;` exactly
 
 ## BrasilAPI (`brasilapi`)
+
 - Auth: none
 - Base: `https://brasilapi.com.br/api`
 - Endpoints: `/cep/v2/{cep}`, `/cnpj/v1/{cnpj}`, `/banks/v1`, `/ddd/v1/{ddd}`, `/feriados/v1/{ano}`, `/ibge/municipios/v1/{uf}`, `/fipe/preco/v1/{cod}`, `/pix/v1/participants`, `/registrobr/v1/{dominio}`
 - Gotchas: CNPJ can be slow/5xx when Receita down; no SLA; ToS forbids sweeping
 
 ## ViaCEP (`viacep`)
+
 - Auth: none
 - Base: `https://viacep.com.br/ws/`
 - Endpoints: `GET /ws/{cep}/json/`, address search `/ws/{UF}/{City}/{Street}/json/`

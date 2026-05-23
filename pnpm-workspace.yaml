@@ -3,7 +3,6 @@ packages:
   - packages/*
 
 catalog:
-  "@biomejs/biome": ^2.4.15
   "@clack/prompts": ^0.9.1
   "@tailwindcss/postcss": ^4.3.0
   "@types/node": ^20.17.0
@@ -13,6 +12,10 @@ catalog:
   lucide-react: ^1.16.0
   next: ^16.2.6
   nuqs: ^2.8.9
+  oxfmt: ^0.51.0
+  oxlint: ^1.66.0
+  oxlint-plugin-complexity: ^2.1.2
+  oxlint-tsgolint: ^0.23.0
   react: ^19.2.6
   react-dom: ^19.2.6
   tailwindcss: ^4.3.0

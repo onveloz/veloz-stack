@@ -1,7 +1,9 @@
-# Local git hooks — `pnpm install` runs `lefthook install` via the root prepare script.
 pre-commit:
   commands:
-    biome:
-      glob: "*.{js,jsx,ts,tsx,json,jsonc,mjs,cjs,yml,yaml}"
-      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+    lint:
+      glob: "*.{js,jsx,ts,tsx,mjs,cjs}"
+      run: pnpm exec oxlint --fix --deny-warnings {staged_files}
+    format:
+      glob: "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,yml,yaml}"
+      run: pnpm exec oxfmt --write {staged_files}
       stage_fixed: true

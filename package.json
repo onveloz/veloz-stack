@@ -8,25 +8,32 @@
     "dev:cli": "turbo -F create-veloz-stack dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
-    "lint": "biome ci .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
+    "lint": "oxlint --deny-warnings . && oxfmt --check .",
+    "lint:fix": "oxlint --fix . && oxfmt .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "test": "turbo test",
     "prepare": "lefthook install",
     "sync-versions": "pnpm --filter @veloz-stack/template-generator sync-versions",
     "sync-versions:check": "pnpm --filter @veloz-stack/template-generator exec node scripts/sync-versions.mjs --check",
-    "cli:link": "pnpm --filter create-veloz-stack build && pnpm --filter create-veloz-stack link --global"
+    "cli:link": "pnpm --filter create-veloz-stack build && pnpm --filter create-veloz-stack link --global",
+    "docs:lint": "markdownlint-cli2",
+    "docs:links": "node scripts/check-doc-links.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "lefthook": "catalog:",
+    "markdownlint-cli2": "^0.22.1",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-plugin-complexity": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:"
   },
-  "packageManager": "pnpm@10.14.0",
   "engines": {
     "node": ">=20.11.0",
     "pnpm": ">=10"
-  }
+  },
+  "packageManager": "pnpm@10.14.0"
 }

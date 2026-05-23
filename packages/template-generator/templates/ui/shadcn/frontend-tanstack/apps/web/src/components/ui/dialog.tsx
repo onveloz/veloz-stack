@@ -4,11 +4,16 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const Dialog = DialogPrimitive.Root;
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogTrigger = DialogPrimitive.Trigger;
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogPortal = DialogPrimitive.Portal;
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogClose = DialogPrimitive.Close;
 
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -24,6 +29,7 @@ export const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -48,6 +54,7 @@ export const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogHeader = ({
   className,
   ...props
@@ -56,6 +63,7 @@ export const DialogHeader = ({
 );
 DialogHeader.displayName = "DialogHeader";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -68,6 +76,7 @@ export const DialogTitle = React.forwardRef<
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
+/** shadcn/ui primitive copied into generated apps. */
 export const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
@@ -79,3 +88,4 @@ export const DialogDescription = React.forwardRef<
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
+

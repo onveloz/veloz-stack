@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -17,6 +18,7 @@ export const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -25,6 +27,7 @@ export const CardHeader = React.forwardRef<
 ));
 CardHeader.displayName = "CardHeader";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const CardTitle = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -37,6 +40,7 @@ export const CardTitle = React.forwardRef<
 ));
 CardTitle.displayName = "CardTitle";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const CardDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -49,6 +53,7 @@ export const CardDescription = React.forwardRef<
 ));
 CardDescription.displayName = "CardDescription";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -57,6 +62,7 @@ export const CardContent = React.forwardRef<
 ));
 CardContent.displayName = "CardContent";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -68,3 +74,4 @@ export const CardFooter = React.forwardRef<
   />
 ));
 CardFooter.displayName = "CardFooter";
+

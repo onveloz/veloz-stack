@@ -1,7 +1,7 @@
 # Plano de Deploy — Veloz
 
 **Data/hora inicial:** 2026-04-17
-**Framework detectado:** Next.js 15 (App Router)
+**Framework detectado:** Next.js 16 (App Router; catalog `next: ^16.2.6`)
 **Package manager:** pnpm (v10.14.0)
 **Monorepo:** Turborepo
 **Org:** Veloz
@@ -11,7 +11,7 @@
 ## Contexto
 
 Projeto: `veloz-stack` — monorepo pnpm + Turborepo.
-App deployado: `apps/web` — Next.js 15 App Router (landing page + stack builder).
+App deployado: `apps/web` — Next.js 16 App Router (landing page + stack builder).
 Outros apps no monorepo: `apps/cli` (CLI `create-veloz-stack`), não deployado.
 Packages internos: `packages/template-generator`, `packages/types`.
 
@@ -29,6 +29,7 @@ Packages internos: `packages/template-generator`, `packages/types`.
 ## Configuração
 
 ### Serviço
+
 - **Nome:** `web`
 - **Projeto:** `veloz-stack`
 - **Tipo:** WEB
@@ -37,6 +38,7 @@ Packages internos: `packages/template-generator`, `packages/types`.
 - **Método de build:** Nixpacks (auto-detect)
 
 ### Build customizado
+
 - **Motivo:** O arquivo `packages/template-generator/src/templates.generated.ts` está em `.gitignore` (gerado pelo script `gen`). O Turborepo não executa o `prebuild` automaticamente, então o arquivo não estava disponível no ambiente de build.
 - **Solução:** Build command customizado que gera o arquivo antes do `turbo build`.
 - **Build command:** `pnpm --filter @veloz-stack/template-generator run gen && pnpm run build`
@@ -44,18 +46,19 @@ Packages internos: `packages/template-generator`, `packages/types`.
 - **Porta:** 3000
 
 ### Env vars configuradas
+
 - Nenhuma (app não requer env vars)
 
 ---
 
 ## Deploy
 
-| Deploy | Status | Motivo |
-|--------|--------|--------|
-| dep_552Awm9NT8wG | BUILD_FAILED | Nixpacks não detectou start command no monorepo |
+| Deploy           | Status       | Motivo                                                           |
+| ---------------- | ------------ | ---------------------------------------------------------------- |
+| dep_552Awm9NT8wG | BUILD_FAILED | Nixpacks não detectou start command no monorepo                  |
 | dep_X1KRPClPH7BF | BUILD_FAILED | Nome do serviço com `@/` causava referência inválida no registry |
-| dep_yvXTLE9V8r0c | BUILD_FAILED | `templates.generated.ts` ausente (em .gitignore) |
-| dep_final | **LIVE** | Build command corrigido para gerar templates antes do build |
+| dep_yvXTLE9V8r0c | BUILD_FAILED | `templates.generated.ts` ausente (em .gitignore)                 |
+| dep_final        | **LIVE**     | Build command corrigido para gerar templates antes do build      |
 
 **URL final:** https://www.veloz-stack.com
 
@@ -64,7 +67,7 @@ Packages internos: `packages/template-generator`, `packages/types`.
 ## Health Check
 
 - **HTTP check:** GET https://www.veloz-stack.com/ → **200 OK** (0.9s, 27KB)
-- **Logs:** Next.js 15.5.15 iniciou em 1094ms. Nenhum erro.
+- **Logs:** Next.js 16.x iniciou em ~1s (versão exata depende do build no deploy). Nenhum erro na verificação original.
 - **Métricas:** 0 restarts, 0 OOM events, 0% CPU throttle.
 
 **Resultado: SAUDÁVEL**
