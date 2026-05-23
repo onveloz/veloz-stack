@@ -133,6 +133,23 @@ function buildEnabledModuleList(
   return modules;
 }
 
+function rejectComingSoonModule(
+  cfg: ProjectConfig,
+  moduleName: string,
+): { newCfg: ProjectConfig; changes: ConfigChange[] } {
+  return {
+    newCfg: cfg,
+    changes: [
+      {
+        key: "modules",
+        from: "—",
+        to: null,
+        reason: `${moduleName} está em breve`,
+      },
+    ],
+  };
+}
+
 /** Turn on a module, repairing stack fields first when {@link getModuleDisableReason} blocks it. */
 export function resolveEnableModule(
   cfg: ProjectConfig,
@@ -140,7 +157,7 @@ export function resolveEnableModule(
 ): { newCfg: ProjectConfig; changes: ConfigChange[] } {
   const meta = MODULES[moduleId];
   if (meta.comingSoon) {
-    return { newCfg: cfg, changes: [] };
+    return rejectComingSoonModule(cfg, meta.name);
   }
 
   const block = getModuleDisableReason(cfg, moduleId);

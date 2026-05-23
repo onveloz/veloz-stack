@@ -116,5 +116,8 @@ export type DependencyName = keyof typeof DEPENDENCY_VERSIONS;
 
 /** Resolve a catalog dependency name to its pinned range. */
 export function version(name: DependencyName): string {
+  if (!(name in DEPENDENCY_VERSIONS)) {
+    throw new Error(`Dependency "${name}" not in central version map.`);
+  }
   return DEPENDENCY_VERSIONS[name];
 }
