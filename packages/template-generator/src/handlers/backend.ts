@@ -3,41 +3,80 @@ import { version } from "../deps";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
-export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
-  if (config.backend === "none") return;
+const HONO_PREFIX: Record<ProjectConfig["runtime"], string> = {
+  workers: "backend/hono-workers/",
+  bun: "backend/hono-bun/",
+  node: "backend/hono-node/",
+};
 
-  if (config.backend === "next") {
-    processTemplatesFromPrefix(vfs, "backend/next/", "apps/web/", config);
-    return;
+function honoScripts(runtime: ProjectConfig["runtime"]): {
+  dev: string;
+  start: string;
+} {
+  if (runtime === "workers") {
+    return { dev: "wrangler dev", start: "wrangler deploy" };
   }
+  if (runtime === "bun") {
+    return {
+      dev: "bun run --watch src/index.ts",
+      start: "bun run src/index.ts",
+    };
+  }
+  return {
+    dev: "tsx watch src/index.ts",
+    start: "node --experimental-strip-types src/index.ts",
+  };
+}
 
-  if (config.backend !== "hono") return;
-
-  const runtime = config.runtime;
-  const prefix =
-    runtime === "workers"
-      ? "backend/hono-workers/"
-      : runtime === "bun"
-        ? "backend/hono-bun/"
-        : "backend/hono-node/";
-  processTemplatesFromPrefix(vfs, prefix, "apps/server/", config);
-
+function honoDependencies(
+  config: ProjectConfig,
+  runtime: ProjectConfig["runtime"],
+): Record<string, string> {
   const isBun = runtime === "bun";
   const isWorkers = runtime === "workers";
+  return {
+    hono: version("hono"),
+    ...(!isBun && !isWorkers
+      ? { "@hono/node-server": version("@hono/node-server") }
+      : {}),
+    ...(config.api === "orpc"
+      ? { "@orpc/server": version("@orpc/server") }
+      : {}),
+    ...(config.api !== "none"
+      ? { [`@${config.projectName}/api`]: "workspace:*" }
+      : {}),
+    ...(config.auth === "better-auth"
+      ? { [`@${config.projectName}/auth`]: "workspace:*" }
+      : {}),
+  };
+}
 
-  let devScript: string;
-  let startScript: string;
-  if (isWorkers) {
-    devScript = "wrangler dev";
-    startScript = "wrangler deploy";
-  } else if (isBun) {
-    devScript = "bun run --watch src/index.ts";
-    startScript = "bun run src/index.ts";
-  } else {
-    devScript = "tsx watch src/index.ts";
-    startScript = "node --experimental-strip-types src/index.ts";
-  }
+function honoDevDependencies(
+  runtime: ProjectConfig["runtime"],
+): Record<string, string> {
+  const isBun = runtime === "bun";
+  const isWorkers = runtime === "workers";
+  return {
+    typescript: version("typescript"),
+    ...(isBun
+      ? { "@types/bun": version("@types/bun") }
+      : { "@types/node": version("@types/node") }),
+    ...(!isBun && !isWorkers ? { tsx: version("tsx") } : {}),
+    ...(isWorkers
+      ? {
+          wrangler: version("wrangler"),
+          "@cloudflare/workers-types": version("@cloudflare/workers-types"),
+        }
+      : {}),
+  };
+}
 
+function writeHonoServerPackage(
+  vfs: VirtualFs,
+  config: ProjectConfig,
+  runtime: ProjectConfig["runtime"],
+): void {
+  const scripts = honoScripts(runtime);
   vfs.write(
     "apps/server/package.json",
     `${JSON.stringify(
@@ -46,35 +85,47 @@ export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
         private: true,
         type: "module",
         scripts: {
-          dev: devScript,
-          start: startScript,
+          dev: scripts.dev,
+          start: scripts.start,
           "check-types": "tsc --noEmit",
         },
-        dependencies: {
-          hono: version("hono"),
-          ...(isBun || isWorkers ? {} : { "@hono/node-server": version("@hono/node-server") }),
-          ...(config.api === "orpc" ? { "@orpc/server": version("@orpc/server") } : {}),
-          ...(config.api !== "none" ? { [`@${config.projectName}/api`]: "workspace:*" } : {}),
-          ...(config.auth === "better-auth"
-            ? { [`@${config.projectName}/auth`]: "workspace:*" }
-            : {}),
-        },
-        devDependencies: {
-          typescript: version("typescript"),
-          ...(isBun
-            ? { "@types/bun": version("@types/bun") }
-            : { "@types/node": version("@types/node") }),
-          ...(!isBun && !isWorkers ? { tsx: version("tsx") } : {}),
-          ...(isWorkers
-            ? {
-                wrangler: version("wrangler"),
-                "@cloudflare/workers-types": version("@cloudflare/workers-types"),
-              }
-            : {}),
-        },
+        dependencies: honoDependencies(config, runtime),
+        devDependencies: honoDevDependencies(runtime),
       },
       null,
       2,
     )}\n`,
   );
+}
+
+function processHonoBackend(vfs: VirtualFs, config: ProjectConfig): void {
+  const { runtime } = config;
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: HONO_PREFIX[runtime],
+    destPrefix: "apps/server/",
+    config,
+  });
+  writeHonoServerPackage(vfs, config, runtime);
+}
+
+/** @internal Scaffold pipeline step. */
+export function processBackend(vfs: VirtualFs, config: ProjectConfig): void {
+  if (config.backend === "none") {
+    return;
+  }
+
+  if (config.backend === "next") {
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "backend/next/",
+      destPrefix: "apps/web/",
+      config,
+    });
+    return;
+  }
+
+  if (config.backend === "hono") {
+    processHonoBackend(vfs, config);
+  }
 }

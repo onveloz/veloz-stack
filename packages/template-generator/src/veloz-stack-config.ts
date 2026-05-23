@@ -1,13 +1,15 @@
-import type { ProjectConfig } from "@veloz-stack/types";
+import type { ProjectConfig, VelozStackConfigFile } from "./project-config";
 import {
   VELOZ_STACK_CONFIG_FILENAME,
   VELOZ_STACK_CONFIG_SCHEMA_URL,
-  type VelozStackConfigFile,
 } from "@veloz-stack/types";
 import { buildReproducibleCommand } from "./utils/reproducible-command";
 import type { VirtualFs } from "./vfs";
 
-function toVelozStackConfig(config: ProjectConfig, cliVersion: string): VelozStackConfigFile {
+function toVelozStackConfig(
+  config: ProjectConfig,
+  cliVersion: string,
+): VelozStackConfigFile {
   return {
     $schema: VELOZ_STACK_CONFIG_SCHEMA_URL,
     version: cliVersion,
@@ -42,6 +44,7 @@ const FILE_HEADER = `// Veloz Stack — stack manifest (safe to delete for day-t
 // Showcase: https://www.veloz-stack.com/showcase
 `;
 
+/** @internal Scaffold pipeline step. */
 export function writeVelozStackConfigToVfs(
   vfs: VirtualFs,
   config: ProjectConfig,

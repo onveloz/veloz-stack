@@ -9,7 +9,9 @@
     ".": "./src/index.ts",
     "./modules": "./src/modules.ts",
     "./compatibility": "./src/compatibility.ts",
-    "./defaults": "./src/defaults.ts"
+    "./defaults": "./src/defaults.ts",
+    "./labels": "./src/labels.ts",
+    "./resolve-stack": "./src/resolve-stack.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit"

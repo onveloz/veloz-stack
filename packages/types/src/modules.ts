@@ -1,3 +1,4 @@
+/** All integration module ids the generator can emit (payments, SMS, observability, etc.). */
 export const MODULE_IDS = [
   "claude",
   "abacatepay",
@@ -28,8 +29,10 @@ export const MODULE_IDS = [
   "next-intl",
 ] as const;
 
+/** Union of valid {@link MODULE_IDS} entries. */
 export type ModuleId = (typeof MODULE_IDS)[number];
 
+/** Grouping used by the stack builder module picker. */
 export type ModuleCategory =
   | "ai"
   | "payments"
@@ -46,18 +49,22 @@ export type ModuleCategory =
   | "observability"
   | "storage";
 
+/** Display and constraint metadata for one integration module. */
 export interface ModuleMeta {
   id: ModuleId;
   name: string;
   category: ModuleCategory;
   tagline: string;
   brazilian?: boolean;
+  /** Module appears in the picker but has no generator templates yet. */
+  comingSoon?: boolean;
   requires?: { auth?: boolean; backend?: true; db?: true };
   docsUrl?: string;
   website?: string;
   defaultOn?: boolean;
 }
 
+/** Registry of all modules keyed by {@link ModuleId}. */
 export const MODULES: Record<ModuleId, ModuleMeta> = {
   claude: {
     id: "claude",
@@ -174,6 +181,7 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
     category: "compliance",
     tagline: "Automação fiscal NFe / NFSe",
     brazilian: true,
+    comingSoon: true,
     requires: { backend: true },
     website: "https://nfe.io",
   },
@@ -181,7 +189,8 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
     id: "pt-br-i18n",
     name: "pt-BR i18n",
     category: "i18n",
-    tagline: "Formatadores BRL/data — TanStack, Hono, etc. (não use com next-intl no Next)",
+    tagline:
+      "Formatadores BRL/data — TanStack, Hono, etc. (não use com next-intl no Next)",
     brazilian: true,
     defaultOn: true,
   },
@@ -253,6 +262,7 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
     name: "Cloudflare R2",
     category: "storage",
     tagline: "Compatível com S3, sem custo de egress",
+    comingSoon: true,
     requires: { backend: true },
   },
   pino: {
@@ -275,11 +285,13 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
     id: "next-intl",
     name: "next-intl",
     category: "i18n",
-    tagline: "Locale + mensagens no App Router (só Next.js; substitui pt-BR i18n)",
+    tagline:
+      "Locale + mensagens no App Router (só Next.js; substitui pt-BR i18n)",
     website: "https://next-intl.dev",
   },
 };
 
+/** Category order for the module picker UI. */
 export const MODULE_CATEGORIES: ModuleCategory[] = [
   "ai",
   "auth",
@@ -297,6 +309,7 @@ export const MODULE_CATEGORIES: ModuleCategory[] = [
   "storage",
 ];
 
+/** Portuguese labels for {@link ModuleCategory} values. */
 export const MODULE_CATEGORY_LABELS: Record<ModuleCategory, string> = {
   ai: "IA",
   auth: "Auth",

@@ -1,3 +1,5 @@
+import { isJsonObject } from "./package-json";
+
 /**
  * Plain path → string map. Lightweight stand-in for memfs. Every handler
  * writes here; the final `writeTree` step materialises it to disk.
@@ -23,11 +25,21 @@ export class VirtualFs {
   }
 
   /** Merge JSON: reads → parses → mutates via fn → writes back. Creates the file if missing. */
-  updateJson<T>(path: string, fn: (data: T) => T, initial?: T): void {
+  updateJson(
+    path: string,
+    fn: (data: Record<string, unknown>) => Record<string, unknown>,
+    initial: Record<string, unknown> = {},
+  ): void {
     const existing = this.read(path);
-    let data: T = existing ? (JSON.parse(existing) as T) : (initial ?? ({} as T));
-    data = fn(data);
-    this.write(path, `${JSON.stringify(data, null, 2)}\n`);
+    const parsed: unknown = existing ? JSON.parse(existing) : initial;
+    if (!isJsonObject(parsed)) {
+      throw new Error(`Expected JSON object at ${path}`);
+    }
+    const next = fn(parsed);
+    if (!isJsonObject(next)) {
+      throw new Error(`updateJson callback must return an object for ${path}`);
+    }
+    this.write(path, `${JSON.stringify(next, null, 2)}\n`);
   }
 
   entries(): IterableIterator<[string, string]> {
@@ -40,5 +52,5 @@ export class VirtualFs {
 }
 
 function normalise(p: string): string {
-  return p.replace(/^\.?\//, "").replace(/\/+/g, "/");
+  return p.replace(/^\.?\//, "").replaceAll(/\/+/g, "/");
 }

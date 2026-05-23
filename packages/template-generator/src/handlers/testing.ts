@@ -1,5 +1,6 @@
 import type { ProjectConfig } from "@veloz-stack/types";
 import { version } from "../deps";
+import { asPackageJson } from "../package-json";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
@@ -18,7 +19,12 @@ test("API router is defined", () => {
  * Vitest runs from the repo root; Playwright is added when a web frontend exists.
  */
 export function processTesting(vfs: VirtualFs, config: ProjectConfig): void {
-  processTemplatesFromPrefix(vfs, "testing/", "", config);
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: "testing/",
+    destPrefix: "",
+    config,
+  });
 
   if (config.frontend === "none") {
     vfs.remove("playwright.config.ts");
@@ -27,21 +33,25 @@ export function processTesting(vfs: VirtualFs, config: ProjectConfig): void {
 
   if (config.api !== "none" && vfs.exists("packages/api/package.json")) {
     vfs.write("packages/api/src/smoke.test.ts", API_SMOKE_TEST);
-    vfs.updateJson<Record<string, any>>("packages/api/package.json", (pkg) => {
-      pkg.scripts = { ...(pkg.scripts ?? {}), test: "vitest run" };
+    vfs.updateJson("packages/api/package.json", (raw) => {
+      const pkg = asPackageJson(raw);
+      pkg.scripts = { ...pkg.scripts, test: "vitest run" };
       pkg.devDependencies = {
-        ...(pkg.devDependencies ?? {}),
+        ...pkg.devDependencies,
         vitest: version("vitest"),
       };
       return pkg;
     });
   }
 
-  vfs.updateJson<Record<string, any>>("package.json", (pkg) => {
+  vfs.updateJson("package.json", (raw) => {
+    const pkg = asPackageJson(raw);
     pkg.devDependencies = {
-      ...(pkg.devDependencies ?? {}),
+      ...pkg.devDependencies,
       vitest: version("vitest"),
-      ...(config.frontend !== "none" ? { "@playwright/test": version("@playwright/test") } : {}),
+      ...(config.frontend !== "none"
+        ? { "@playwright/test": version("@playwright/test") }
+        : {}),
     };
     return pkg;
   });

@@ -1,47 +1,21 @@
-import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
+import type { ProjectConfig } from "@veloz-stack/types";
+import { moduleTemplatePrefixes } from "../module-registry";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
 /**
  * Each module owns a `templates/modules/<id>/` folder. When the user picks
  * the module, everything in that folder gets merged into the VFS verbatim
- * (or compiled, if `.hbs`). That's the whole plugin surface for Wave 2a.
- * Imperative extras (extra package.json fields, env vars) live in
- * post-process.ts.
+ * (or compiled, if `.hbs`). Imperative extras (extra package.json fields,
+ * env vars) live in post-process.ts via module-registry.
  */
-const MODULE_PREFIXES: Partial<Record<ModuleId, string>> = {
-  claude: "modules/claude/",
-  abacatepay: "modules/abacatepay/",
-  asaas: "modules/asaas/",
-  pagarme: "modules/pagarme/",
-  mercadopago: "modules/mercadopago/",
-  "stripe-br": "modules/stripe/",
-  "ararahq-sms": "modules/ararahq/",
-  "ararahq-wa": "modules/ararahq/",
-  himetrica: "modules/himetrica/",
-  caramelosec: "modules/caramelosec/",
-  "pt-br-i18n": "modules/pt-br-i18n/",
-  "cpf-cnpj": "modules/cpf-cnpj/",
-  viacep: "modules/viacep/",
-  brasilapi: "modules/brasilapi/",
-  "lgpd-consent": "modules/lgpd-consent/",
-  resend: "modules/resend/",
-  posthog: "modules/posthog/",
-  sentry: "modules/sentry/",
-  twilio: "modules/twilio/",
-  "upstash-redis": "modules/upstash-redis/",
-  s3: "modules/s3/",
-  pino: "modules/pino/",
-  opentelemetry: "modules/opentelemetry/",
-  "next-intl": "modules/next-intl/",
-};
-
 export function processModules(vfs: VirtualFs, config: ProjectConfig): void {
-  const applied = new Set<string>();
-  for (const m of config.modules) {
-    const prefix = MODULE_PREFIXES[m];
-    if (!prefix || applied.has(prefix)) continue; // ararahq-sms + ararahq-wa share a folder
-    processTemplatesFromPrefix(vfs, prefix, "", config);
-    applied.add(prefix);
+  for (const prefix of moduleTemplatePrefixes(config.modules)) {
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: prefix,
+      destPrefix: "",
+      config,
+    });
   }
 }

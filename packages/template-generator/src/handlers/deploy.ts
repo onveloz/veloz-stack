@@ -8,7 +8,9 @@ function writeDockerfile(vfs: VirtualFs, config: ProjectConfig): void {
   if (config.backend === "next") {
     const src = EMBEDDED_TEMPLATES.get("deploy/veloz/Dockerfile.next.hbs");
     if (!src) {
-      throw new Error("Missing embedded template: deploy/veloz/Dockerfile.next.hbs");
+      throw new Error(
+        "Missing embedded template: deploy/veloz/Dockerfile.next.hbs",
+      );
     }
     vfs.write("Dockerfile", render(src, config));
     return;
@@ -20,48 +22,87 @@ function writeDockerfile(vfs: VirtualFs, config: ProjectConfig): void {
   vfs.write("Dockerfile", src);
 }
 
+function deployWithDocker(
+  vfs: VirtualFs,
+  config: ProjectConfig,
+  sourcePrefix: string,
+): void {
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix,
+    destPrefix: "",
+    config,
+  });
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: "deploy/veloz/",
+    destPrefix: "",
+    config,
+  });
+  writeDockerfile(vfs, config);
+}
+
+function writeVercelConfig(vfs: VirtualFs, config: ProjectConfig): void {
+  vfs.write(
+    "vercel.json",
+    `${JSON.stringify(
+      {
+        $schema: "https://openapi.vercel.sh/vercel.json",
+        buildCommand: `${config.pm} run build`,
+        installCommand: `${config.pm} install`,
+      },
+      null,
+      2,
+    )}\n`,
+  );
+}
+
+/** @internal Scaffold pipeline step. */
 export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
+  if (config.deploy === "none") {
+    return;
+  }
+
   switch (config.deploy) {
     case "veloz": {
-      processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
+      processTemplatesFromPrefix({
+        vfs,
+        sourcePrefix: "deploy/veloz/",
+        destPrefix: "",
+        config,
+      });
       writeDockerfile(vfs, config);
       vfs.write("veloz.json", velozJson(config));
       break;
     }
-    case "fly":
-      processTemplatesFromPrefix(vfs, "deploy/fly/", "", config);
-      processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
-      writeDockerfile(vfs, config);
+    case "fly": {
+      deployWithDocker(vfs, config, "deploy/fly/");
       break;
-    case "render":
-      processTemplatesFromPrefix(vfs, "deploy/render/", "", config);
-      processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
-      writeDockerfile(vfs, config);
+    }
+    case "render": {
+      deployWithDocker(vfs, config, "deploy/render/");
       break;
-    case "docker":
-      processTemplatesFromPrefix(vfs, "deploy/docker/", "", config);
-      processTemplatesFromPrefix(vfs, "deploy/veloz/", "", config);
-      writeDockerfile(vfs, config);
+    }
+    case "docker": {
+      deployWithDocker(vfs, config, "deploy/docker/");
       break;
-    case "vercel":
-      vfs.write(
-        "vercel.json",
-        `${JSON.stringify(
-          {
-            $schema: "https://openapi.vercel.sh/vercel.json",
-            buildCommand: `${config.pm} run build`,
-            installCommand: `${config.pm} install`,
-          },
-          null,
-          2,
-        )}\n`,
-      );
+    }
+    case "vercel": {
+      writeVercelConfig(vfs, config);
       break;
-    case "cloudflare":
-      processTemplatesFromPrefix(vfs, "deploy/cloudflare/", "", config);
+    }
+    case "cloudflare": {
+      processTemplatesFromPrefix({
+        vfs,
+        sourcePrefix: "deploy/cloudflare/",
+        destPrefix: "",
+        config,
+      });
       break;
-    default:
+    }
+    default: {
       break;
+    }
   }
 }
 
@@ -129,15 +170,23 @@ function velozJson(config: ProjectConfig): string {
 }
 
 function runtimeCommand(config: ProjectConfig): string {
-  if (config.runtime === "bun") return "bun run src/index.ts";
-  if (config.runtime === "node") return "node --experimental-strip-types src/index.ts";
+  if (config.runtime === "bun") {
+    return "bun run src/index.ts";
+  }
+  if (config.runtime === "node") {
+    return "node --experimental-strip-types src/index.ts";
+  }
   // workers runs via `wrangler dev` — Veloz doesn't host Workers so this
   // path is mostly dead code, but emit something sensible.
   return "echo 'Workers: use wrangler deploy'";
 }
 
-function webServiceShape(config: ProjectConfig): Record<string, unknown> | null {
-  if (config.frontend === "none") return null;
+function webServiceShape(
+  config: ProjectConfig,
+): Record<string, unknown> | null {
+  if (config.frontend === "none") {
+    return null;
+  }
 
   const hasTurborepo = config.addons.includes("turborepo");
   const build = hasTurborepo

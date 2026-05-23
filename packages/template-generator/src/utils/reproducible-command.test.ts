@@ -26,7 +26,10 @@ describe("buildReproducibleCommand", () => {
   });
 
   it("omits flags that match defaults", () => {
-    const cmd = buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "plain" });
+    const cmd = buildReproducibleCommand({
+      ...DEFAULT_CONFIG,
+      projectName: "plain",
+    });
     expect(cmd).not.toContain("--preset");
     expect(cmd).not.toContain("--frontend");
     expect(cmd).not.toContain("--backend");
@@ -60,15 +63,27 @@ describe("buildReproducibleCommand", () => {
   });
 
   it("uses the selected package manager in the create prefix", () => {
-    expect(buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "b", pm: "bun" })).toMatch(
-      /^bun create veloz-stack@latest/,
-    );
-    expect(buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "p", pm: "pnpm" })).toMatch(
-      /^pnpm create veloz-stack@latest/,
-    );
-    expect(buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "n", pm: "npm" })).toMatch(
-      /^npm create veloz-stack@latest/,
-    );
+    expect(
+      buildReproducibleCommand({
+        ...DEFAULT_CONFIG,
+        projectName: "b",
+        pm: "bun",
+      }),
+    ).toMatch(/^bun create veloz-stack@latest/);
+    expect(
+      buildReproducibleCommand({
+        ...DEFAULT_CONFIG,
+        projectName: "p",
+        pm: "pnpm",
+      }),
+    ).toMatch(/^pnpm create veloz-stack@latest/);
+    expect(
+      buildReproducibleCommand({
+        ...DEFAULT_CONFIG,
+        projectName: "n",
+        pm: "npm",
+      }),
+    ).toMatch(/^npm create veloz-stack@latest/);
   });
 
   it("skips empty list flags", () => {

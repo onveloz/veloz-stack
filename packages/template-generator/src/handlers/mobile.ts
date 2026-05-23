@@ -8,8 +8,13 @@ import type { VirtualFs } from "../vfs";
  * the same monorepo, sharing @proj/api types.
  */
 export function processMobile(vfs: VirtualFs, config: ProjectConfig): void {
-  if (config.mobile === "none") return;
-  if (config.mobile === "expo") {
-    processTemplatesFromPrefix(vfs, "mobile/expo/", "", config);
+  if (config.mobile === "none") {
+    return;
   }
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: "mobile/expo/",
+    destPrefix: "",
+    config,
+  });
 }

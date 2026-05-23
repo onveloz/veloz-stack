@@ -2,6 +2,11 @@
   "name": "@veloz-stack/template-generator",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "src",
+    "templates",
+    "scripts"
+  ],
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -9,6 +14,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./preview": {
+      "types": "./src/preview.ts",
+      "default": "./src/preview.ts"
     },
     "./scaffold": {
       "types": "./src/scaffold.ts",
@@ -23,11 +32,6 @@
     "test": "pnpm gen && vitest run",
     "test:watch": "vitest"
   },
-  "files": [
-    "src",
-    "templates",
-    "scripts"
-  ],
   "dependencies": {
     "@veloz-stack/types": "workspace:*",
     "handlebars": "^4.7.8"

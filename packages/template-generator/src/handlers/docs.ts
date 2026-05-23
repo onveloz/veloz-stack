@@ -7,15 +7,35 @@ import type { VirtualFs } from "../vfs";
  * Conditional prefixes mirror auth/db handlers — only relevant ADRs land in the tree.
  */
 export function processAdrs(vfs: VirtualFs, config: ProjectConfig): void {
-  processTemplatesFromPrefix(vfs, "docs/adr/core/", "docs/adr/", config);
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: "docs/adr/core/",
+    destPrefix: "docs/adr/",
+    config,
+  });
 
   if (config.auth === "better-auth") {
-    processTemplatesFromPrefix(vfs, "docs/adr/auth/better-auth/", "docs/adr/", config);
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "docs/adr/auth/better-auth/",
+      destPrefix: "docs/adr/",
+      config,
+    });
   }
   if (config.api === "orpc") {
-    processTemplatesFromPrefix(vfs, "docs/adr/api/orpc/", "docs/adr/", config);
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "docs/adr/api/orpc/",
+      destPrefix: "docs/adr/",
+      config,
+    });
   }
   if (config.db !== "none" && config.orm !== "none") {
-    processTemplatesFromPrefix(vfs, "docs/adr/db/", "docs/adr/", config);
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "docs/adr/db/",
+      destPrefix: "docs/adr/",
+      config,
+    });
   }
 }
