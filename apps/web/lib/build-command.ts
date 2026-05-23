@@ -81,12 +81,18 @@ function toolingFlags(cfg: ProjectConfig): string[] {
   return flags;
 }
 
+function sanitizeProjectName(name: string): string {
+  const normalized = name.trim() || DEFAULT_CONFIG.projectName;
+  return normalized.replaceAll(/[^a-zA-Z0-9._-]/g, "-");
+}
+
 export function buildCommand(
   cfg: ProjectConfig,
   opts?: { pm?: "bun" | "pnpm" | "npm" },
 ): string {
   const runner = opts?.pm ?? cfg.pm;
   const head = createHead(runner);
+  const projectName = sanitizeProjectName(cfg.projectName);
   const flags = [
     ...stackFlags(cfg),
     ...moduleAndExampleFlags(cfg),
@@ -94,7 +100,7 @@ export function buildCommand(
     ...toolingFlags(cfg),
   ];
 
-  return `${head} ${cfg.projectName.trim() || DEFAULT_CONFIG.projectName} ${flags.join(" ")}`
+  return `${head} ${projectName} ${flags.join(" ")}`
     .replaceAll(/\s+/g, " ")
     .trim();
 }

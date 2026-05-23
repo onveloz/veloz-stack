@@ -16,7 +16,7 @@ export function ToggleOptionRow({
 }) {
   return (
     <label
-      className={`w-full text-left flex items-start gap-3 min-h-[52px] px-2 py-2 transition-colors cursor-pointer ${
+      className={`w-full text-left flex items-start gap-3 min-h-[52px] px-2 py-2 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-brand focus-within:ring-offset-2 ${
         active
           ? "border border-brand bg-brand-subtle/30"
           : "border border-transparent hover:bg-secondary/60"

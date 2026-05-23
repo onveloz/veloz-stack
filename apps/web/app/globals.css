@@ -38,6 +38,8 @@
   --input: #2a2a2a;
   --ring: #ff4d00;
 
+  --site-header-height: 2.75rem; /* matches SiteHeader h-11 */
+
   --success: #16a34a;
   --warning: #d97706;
   --destructive: #dc2626;

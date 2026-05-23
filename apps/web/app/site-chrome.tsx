@@ -3,9 +3,11 @@ import Link from "next/link";
 
 import { Logo } from "@/components/logo";
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export function SiteHeader() {
   return (
-    <header className="h-11 border-b border-border flex items-center justify-between px-6">
+    <header className="h-[var(--site-header-height)] border-b border-border flex items-center justify-between px-6">
       <Logo />
       <nav className="flex items-center gap-5 text-xs text-muted-foreground">
         <a
@@ -17,7 +19,10 @@ export function SiteHeader() {
         <Link href="/showcase" className="hover:text-foreground">
           Showcase
         </Link>
-        <a href="/docs" className="hover:text-foreground">
+        <a
+          href="https://github.com/onveloz/veloz-stack/tree/main/docs"
+          className="hover:text-foreground"
+        >
           Docs
         </a>
         <Link
@@ -36,7 +41,7 @@ export function SiteFooter() {
     <footer className="border-t border-border">
       <div className="max-w-5xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-muted-foreground">
         <Logo />
-        <span>© {new Date().getFullYear()} Veloz — feito no Brasil</span>
+        <span>© {CURRENT_YEAR} Veloz — feito no Brasil</span>
       </div>
     </footer>
   );

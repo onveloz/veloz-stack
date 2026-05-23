@@ -14,7 +14,7 @@ export function StackBuilderLayoutAside({
   builder: StackBuilderState;
 }) {
   return (
-    <aside className="hidden lg:flex flex-col border-l border-border bg-secondary/20 lg:sticky lg:top-11 lg:self-start lg:h-[calc(100vh-44px)]">
+    <aside className="hidden lg:flex flex-col border-l border-border bg-secondary/20 lg:sticky lg:top-[var(--site-header-height)] lg:self-start lg:h-[calc(100vh-var(--site-header-height))]">
       <SummaryPanel config={config} onJump={builder.handleGoToStepForKey} />
       <div className="flex-1 min-h-0 border-t border-border">
         <PreviewPanel config={config} />

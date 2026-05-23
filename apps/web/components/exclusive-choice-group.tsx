@@ -10,6 +10,9 @@ function useChoiceKeyboard<T extends string>(
   onChange: (v: T) => void,
 ) {
   function move(delta: number) {
+    if (choices.length === 0) {
+      return;
+    }
     const idx = choices.indexOf(value);
     const nextIndex = (idx + delta + choices.length) % choices.length;
     const next = choices[nextIndex];

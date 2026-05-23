@@ -125,6 +125,7 @@ function PresetButton({
   return (
     <button
       type="button"
+      aria-pressed={isActive}
       aria-disabled={comingSoon || undefined}
       aria-describedby={comingSoon ? `${id}-coming-soon` : undefined}
       onClick={() => {

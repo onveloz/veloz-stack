@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { SHOWCASE_SUBMIT_URL } from "@/lib/showcase";
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export function ShowcaseHeader() {
   return (
     <header className="h-11 border-b border-border flex items-center justify-between px-6">
@@ -81,7 +83,7 @@ export function ShowcaseFooter() {
     <footer className="border-t border-border">
       <div className="max-w-5xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-muted-foreground">
         <Logo />
-        <span>© {new Date().getFullYear()} Veloz — feito no Brasil</span>
+        <span>© {CURRENT_YEAR} Veloz — feito no Brasil</span>
       </div>
     </footer>
   );

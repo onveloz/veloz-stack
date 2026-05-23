@@ -32,14 +32,14 @@ function chipTitle(
 }
 
 function OptionChipDisabledReason({
-  id,
+  disabledReasonId,
   disabledReason,
 }: {
-  id: string;
+  disabledReasonId: string;
   disabledReason: string;
 }) {
   return (
-    <span id={`${id}-disabled-reason`} className="sr-only">
+    <span id={disabledReasonId} className="sr-only">
       {disabledReason}
     </span>
   );
@@ -48,6 +48,7 @@ function OptionChipDisabledReason({
 function OptionChipLabel({
   id,
   label,
+  sectionKey,
   active,
   showBrandBadge,
   needsAdjust,
@@ -55,11 +56,13 @@ function OptionChipLabel({
 }: {
   id: string;
   label: string;
+  sectionKey: string;
   active: boolean;
   showBrandBadge: boolean;
   needsAdjust: boolean;
   disabledReason: string | null;
 }) {
+  const disabledReasonId = `${sectionKey}-${id}-disabled-reason`;
   return (
     <>
       <BrandLogo id={id} label={label} height={20} />
@@ -74,7 +77,10 @@ function OptionChipLabel({
         </span>
       ) : null}
       {needsAdjust && disabledReason ? (
-        <OptionChipDisabledReason id={id} disabledReason={disabledReason} />
+        <OptionChipDisabledReason
+          disabledReasonId={disabledReasonId}
+          disabledReason={disabledReason}
+        />
       ) : null}
     </>
   );
@@ -100,27 +106,28 @@ export function OptionChip({
   const needsAdjust = !active && disabledReason !== null;
   const hint = getHint(id, sectionKey);
   const showBrandBadge = Boolean(brandHint && !active);
+  const disabledReasonId = `${sectionKey}-${id}-disabled-reason`;
 
   return (
     <button
       type="button"
       aria-disabled={needsAdjust || undefined}
       onClick={() => {
-        if (needsAdjust) {
-          return;
+        if (!needsAdjust) {
+          onSelect();
         }
-        onSelect();
       }}
       title={chipTitle(needsAdjust, disabledReason, hint)}
       aria-pressed={active}
       aria-describedby={
-        needsAdjust && disabledReason ? `${id}-disabled-reason` : undefined
+        needsAdjust && disabledReason ? disabledReasonId : undefined
       }
       className={chipClassName(active, needsAdjust, Boolean(brandHint))}
     >
       <OptionChipLabel
         id={id}
         label={label}
+        sectionKey={sectionKey}
         active={active}
         showBrandBadge={showBrandBadge}
         needsAdjust={needsAdjust}
