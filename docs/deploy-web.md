@@ -34,10 +34,10 @@ No database or secrets are required for the public stack builder.
 
 This repo’s production deploy is a **static site** on Veloz. Source of truth for build settings:
 
-| File        | Role                                                                 |
-| ----------- | -------------------------------------------------------------------- |
-| `veloz.json` | Veloz project config — service type, build command, `outputDir`     |
-| [`veloz-deploy-plano.md`](../veloz-deploy-plano.md) | Operational runbook (Portuguese) |
+| File                                                | Role                                                            |
+| --------------------------------------------------- | --------------------------------------------------------------- |
+| `veloz.json`                                        | Veloz project config — service type, build command, `outputDir` |
+| [`veloz-deploy-plano.md`](../veloz-deploy-plano.md) | Operational runbook (Portuguese)                                |
 
 Current `veloz.json` (abridged):
 

@@ -22,15 +22,15 @@ Packages internos: `packages/template-generator`, `packages/types`.
 
 ## Configuração atual (fonte: `veloz.json`)
 
-| Campo | Valor |
-| ----- | ----- |
-| Serviço | `web` (`apps/web`) |
-| Tipo | **`static`** (não é container Node com `next start`) |
-| Branch | `main` |
-| Build method | `turborepo` |
+| Campo         | Valor                                                                     |
+| ------------- | ------------------------------------------------------------------------- |
+| Serviço       | `web` (`apps/web`)                                                        |
+| Tipo          | **`static`** (não é container Node com `next start`)                      |
+| Branch        | `main`                                                                    |
+| Build method  | `turborepo`                                                               |
 | Build command | `pnpm --filter @veloz-stack/template-generator run gen && pnpm run build` |
-| Output dir | **`apps/web/out`** |
-| URL | https://www.veloz-stack.com |
+| Output dir    | **`apps/web/out`**                                                        |
+| URL           | https://www.veloz-stack.com                                               |
 
 ### Por que `gen` antes do build?
 
@@ -44,12 +44,12 @@ Nenhuma obrigatória para o stack builder público. Opcional: `NEXT_PUBLIC_SHOW_
 
 ## Histórico de deploy (arquivo)
 
-| Deploy | Status | Motivo |
-| ------ | ------ | ------ |
-| dep_552Awm9NT8wG | BUILD_FAILED | Nixpacks não detectou start command no monorepo |
-| dep_X1KRPClPH7BF | BUILD_FAILED | Nome do serviço com `@/` causava referência inválida no registry |
-| dep_yvXTLE9V8r0c | BUILD_FAILED | `templates.generated.ts` ausente (em .gitignore) |
-| dep_final | **LIVE** | Build command corrigido; depois migrado para **static** + `apps/web/out` |
+| Deploy           | Status       | Motivo                                                                   |
+| ---------------- | ------------ | ------------------------------------------------------------------------ |
+| dep_552Awm9NT8wG | BUILD_FAILED | Nixpacks não detectou start command no monorepo                          |
+| dep_X1KRPClPH7BF | BUILD_FAILED | Nome do serviço com `@/` causava referência inválida no registry         |
+| dep_yvXTLE9V8r0c | BUILD_FAILED | `templates.generated.ts` ausente (em .gitignore)                         |
+| dep_final        | **LIVE**     | Build command corrigido; depois migrado para **static** + `apps/web/out` |
 
 **Nota:** deploys antigos usavam Nixpacks + `next start` na porta 3000. A configuração atual em `veloz.json` é **site estático** — não use `next start` como referência de produção.
 
@@ -64,13 +64,13 @@ Nenhuma obrigatória para o stack builder público. Opcional: `NEXT_PUBLIC_SHOW_
 
 ## Arquivos relevantes
 
-| Arquivo | Papel |
-| ------- | ----- |
-| `veloz.json` | Config Veloz (gerado/atualizado pelo CLI — preferir `veloz deploy` a editar manualmente) |
-| `veloz-deploy-plano.md` | Este runbook operacional (PT) |
-| `docs/deploy-web.md` | Referência EN (build, env, `veloz.json`) |
-| `apps/web/next.config.mjs` | `output: "export"` |
-| `.gitignore` | Ignora `apps/web/out` |
+| Arquivo                    | Papel                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------- |
+| `veloz.json`               | Config Veloz (gerado/atualizado pelo CLI — preferir `veloz deploy` a editar manualmente) |
+| `veloz-deploy-plano.md`    | Este runbook operacional (PT)                                                            |
+| `docs/deploy-web.md`       | Referência EN (build, env, `veloz.json`)                                                 |
+| `apps/web/next.config.mjs` | `output: "export"`                                                                       |
+| `.gitignore`               | Ignora `apps/web/out`                                                                    |
 
 ---
 
