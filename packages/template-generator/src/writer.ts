@@ -19,25 +19,29 @@ export async function writeTree(
   vfs: VirtualFs,
   rootDir: string,
 ): Promise<number> {
-  const entries = [...vfs.entries()];
+  const entries = [...vfs.entries()] as [string, string][];
   const root = resolve(rootDir);
 
-  const batches: [string, string][][] = [];
-  for (let i = 0; i < entries.length; i += WRITE_CONCURRENCY) {
-    batches.push(entries.slice(i, i + WRITE_CONCURRENCY));
+  async function writeBatch(batch: [string, string][]): Promise<void> {
+    await Promise.all(
+      batch.map(async ([path, content]) => {
+        const abs = resolve(root, path);
+        assertPathInsideRoot(root, abs);
+        await mkdir(dirname(abs), { recursive: true });
+        await writeFile(abs, content, "utf8");
+      }),
+    );
   }
 
-  await Promise.all(
-    batches.map((batch) =>
-      Promise.all(
-        batch.map(async ([path, content]) => {
-          const abs = resolve(root, path);
-          assertPathInsideRoot(root, abs);
-          await mkdir(dirname(abs), { recursive: true });
-          await writeFile(abs, content, "utf8");
-        }),
-      ),
-    ),
-  );
+  async function writeFromOffset(offset: number): Promise<void> {
+    if (offset >= entries.length) {
+      return;
+    }
+    const batch = entries.slice(offset, offset + WRITE_CONCURRENCY);
+    await writeBatch(batch);
+    await writeFromOffset(offset + WRITE_CONCURRENCY);
+  }
+
+  await writeFromOffset(0);
   return entries.length;
 }
