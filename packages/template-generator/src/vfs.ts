@@ -27,7 +27,7 @@ export class VirtualFs {
     const existing = this.read(path);
     let data: T = existing ? (JSON.parse(existing) as T) : (initial ?? ({} as T));
     data = fn(data);
-    this.write(path, JSON.stringify(data, null, 2) + "\n");
+    this.write(path, `${JSON.stringify(data, null, 2)}\n`);
   }
 
   entries(): IterableIterator<[string, string]> {

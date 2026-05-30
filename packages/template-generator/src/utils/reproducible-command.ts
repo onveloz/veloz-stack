@@ -14,6 +14,21 @@ function listFlag(name: string, values: readonly string[]): string[] {
   return [`--${name}`, values.join(",")];
 }
 
+function hasShellMetacharacters(value: string): boolean {
+  // Single quotes are omitted — shellEscape uses double quotes only.
+  if (/[\s"`$\\]/.test(value)) return true;
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code < 32 || code === 127) return true;
+  }
+  return false;
+}
+
+function shellEscape(value: string): string {
+  if (!hasShellMetacharacters(value)) return value;
+  return `"${value.replace(/["\\`$]/g, "\\$&")}"`;
+}
+
 /**
  * CLI command that recreates this stack (mirrors create-veloz-stack flags).
  */
@@ -29,7 +44,7 @@ export function buildReproducibleCommand(config: ProjectConfig): string {
 
   const parts = [
     ...create,
-    config.projectName,
+    shellEscape(config.projectName),
     ...flag("preset", config.preset !== d.preset ? config.preset : ""),
     ...flag("frontend", config.frontend !== d.frontend ? config.frontend : ""),
     ...flag("mobile", config.mobile !== d.mobile ? config.mobile : ""),

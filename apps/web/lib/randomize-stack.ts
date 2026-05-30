@@ -1,29 +1,26 @@
 import {
   DEFAULT_CONFIG,
-  MODULE_IDS,
-  PRESETS,
   getModuleDisableReason,
+  MODULE_IDS,
   type ModuleId,
+  PRESETS,
   type PresetKey,
   type ProjectConfig,
 } from "@veloz-stack/types";
-import { resolveConfig, repairStackConfig, isStackConfigValid } from "@/lib/resolve-config";
+import { isStackConfigValid, repairStackConfig, resolveConfig } from "@/lib/resolve-config";
 import {
-  GIT_HOOK_CHOICES,
-  LINTER_CHOICES,
   addonFlagsAfterGitHook,
   addonFlagsAfterLinter,
+  type GitHookChoice,
+  LINTER_CHOICES,
+  type LinterChoice,
   patchAddonsForGitHook,
   patchAddonsForLinter,
   patchAddonsTurborepo,
-  type GitHookChoice,
-  type LinterChoice,
 } from "@/lib/stack-addons";
 
 const SURPRISE_PRESETS = [
   "veloz-br",
-  "mern",
-  "pern",
   "next-native",
   "minimal",
 ] as const satisfies readonly PresetKey[];
@@ -31,6 +28,7 @@ const SURPRISE_PRESETS = [
 const SPICE_KEYS = ["deploy", "auth", "api", "pm"] as const;
 
 function pick<T>(arr: readonly T[]): T {
+  if (arr.length === 0) throw new Error("Cannot pick from empty array");
   return arr[Math.floor(Math.random() * arr.length)]!;
 }
 
@@ -48,11 +46,7 @@ function randomCompatibleModules(cfg: ProjectConfig): ModuleId[] {
   const max = Math.min(8, pool.length);
   const count = Math.floor(Math.random() * (max + 1));
   let picked = shuffle(pool).slice(0, count);
-  if (
-    cfg.frontend === "next" &&
-    picked.includes("next-intl") &&
-    picked.includes("pt-br-i18n")
-  ) {
+  if (cfg.frontend === "next" && picked.includes("next-intl") && picked.includes("pt-br-i18n")) {
     picked = picked.filter((m) => m !== "pt-br-i18n");
   }
   return picked;
@@ -62,15 +56,14 @@ function randomAddons(): Pick<
   ProjectConfig,
   "addons" | "oxlintStrict" | "lefthookCi" | "lefthookAdvanced"
 > {
-  let addons: ProjectConfig["addons"] =
-    Math.random() < 0.85 ? ["turborepo"] : [];
+  let addons: ProjectConfig["addons"] = Math.random() < 0.85 ? ["turborepo"] : [];
 
   const linter: LinterChoice = pick(LINTER_CHOICES);
   addons = patchAddonsForLinter(addons, linter);
   const oxlintStrict = linter === "oxlint" && Math.random() < 0.2;
 
-  const hook: GitHookChoice =
-    Math.random() < 0.35 ? pick(GIT_HOOK_CHOICES.filter((h) => h !== "none")) : "none";
+  // Deprecated Husky in product surface — randomized stacks never pick it (CLI/templates still accept it).
+  const hook: GitHookChoice = Math.random() < 0.35 ? "lefthook" : "none";
   addons = patchAddonsForGitHook(addons, hook);
 
   let lefthookCi = false;
@@ -120,8 +113,8 @@ export function buildSurpriseConfig(keep: {
     const key = pick(SPICE_KEYS);
     const resolverOpts: Record<(typeof SPICE_KEYS)[number], readonly string[]> = {
       deploy: ["veloz", "vercel", "fly", "render"],
-      auth: ["better-auth", "clerk", "none"],
-      api: ["orpc", "trpc", "rest"],
+      auth: ["better-auth", "none"],
+      api: ["orpc", "none"],
       pm: ["pnpm", "bun", "npm"],
     };
     const value = pick(resolverOpts[key]);
@@ -145,10 +138,7 @@ export function buildSurpriseConfig(keep: {
       desktop: "none",
       examples: [],
       ...randomAddons(),
-      addons: patchAddonsTurborepo(
-        patchAddonsForLinter([], "biome"),
-        true,
-      ),
+      addons: patchAddonsTurborepo(patchAddonsForLinter([], "biome"), true),
     });
   }
 

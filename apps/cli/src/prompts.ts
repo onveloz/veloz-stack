@@ -1,23 +1,16 @@
 import * as p from "@clack/prompts";
-import chalk from "chalk";
 import {
   ApiId,
   AuthId,
+  applyImplicitStackRules,
   BackendId,
+  COMING_SOON_PRESETS,
   DbHostingId,
   DbId,
   DeployId,
   FrontendId,
-  MODULES,
-  MODULE_CATEGORIES,
-  MODULE_CATEGORY_LABELS,
-  OrmId,
-  PRESETS,
-  PackageManagerId,
-  RuntimeId,
-  UiId,
-  type ProjectConfig,
   getApiDisableReason,
+  getAuthDisableReason,
   getBackendDisableReason,
   getDbHostingDisableReason,
   getDeployDisableReason,
@@ -25,8 +18,17 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
-  applyImplicitStackRules,
+  MODULE_CATEGORIES,
+  MODULE_CATEGORY_LABELS,
+  MODULES,
+  OrmId,
+  PackageManagerId,
+  PRESETS,
+  type ProjectConfig,
+  RuntimeId,
+  UiId,
 } from "@veloz-stack/types";
+import chalk from "chalk";
 
 type CreateInput = Partial<ProjectConfig> & { projectName?: string };
 
@@ -59,16 +61,17 @@ export async function gatherInteractive(
     const preset = await p.select({
       message: "Qual modelo pronto?",
       initialValue: seeded.preset,
-      options: (Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((k) => ({
-        value: k,
-        label: PRESETS[k].label,
-        hint: PRESETS[k].description,
-      })),
+      options: (Object.keys(PRESETS) as Array<keyof typeof PRESETS>)
+        .filter((k) => !COMING_SOON_PRESETS.includes(k as (typeof COMING_SOON_PRESETS)[number]))
+        .map((k) => ({
+          value: k,
+          label: PRESETS[k].label,
+          hint: PRESETS[k].description,
+        })),
     });
     cancelIfNeeded(preset);
     if (preset !== "custom") {
       Object.assign(cfg, PRESETS[preset as keyof typeof PRESETS].config);
-      cfg.projectName = cfg.projectName; // keep user-provided name
     }
     cfg.preset = preset as typeof cfg.preset;
   }
@@ -89,17 +92,11 @@ export async function gatherInteractive(
     cfg.backend = cascaded.backend;
     cfg.runtime = cascaded.runtime;
   }
-  cfg.backend = await pickOne(
-    "Backend",
-    BackendId.options,
-    input.backend ?? cfg.backend,
-    (id) => getBackendDisableReason({ ...cfg, backend: id }, id),
+  cfg.backend = await pickOne("Backend", BackendId.options, input.backend ?? cfg.backend, (id) =>
+    getBackendDisableReason({ ...cfg, backend: id }, id),
   );
-  cfg.runtime = await pickOne(
-    "Runtime",
-    RuntimeId.options,
-    input.runtime ?? cfg.runtime,
-    (id) => getRuntimeDisableReason({ ...cfg, runtime: id }, id),
+  cfg.runtime = await pickOne("Runtime", RuntimeId.options, input.runtime ?? cfg.runtime, (id) =>
+    getRuntimeDisableReason({ ...cfg, runtime: id }, id),
   );
   cfg.api = await pickOne(
     "API",
@@ -109,11 +106,8 @@ export async function gatherInteractive(
     apiLabels,
   );
   cfg.db = await pickOne("Banco de dados", DbId.options, input.db ?? cfg.db, () => null);
-  cfg.orm = await pickOne(
-    "ORM",
-    OrmId.options,
-    input.orm ?? cfg.orm,
-    (id) => getOrmDisableReason({ ...cfg, orm: id }, id),
+  cfg.orm = await pickOne("ORM", OrmId.options, input.orm ?? cfg.orm, (id) =>
+    getOrmDisableReason({ ...cfg, orm: id }, id),
   );
   cfg.dbHosting = await pickOne(
     "Hospedagem do banco",
@@ -125,14 +119,11 @@ export async function gatherInteractive(
     "Autenticação",
     AuthId.options,
     input.auth ?? cfg.auth,
-    () => null,
+    (id) => getAuthDisableReason({ ...cfg, auth: id }, id),
     authLabels,
   );
-  cfg.deploy = await pickOne(
-    "Alvo de deploy",
-    DeployId.options,
-    input.deploy ?? cfg.deploy,
-    (id) => getDeployDisableReason({ ...cfg, deploy: id }, id),
+  cfg.deploy = await pickOne("Alvo de deploy", DeployId.options, input.deploy ?? cfg.deploy, (id) =>
+    getDeployDisableReason({ ...cfg, deploy: id }, id),
   );
   cfg.pm = await pickOne(
     "Gerenciador de pacotes",

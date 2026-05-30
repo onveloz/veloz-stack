@@ -1,0 +1,231 @@
+<script lang="ts">
+  {{#unless (eq api "none")}}
+  import { onMount } from "svelte";
+  {{/unless}}
+  import { signIn, signOut, signUp, useSession } from "$lib/auth-client";
+  {{#unless (eq api "none")}}
+  import { client } from "$lib/orpc";
+  {{/unless}}
+
+  const session = useSession();
+
+  let email = $state("");
+  let password = $state("");
+  let name = $state("");
+  let mode = $state<"sign-in" | "sign-up">("sign-in");
+  let error = $state<string | null>(null);
+  let loading = $state(false);
+  {{#unless (eq api "none")}}
+  let rpcUserId = $state<string | null>(null);
+  let rpcLoading = $state(true);
+
+  async function refreshRpcSession() {
+    rpcLoading = true;
+    try {
+      const res = await client.session();
+      if (res.user) {
+        const me = await client.me();
+        const id = me.user?.id;
+        // Display-only prefix of the user id in the UI.
+        rpcUserId = id != null ? String(id).slice(0, 8) : null;
+      } else {
+        rpcUserId = null;
+      }
+    } catch {
+      rpcUserId = null;
+    } finally {
+      rpcLoading = false;
+    }
+  }
+
+  onMount(() => {
+    void refreshRpcSession();
+  });
+  {{/unless}}
+
+  async function handleSubmit(event: SubmitEvent) {
+    event.preventDefault();
+    error = null;
+    loading = true;
+    try {
+      if (mode === "sign-up") {
+        const res = await signUp.email({ email, password, name });
+        if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
+      } else {
+        const res = await signIn.email({ email, password });
+        if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
+      }
+{{#unless (eq api "none")}}
+      try {
+        await refreshRpcSession();
+      } catch (err) {
+        console.warn("Failed to refresh oRPC session after auth:", err);
+      }
+{{/unless}}
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Erro de autenticação";
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function handleSignOut() {
+    loading = true;
+    try {
+      await signOut();
+{{#unless (eq api "none")}}
+      rpcUserId = null;
+{{/unless}}
+    } finally {
+      loading = false;
+    }
+  }
+
+  const user = $derived($session.data?.user ?? null);
+  const sessionLoading = $derived(
+    {{#unless (eq api "none")}}
+    $session.isPending || rpcLoading
+    {{else}}
+    $session.isPending
+    {{/unless}},
+  );
+</script>
+
+<section class="section auth-panel">
+  <h2>Autenticação</h2>
+  <p class="auth-lede">
+    Better Auth{{#unless (eq api "none")}}
+    + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>.
+    {{else}}
+    — sessão no cliente (sem camada RPC neste projeto).
+    {{/unless}}
+    <a href="/login">Página de login →</a>
+  </p>
+
+  <div class="auth-card">
+    <div class="auth-status">
+      {#if sessionLoading}
+        Carregando sessão…
+      {:else if user}
+        Autenticado como {user.name} ({user.email})
+{{#unless (eq api "none")}}
+        {#if rpcUserId}
+          <div class="auth-meta">oRPC <code>me</code>: {rpcUserId}…</div>
+        {/if}
+{{/unless}}
+      {:else}
+        Não autenticado
+      {/if}
+    </div>
+
+    {#if user}
+      <button type="button" class="auth-btn" disabled={loading} onclick={handleSignOut}>
+        Sair
+      </button>
+    {:else}
+      <form class="auth-form" onsubmit={handleSubmit}>
+        <label>
+          Modo
+          <select bind:value={mode}>
+            <option value="sign-in">Entrar</option>
+            <option value="sign-up">Criar conta</option>
+          </select>
+        </label>
+        {#if mode === "sign-up"}
+          <label>
+            Nome
+            <input bind:value={name} required />
+          </label>
+        {/if}
+        <label>
+          Email
+          <input type="email" bind:value={email} required />
+        </label>
+        <label>
+          Senha
+          <input type="password" bind:value={password} minlength="8" required />
+        </label>
+        {#if error}
+          <p class="auth-error">{error}</p>
+        {/if}
+        <button type="submit" class="auth-btn auth-btn-primary" disabled={loading}>
+          {loading ? "Processando…" : mode === "sign-up" ? "Criar conta" : "Entrar"}
+        </button>
+      </form>
+    {/if}
+  </div>
+</section>
+
+<style>
+  .auth-panel {
+    margin-bottom: 48px;
+  }
+
+  .auth-lede {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0 0 12px;
+  }
+
+  .auth-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .auth-status {
+    font-size: 14px;
+  }
+
+  .auth-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .auth-form {
+    display: grid;
+    gap: 12px;
+    max-width: 28rem;
+  }
+
+  .auth-form label {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .auth-form input,
+  .auth-form select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .auth-btn {
+    width: fit-content;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .auth-btn-primary {
+    border-color: rgba(255, 77, 0, 0.4);
+    background: rgba(255, 77, 0, 0.1);
+    color: var(--brand);
+  }
+
+  .auth-error {
+    color: #f87171;
+    font-size: 12px;
+    margin: 0;
+  }
+</style>

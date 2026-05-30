@@ -1,0 +1,28 @@
+import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+{{#if (eq auth "better-auth")}}
+import { user } from "./auth";
+{{/if}}
+
+export const todos = pgTable(
+  "todos",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    done: boolean("done").default(false).notNull(),
+    {{#if (eq auth "better-auth")}}
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    {{/if}}
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    {{#if (eq auth "better-auth")}}
+    userIdIdx: index("todos_user_id_idx").on(table.userId),
+    {{/if}}
+  }),
+);

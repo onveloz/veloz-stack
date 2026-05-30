@@ -94,7 +94,7 @@ export const ADDON_META = {
   },
   husky: {
     label: "Husky + lint-staged",
-    tagline: "Pre-commit hooks",
+    tagline: "Legado na UI — prefira Lefthook (ou ?showLegacy=1)",
   },
   oxlint: {
     label: "oxlint + oxfmt",
@@ -102,7 +102,7 @@ export const ADDON_META = {
   },
   lefthook: {
     label: "Lefthook",
-    tagline: "Hooks Git em YAML",
+    tagline: "Hooks Git recomendados (YAML, rápidos)",
   },
 } as const satisfies Record<string, { label: string; tagline: string }>;
 

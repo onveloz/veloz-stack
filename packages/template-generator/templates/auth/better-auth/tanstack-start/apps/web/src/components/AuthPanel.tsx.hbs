@@ -1,0 +1,314 @@
+import { useMutation{{#unless (eq api "none")}}, useQuery{{/unless}}, useQueryClient } from "@tanstack/react-query";
+import { LogIn, LogOut, UserRound } from "lucide-react";
+import { useState } from "react";
+import { signIn, signOut, signUp, useSession } from "@{{projectName}}/auth/client";
+{{#unless (eq api "none")}}
+import { orpc } from "@/utils/orpc";
+{{/unless}}
+{{#if (eq ui "shadcn")}}
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+{{/if}}
+
+export function AuthPanel() {
+  const queryClient = useQueryClient();
+  const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
+{{#unless (eq api "none")}}
+  const rpcSession = useQuery({
+    ...orpc.session.queryOptions(),
+    enabled: !session?.user,
+  });
+  const me = useQuery({
+    ...orpc.me.queryOptions(),
+    enabled: !!session?.user,
+  });
+{{/unless}}
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [error, setError] = useState<string | null>(null);
+
+  const invalidateAuth = () => {
+    void refetchSession();
+{{#unless (eq api "none")}}
+    void queryClient.invalidateQueries({ queryKey: orpc.session.key() });
+    void queryClient.invalidateQueries({ queryKey: orpc.me.key() });
+{{/unless}}
+  };
+
+  const authAction = useMutation({
+    mutationFn: async () => {
+      setError(null);
+      if (mode === "sign-up") {
+        const res = await signUp.email({ email, password, name });
+        if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
+        return;
+      }
+      const res = await signIn.email({ email, password });
+      if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
+    },
+    onSuccess: invalidateAuth,
+    onError: (err: Error) => setError(err.message),
+  });
+
+  const signingOut = useMutation({
+    mutationFn: async () => {
+      await signOut();
+    },
+    onSuccess: invalidateAuth,
+  });
+
+  const user = session?.user
+    {{#unless (eq api "none")}}
+    ? session.user
+    : rpcSession.data?.user ?? null
+    {{else}}
+    ?? null
+    {{/unless}};
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading || me.isLoading{{/unless}};
+
+  {{#if (eq ui "shadcn")}}
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <UserRound className="size-4 text-brand" />
+          Autenticação
+        </CardTitle>
+        <CardDescription>
+          Better Auth{{#unless (eq api "none")}}
+          {" "}
+          + oRPC — sessão via cookies e rotas <code>session</code> / <code>me</code>
+          {{else}}
+          {" "}
+          — sessão no cliente (sem camada RPC no monorepo)
+          {{/unless}}
+          .{" "}
+          <a href="/login" className="underline underline-offset-2">
+            Página de login →
+          </a>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className="text-sm font-medium">
+            {loading
+              ? "Carregando sessão…"
+              : user
+                ? `Autenticado como ${user.name}`
+                : "Não autenticado"}
+          </div>
+          {user && (
+            <div className="text-xs text-muted-foreground space-y-1">
+              <div>{user.email}</div>
+{{#unless (eq api "none")}}
+              {me.data?.user && (
+                <div>
+                  oRPC <code>me</code>:{" "}
+                  <Badge variant="outline">{String(me.data.user.id).slice(0, 8)}…</Badge>
+                </div>
+              )}
+{{/unless}}
+            </div>
+          )}
+        </div>
+
+        {user ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => signingOut.mutate()}
+            disabled={signingOut.isPending}
+          >
+            <LogOut className="size-3.5" />
+            Sair
+          </Button>
+        ) : (
+          <form
+            className="grid gap-3 sm:grid-cols-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              authAction.mutate();
+            }}
+          >
+            <label className="grid gap-1 text-xs text-muted-foreground sm:col-span-2">
+              Modo
+              <select
+                value={mode}
+                onChange={(event) =>
+                  setMode(event.target.value as "sign-in" | "sign-up")
+                }
+                className="bg-background border border-input px-3 py-2 text-sm rounded-md"
+              >
+                <option value="sign-in">Entrar</option>
+                <option value="sign-up">Criar conta</option>
+              </select>
+            </label>
+            {mode === "sign-up" && (
+              <label className="grid gap-1 text-xs text-muted-foreground sm:col-span-2">
+                Nome
+                <Input value={name} onChange={(event) => setName(event.target.value)} required />
+              </label>
+            )}
+            <label className="grid gap-1 text-xs text-muted-foreground">
+              Email
+              <Input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-xs text-muted-foreground">
+              Senha
+              <Input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                minLength={8}
+                required
+              />
+            </label>
+            {error && <p className="text-xs text-destructive sm:col-span-2">{error}</p>}
+            <Button type="submit" disabled={authAction.isPending} className="sm:col-span-2 w-fit">
+              <LogIn className="size-3.5" />
+              {authAction.isPending
+                ? "Processando…"
+                : mode === "sign-up"
+                  ? "Criar conta"
+                  : "Entrar"}
+            </Button>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+  {{else}}
+  return (
+    <section className="mb-12">
+      <h2 className="text-[11px] uppercase tracking-wider text-white/50 mb-3">
+        Autenticação
+      </h2>
+      <div className="border border-white/10 bg-[#0f0f0f] p-4 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[#FF4D00]">
+            <UserRound className="w-4 h-4" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="text-sm font-medium">
+              {loading
+                ? "Carregando sessão…"
+                : user
+                  ? `Autenticado como ${user.name}`
+                  : "Não autenticado"}
+            </div>
+            {user && (
+              <div className="text-xs text-white/60 space-y-1">
+                <div>{user.email}</div>
+{{#unless (eq api "none")}}
+                {me.data?.user && (
+                  <div>
+                    oRPC <code>me</code>: {String(me.data.user.id).slice(0, 8)}…
+                  </div>
+                )}
+{{/unless}}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {user ? (
+          <button
+            type="button"
+            onClick={() => signingOut.mutate()}
+            disabled={signingOut.isPending}
+            className="inline-flex items-center gap-2 text-xs font-medium px-3 py-2 border border-white/10 hover:bg-white/5 transition-colors disabled:opacity-50"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Sair
+          </button>
+        ) : (
+          <form
+            className="grid gap-3 sm:grid-cols-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              authAction.mutate();
+            }}
+          >
+            <label className="grid gap-1 text-xs text-white/60 sm:col-span-2">
+              Modo
+              <select
+                value={mode}
+                onChange={(event) =>
+                  setMode(event.target.value as "sign-in" | "sign-up")
+                }
+                className="bg-black border border-white/10 px-3 py-2 text-sm text-white"
+              >
+                <option value="sign-in">Entrar</option>
+                <option value="sign-up">Criar conta</option>
+              </select>
+            </label>
+            {mode === "sign-up" && (
+              <label className="grid gap-1 text-xs text-white/60 sm:col-span-2">
+                Nome
+                <input
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className="bg-black border border-white/10 px-3 py-2 text-sm text-white"
+                  required
+                />
+              </label>
+            )}
+            <label className="grid gap-1 text-xs text-white/60">
+              Email
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="bg-black border border-white/10 px-3 py-2 text-sm text-white"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-xs text-white/60">
+              Senha
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="bg-black border border-white/10 px-3 py-2 text-sm text-white"
+                minLength={8}
+                required
+              />
+            </label>
+            {error && (
+              <p className="text-xs text-red-400 sm:col-span-2">{error}</p>
+            )}
+            <button
+              type="submit"
+              disabled={authAction.isPending}
+              className="inline-flex items-center gap-2 text-xs font-medium px-3 py-2 border border-[#FF4D00]/40 bg-[#FF4D00]/10 text-[#FF4D00] hover:bg-[#FF4D00]/20 transition-colors disabled:opacity-50 sm:col-span-2 w-fit"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              {authAction.isPending
+                ? "Processando…"
+                : mode === "sign-up"
+                  ? "Criar conta"
+                  : "Entrar"}
+            </button>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+  {{/if}}
+}

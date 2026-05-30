@@ -15,9 +15,9 @@ export const OPTION_HINTS: Record<string, string> = {
 
   // Backend
   hono: "Ultra-rápido · padrões web · roda em edge",
-  express: "Clássico do Node, testado à exaustão",
-  fastify: "Overhead baixo · schema-validated",
-  elysia: "Nativo do Bun · tipos end-to-end",
+  express: "Em breve — templates atualmente só Hono ou Next como backend.",
+  fastify: "Em breve — use Hono até termos scaffolding.",
+  elysia: "Em breve — use Bun + Hono no gerador até termos scaffold Elysia.",
 
   // Runtime
   bun: "Runtime JS mais rápido · TS nativo",
@@ -26,19 +26,18 @@ export const OPTION_HINTS: Record<string, string> = {
 
   // API
   orpc: "Type-safe · OpenAPI-first",
-  trpc: "Type-safe · RPC-first",
-  rest: "REST clássico · OpenAPI opcional",
-
+  trpc: "Em breve — oRPC já vem integrado aos templates gerados.",
+  rest: "Em breve — use o fluxo oRPC/OpenAPI atual do stack.",
   // DB
   postgres: "SQL · ACID · primeira escolha",
-  mysql: "SQL · amplamente suportado",
+  mysql: "Em breve com Drizzle nos templates — Postgres/SQLite hoje.",
   sqlite: "Embedded · arquivo local",
   mongodb: "Document · schemaless",
 
   // ORM
   drizzle: "TS-native · SQL-like · leve",
   prisma: "Schema-first · migrations · studio",
-  mongoose: "ODM só pra MongoDB",
+  mongoose: "Em breve — Drizzle ou Prisma no gerador hoje.",
 
   // DB hosting
   veloz: "Postgres/MySQL gerenciado · em pt-BR",
@@ -51,7 +50,7 @@ export const OPTION_HINTS: Record<string, string> = {
 
   // Auth
   "better-auth": "OSS · você controla os tokens",
-  clerk: "Hospedado · UI pronta",
+  clerk: "Em breve — Better Auth já vem ligado aos handlers do gerador.",
 
   // Deploy
   vercel: "Zero-config · URLs de preview",

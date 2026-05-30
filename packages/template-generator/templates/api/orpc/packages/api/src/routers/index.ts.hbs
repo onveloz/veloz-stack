@@ -1,5 +1,8 @@
 import { {{#if (eq auth "better-auth")}}protectedProcedure, {{/if}}publicProcedure } from "../index";
 import type { RouterClient } from "@orpc/server";
+{{#if (eq auth "better-auth")}}
+import { meOutputSchema, sessionOutputSchema, toPublicUser } from "../schemas/user";
+{{/if}}
 {{#if (and (includes examples "todo") (eq orm "drizzle"))}}
 import { todoRouter } from "./todo";
 {{/if}}
@@ -10,9 +13,16 @@ import { checkoutRouter } from "./checkout";
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => "OK"),
   {{#if (eq auth "better-auth")}}
-  me: protectedProcedure.handler(({ context }) => {
-    return { user: context.session?.user };
-  }),
+  session: publicProcedure
+    .output(sessionOutputSchema)
+    .handler(({ context }) => ({
+      user: context.session?.user ? toPublicUser(context.session.user) : null,
+    })),
+  me: protectedProcedure
+    .output(meOutputSchema)
+    .handler(({ context }) => ({
+      user: toPublicUser(context.user),
+    })),
   {{/if}}
   {{#if (and (includes examples "todo") (eq orm "drizzle"))}}
   todo: todoRouter,

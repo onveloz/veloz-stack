@@ -21,8 +21,20 @@ function emitTodo(vfs: VirtualFs, config: ProjectConfig): void {
   // `@proj/db` — those are Drizzle-specific. Prisma variant lands in 2d.
   if (config.orm !== "drizzle" || config.db === "none") return;
 
+  if (config.db !== "postgres" && config.db !== "sqlite") {
+    console.warn(
+      `[veloz-stack] todo example skipped: unsupported db "${config.db}" (expected postgres or sqlite)`,
+    );
+    return;
+  }
+
   processTemplatesFromPrefix(vfs, "examples/todo/common/", "", config);
-  processTemplatesFromPrefix(vfs, "examples/todo/drizzle/", "", config);
+  if (config.db === "postgres") {
+    processTemplatesFromPrefix(vfs, "examples/todo/drizzle-pg/", "", config);
+  }
+  if (config.db === "sqlite") {
+    processTemplatesFromPrefix(vfs, "examples/todo/drizzle-sqlite/", "", config);
+  }
 }
 
 function emitPixCheckout(vfs: VirtualFs, config: ProjectConfig): void {
@@ -33,11 +45,6 @@ function emitPixCheckout(vfs: VirtualFs, config: ProjectConfig): void {
   processTemplatesFromPrefix(vfs, "examples/pix-checkout/common/", "", config);
 
   if (config.frontend === "tanstack-start") {
-    processTemplatesFromPrefix(
-      vfs,
-      "examples/pix-checkout/frontend-tanstack/",
-      "",
-      config,
-    );
+    processTemplatesFromPrefix(vfs, "examples/pix-checkout/frontend-tanstack/", "", config);
   }
 }

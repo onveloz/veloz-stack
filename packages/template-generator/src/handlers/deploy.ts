@@ -1,7 +1,7 @@
 import type { ProjectConfig } from "@veloz-stack/types";
 import { render } from "../processor";
-import { EMBEDDED_TEMPLATES } from "../templates.generated";
 import { processTemplatesFromPrefix } from "../template-utils";
+import { EMBEDDED_TEMPLATES } from "../templates.generated";
 import type { VirtualFs } from "../vfs";
 
 function writeDockerfile(vfs: VirtualFs, config: ProjectConfig): void {
@@ -46,7 +46,7 @@ export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
     case "vercel":
       vfs.write(
         "vercel.json",
-        JSON.stringify(
+        `${JSON.stringify(
           {
             $schema: "https://openapi.vercel.sh/vercel.json",
             buildCommand: `${config.pm} run build`,
@@ -54,13 +54,12 @@ export function processDeploy(vfs: VirtualFs, config: ProjectConfig): void {
           },
           null,
           2,
-        ) + "\n",
+        )}\n`,
       );
       break;
     case "cloudflare":
       processTemplatesFromPrefix(vfs, "deploy/cloudflare/", "", config);
       break;
-    case "none":
     default:
       break;
   }
@@ -126,7 +125,7 @@ function velozJson(config: ProjectConfig): string {
     services,
   };
 
-  return JSON.stringify(doc, null, 2) + "\n";
+  return `${JSON.stringify(doc, null, 2)}\n`;
 }
 
 function runtimeCommand(config: ProjectConfig): string {
@@ -137,9 +136,7 @@ function runtimeCommand(config: ProjectConfig): string {
   return "echo 'Workers: use wrangler deploy'";
 }
 
-function webServiceShape(
-  config: ProjectConfig,
-): Record<string, unknown> | null {
+function webServiceShape(config: ProjectConfig): Record<string, unknown> | null {
   if (config.frontend === "none") return null;
 
   const hasTurborepo = config.addons.includes("turborepo");

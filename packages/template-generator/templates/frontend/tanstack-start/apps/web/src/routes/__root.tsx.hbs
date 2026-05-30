@@ -7,11 +7,15 @@ import {
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+{{#unless (eq api "none")}}
 import type { orpc } from "@/utils/orpc";
+{{/unless}}
 import appCss from "../index.css?url";
 
 export interface RouterAppContext {
+  {{#unless (eq api "none")}}
   orpc: typeof orpc;
+  {{/unless}}
   queryClient: QueryClient;
 }
 

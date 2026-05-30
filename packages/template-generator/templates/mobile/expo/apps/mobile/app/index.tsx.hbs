@@ -1,6 +1,11 @@
+{{#unless (eq api "none")}}
 import { useQuery } from "@tanstack/react-query";
-import { ScrollView, View, Text, StyleSheet, Linking, TouchableOpacity } from "react-native";
 import { orpc } from "@/lib/orpc";
+{{/unless}}
+import { ScrollView, View, Text, StyleSheet, Linking, TouchableOpacity } from "react-native";
+{{#if (eq auth "better-auth")}}
+import { AuthPanel } from "@/components/AuthPanel";
+{{/if}}
 
 const STACK: Array<{ label: string; brand?: boolean }> = [
   { label: "{{frontend}}", brand: true },
@@ -15,6 +20,7 @@ const STACK: Array<{ label: string; brand?: boolean }> = [
 const MODULES: string[] = {{{json modules}}};
 
 export default function Home() {
+{{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
   const ok = health.data === "OK";
   const dotColor = ok ? "#22c55e" : health.isLoading ? "#eab308" : "#ef4444";
@@ -23,6 +29,10 @@ export default function Home() {
     : ok
     ? "API conectada"
     : "API desconectada";
+{{else}}
+  const dotColor = "#737373";
+  const statusText = "Sem tipo RPC configurado — app apenas";
+{{/unless}}
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
@@ -41,6 +51,10 @@ export default function Home() {
         <Text style={styles.code}>apps/mobile/app/index.tsx</Text> ou pergunte
         pro Claude.
       </Text>
+
+      {{#if (eq auth "better-auth")}}
+      <AuthPanel />
+      {{/if}}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>NO SEU STACK</Text>

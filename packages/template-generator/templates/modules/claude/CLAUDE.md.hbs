@@ -4,6 +4,11 @@ Este projeto foi gerado com `create-veloz-stack`. O stack padrão é
 **Bun · Hono · oRPC · TanStack Start · Better Auth · Drizzle · Postgres**, com
 deploy em **{{deploy}}**.
 
+## Decisões de arquitetura
+Leia `docs/adr/` antes de mudar auth, camada de API, banco ou deploy.
+Não introduza bibliotecas alternativas (Clerk, tRPC, segundo ORM, etc.) sem uma ADR
+que superseda a decisão existente.
+
 ## Regras pra editar
 - Mantenha as queries do ORM tipadas — evite SQL cru a não ser que seja estritamente necessário.
 - Dinheiro: cuidado com a unidade (centavos vs reais) por fornecedor. Veja `.claude/skills/`.

@@ -25,11 +25,17 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Version manifest parity
+        run: pnpm sync-versions:check
+
       - name: Build embedded template map
         run: pnpm --filter @veloz-stack/template-generator gen
 
       - name: Type-check all workspaces
         run: pnpm -r --parallel check-types
+
+      - name: Lint (Biome)
+        run: pnpm lint
 
       - name: Unit tests (template-generator)
         run: pnpm --filter @veloz-stack/template-generator test

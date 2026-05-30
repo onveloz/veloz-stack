@@ -93,7 +93,7 @@ const LOGO_MAP = {
   "upstash-redis": ["Upstash", "Redis"],
   s3: ["AWS", "Amazon Web Services"],
   "cloudflare-r2": ["Cloudflare"],
-  "mercadopago": ["Mercado Pago"],
+  mercadopago: ["Mercado Pago"],
   pino: ["Pino"],
   opentelemetry: ["OpenTelemetry"],
   "next-intl": ["next-intl"],
@@ -116,10 +116,10 @@ function findByCandidates(catalog, candidates) {
     const partial = catalog.find((e) => {
       const t = e.title.toLowerCase();
       if (t === needle) return true;
-      if (t.startsWith(needle + " ") || t.startsWith(needle + "/") || t.startsWith(needle + "."))
+      if (t.startsWith(`${needle} `) || t.startsWith(`${needle}/`) || t.startsWith(`${needle}.`))
         return true;
       // endsWith only for multi-word needles (avoids "Photoshop Express" for "Express")
-      if (needle.includes(" ") && t.endsWith(" " + needle)) return true;
+      if (needle.includes(" ") && t.endsWith(` ${needle}`)) return true;
       return false;
     });
     if (partial) return partial;

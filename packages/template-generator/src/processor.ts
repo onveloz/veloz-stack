@@ -1,5 +1,6 @@
-import Handlebars from "handlebars";
 import type { ProjectConfig } from "@veloz-stack/types";
+import Handlebars from "handlebars";
+import { DEPENDENCY_VERSIONS, type DependencyName } from "./deps";
 import { EMBEDDED_TEMPLATES } from "./templates.generated";
 
 const hb = Handlebars.create();
@@ -38,6 +39,16 @@ hb.registerHelper("pmExec", (command: unknown, pm: unknown) => {
   if (p === "bun") return `bunx ${cmd}`;
   return `npx ${cmd}`;
 });
+hb.registerHelper("version", (name: unknown) => {
+  const key = String(name);
+  if (!(key in DEPENDENCY_VERSIONS)) {
+    throw new Error(`Dependency "${key}" not in central version map. Add it to versions.yaml.`);
+  }
+  return DEPENDENCY_VERSIONS[key as DependencyName];
+});
+hb.registerHelper("serverUrl", (backend: unknown) =>
+  backend === "next" ? "http://localhost:3001" : "http://localhost:3000",
+);
 
 export function render(template: string, config: ProjectConfig): string {
   const compiled = hb.compile(template, { noEscape: true });

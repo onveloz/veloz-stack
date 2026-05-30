@@ -11,14 +11,12 @@
  *
  * Safe to re-run.
  */
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIR = join(__dirname, "..", "public", "logos");
-
-const BLACK_RE = /"(?:black|#000|#000000|#111111?|#222222?)"/gi;
 
 function repaint(svg) {
   let out = svg;
@@ -44,7 +42,10 @@ function isMostlyColored(svg) {
   // Any non-black hex or named color beyond black/white counts as "colored"
   const fills = svg.match(/(fill|stroke)="[^"]+"/gi) ?? [];
   for (const f of fills) {
-    const v = f.replace(/^(fill|stroke)="/i, "").replace(/"$/, "").toLowerCase();
+    const v = f
+      .replace(/^(fill|stroke)="/i, "")
+      .replace(/"$/, "")
+      .toLowerCase();
     if (v === "none" || v === "currentcolor") continue;
     if (v === "black" || v === "#000" || v === "#000000") continue;
     if (v === "white" || v === "#fff" || v === "#ffffff") continue;

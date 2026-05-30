@@ -15,18 +15,14 @@ const STACK_KEYS = [
   "ui",
 ] as const satisfies readonly (keyof ProjectConfig)[];
 
-function sortedKeyList(xs: readonly string[]): string {
-  return [...xs].sort().join(",");
-}
-
 export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | "npm" }): string {
   const runner = opts?.pm ?? cfg.pm;
   const head =
     runner === "bun"
       ? "bun create veloz-stack@latest"
       : runner === "pnpm"
-      ? "pnpm create veloz-stack@latest"
-      : "npm create veloz-stack@latest --";
+        ? "pnpm create veloz-stack@latest"
+        : "npm create veloz-stack@latest --";
 
   const flags: string[] = [];
   for (const key of STACK_KEYS) {
@@ -43,7 +39,7 @@ export function buildCommand(cfg: ProjectConfig, opts?: { pm?: "bun" | "pnpm" | 
   const defaultAddons = [...DEFAULT_CONFIG.addons].sort().join(",");
   const selectedAddons = [...cfg.addons].sort().join(",");
   if (selectedAddons !== defaultAddons) {
-    flags.push(`--addons ${cfg.addons.length ? cfg.addons.join(",") : "''"}`);
+    flags.push(`--addons ${selectedAddons || "''"}`);
   }
   if (cfg.lefthookCi) flags.push("--lefthook-ci");
   if (cfg.lefthookAdvanced) flags.push("--lefthook-advanced");

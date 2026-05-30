@@ -7,10 +7,7 @@ import {
 import { buildReproducibleCommand } from "./utils/reproducible-command";
 import type { VirtualFs } from "./vfs";
 
-function toVelozStackConfig(
-  config: ProjectConfig,
-  cliVersion: string,
-): VelozStackConfigFile {
+function toVelozStackConfig(config: ProjectConfig, cliVersion: string): VelozStackConfigFile {
   return {
     $schema: VELOZ_STACK_CONFIG_SCHEMA_URL,
     version: cliVersion,
@@ -52,5 +49,5 @@ export function writeVelozStackConfigToVfs(
 ): void {
   const body = toVelozStackConfig(config, cliVersion);
   const json = JSON.stringify(body, null, 2);
-  vfs.write(VELOZ_STACK_CONFIG_FILENAME, FILE_HEADER + json + "\n");
+  vfs.write(VELOZ_STACK_CONFIG_FILENAME, `${FILE_HEADER + json}\n`);
 }

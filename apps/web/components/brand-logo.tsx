@@ -68,7 +68,7 @@ export function BrandLogo({
     <img
       src={src}
       alt={label}
-      className={"shrink-0 block " + (className ?? "")}
+      className={`shrink-0 block ${className ?? ""}`}
       style={{ height, width: "auto" }}
       onError={() => setErrored(true)}
     />

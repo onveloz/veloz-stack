@@ -1,17 +1,15 @@
 import {
   ApiId,
   AuthId,
+  applyImplicitStackRules,
   BackendId,
   DbHostingId,
   DbId,
   DeployId,
+  FRONTEND_NEXT_BACKEND_CASCADE_REASON,
   FrontendId,
-  ModuleId,
-  OrmId,
-  PackageManagerId,
-  RuntimeId,
-  UiId,
   getApiDisableReason,
+  getAuthDisableReason,
   getBackendDisableReason,
   getDbHostingDisableReason,
   getDeployDisableReason,
@@ -20,14 +18,17 @@ import {
   getOrmDisableReason,
   getRuntimeDisableReason,
   getUiDisableReason,
-  applyImplicitStackRules,
-  FRONTEND_NEXT_BACKEND_CASCADE_REASON,
   LEAVE_NEXT_BACKEND_CASCADE_REASON,
   LEAVE_NEXT_RUNTIME_CASCADE_REASON,
-  validateConfig,
+  MODULES,
+  type ModuleId,
+  OrmId,
+  PackageManagerId,
   type ProjectConfig,
+  RuntimeId,
+  UiId,
+  validateConfig,
 } from "@veloz-stack/types";
-import { MODULES } from "@veloz-stack/types";
 import {
   addonFlagsAfterGitHook,
   addonFlagsAfterLinter,
@@ -46,7 +47,7 @@ export type ConfigChange = {
 
 type StackKey = Extract<
   keyof ProjectConfig,
-  "frontend" | "backend" | "runtime" | "api" | "orm" | "dbHosting" | "deploy" | "ui"
+  "frontend" | "backend" | "runtime" | "api" | "auth" | "orm" | "dbHosting" | "deploy" | "ui"
 >;
 
 const RESOLVERS: Array<{
@@ -58,6 +59,7 @@ const RESOLVERS: Array<{
   { key: "backend", options: BackendId.options, check: getBackendDisableReason },
   { key: "runtime", options: RuntimeId.options, check: getRuntimeDisableReason },
   { key: "api", options: ApiId.options, check: getApiDisableReason },
+  { key: "auth", options: AuthId.options, check: getAuthDisableReason },
   { key: "orm", options: OrmId.options, check: getOrmDisableReason },
   { key: "dbHosting", options: DbHostingId.options, check: getDbHostingDisableReason },
   { key: "deploy", options: DeployId.options, check: getDeployDisableReason },
@@ -283,10 +285,7 @@ export function resolveEnableModule(
     changes.push(...resolved.changes);
   }
 
-  if (
-    (moduleId === "pino" || moduleId === "opentelemetry") &&
-    proposed.runtime === "workers"
-  ) {
+  if ((moduleId === "pino" || moduleId === "opentelemetry") && proposed.runtime === "workers") {
     changes.push({
       key: "runtime",
       from: "workers",
@@ -300,11 +299,7 @@ export function resolveEnableModule(
     ? proposed.modules
     : [...proposed.modules, moduleId];
 
-  if (
-    moduleId === "next-intl" &&
-    proposed.frontend === "next" &&
-    modules.includes("pt-br-i18n")
-  ) {
+  if (moduleId === "next-intl" && proposed.frontend === "next" && modules.includes("pt-br-i18n")) {
     modules = modules.filter((m) => m !== "pt-br-i18n");
     changes.push({
       key: "modules",
@@ -365,11 +360,7 @@ function satisfyPendingChoice(
   }
 }
 
-function findReason(
-  cfg: ProjectConfig,
-  key: keyof ProjectConfig,
-  value: string,
-): string | null {
+function findReason(cfg: ProjectConfig, key: keyof ProjectConfig, value: string): string | null {
   const r = RESOLVERS.find((x) => x.key === (key as StackKey));
   if (!r) return null;
   return r.check(cfg, value);

@@ -1,0 +1,32 @@
+# ADR 0003: Usar oRPC como camada de API tipada
+
+## Status
+
+Aceito (escolha do scaffold)
+
+## Contexto
+
+O frontend (e mobile, se houver) consome procedures tipadas end-to-end. Precisamos de
+contratos compartilhados, middleware de contexto (sessão, DB) e erros estruturados.
+
+Alternativas descartadas neste projeto: tRPC (ecossistema diferente), REST manual
+(sem tipagem compartilhada), GraphQL (complexidade desnecessária para o default).
+
+## Decisão
+
+- Router oRPC em `packages/api/src/routers/`.
+- Procedures base em `packages/api/src/index.ts`: `publicProcedure`{{#if (eq auth "better-auth")}},
+  `protectedProcedure` (exige sessão Better Auth){{/if}}.
+- Contexto em `packages/api/src/context.ts` — injeta sessão{{#if (ne db "none")}}, DB{{/if}}
+  e dependências compartilhadas.
+- Cliente gerado/consumido pelo frontend conforme o template (`useOrpc`, providers, etc.).
+
+Novas rotas de domínio devem ser **procedures oRPC**, não handlers REST ad hoc, salvo
+webhooks de terceiros ou requisitos explícitos de HTTP bruto.
+
+## Consequências
+
+- Schemas de input/output com Zod (ou equivalente já usado nos routers gerados).
+- Erros de auth usam `ORPCError("UNAUTHORIZED")` via middleware, não redirects HTML.
+- Não introduzir tRPC ou camada REST paralela para a mesma superfície sem ADR de supersessão.
+- Endpoints HTTP expostos pelo backend delegam ao router oRPC (padrão do template {{backend}}).

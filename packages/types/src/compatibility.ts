@@ -17,6 +17,9 @@ export function getBackendDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["backend"],
 ): DisableReason {
+  if (id === "express" || id === "fastify" || id === "elysia") {
+    return "Em breve";
+  }
   if (id === "next" && cfg.frontend !== "next") {
     return "Backend Next só funciona com frontend Next.js";
   }
@@ -39,18 +42,21 @@ export function getRuntimeDisableReason(
   if (id === "workers" && cfg.deploy !== "cloudflare" && cfg.deploy !== "none") {
     return "Runtime Workers só faz deploy no Cloudflare";
   }
+  if (id === "workers" && cfg.auth === "better-auth") {
+    return "Better Auth no Workers exige Hyperdrive/D1 — use runtime Bun ou Node por enquanto";
+  }
   return null;
 }
 
-export function getOrmDisableReason(
-  cfg: ProjectConfig,
-  id: ProjectConfig["orm"],
-): DisableReason {
-  if (cfg.db === "mongodb" && id !== "mongoose" && id !== "prisma" && id !== "none") {
-    return "MongoDB só combina com Mongoose ou Prisma";
+export function getOrmDisableReason(cfg: ProjectConfig, id: ProjectConfig["orm"]): DisableReason {
+  if (id === "mongoose") {
+    return "Em breve";
   }
-  if (cfg.db !== "mongodb" && id === "mongoose") {
-    return "Mongoose é só pra MongoDB";
+  if (id === "drizzle" && cfg.db !== "none" && cfg.db !== "postgres" && cfg.db !== "sqlite") {
+    return "Em breve";
+  }
+  if (cfg.db === "mongodb" && id !== "prisma" && id !== "none") {
+    return "MongoDB só combina com Mongoose ou Prisma";
   }
   if (cfg.db === "none" && id !== "none") {
     return "Nenhum banco selecionado";
@@ -84,35 +90,31 @@ export function getDeployDisableReason(
   return null;
 }
 
-export function getUiDisableReason(
-  cfg: ProjectConfig,
-  id: ProjectConfig["ui"],
-): DisableReason {
+export function getUiDisableReason(cfg: ProjectConfig, id: ProjectConfig["ui"]): DisableReason {
   if (id === "shadcn" && cfg.frontend === "none") {
     return "shadcn precisa de um frontend React (tanstack-start ou next)";
   }
-  if (
-    id === "shadcn" &&
-    cfg.frontend !== "tanstack-start" &&
-    cfg.frontend !== "next"
-  ) {
+  if (id === "shadcn" && cfg.frontend !== "tanstack-start" && cfg.frontend !== "next") {
     return `shadcn é React-only — use tailwind ou none com ${cfg.frontend}`;
   }
   return null;
 }
 
-export function getApiDisableReason(
-  cfg: ProjectConfig,
-  id: ProjectConfig["api"],
-): DisableReason {
+export function getApiDisableReason(cfg: ProjectConfig, id: ProjectConfig["api"]): DisableReason {
   if (cfg.backend === "none" && id !== "none") return "Nenhum backend selecionado";
+  if (id === "trpc" || id === "rest") return "Em breve";
   return null;
 }
 
-export function getModuleDisableReason(
-  cfg: ProjectConfig,
-  id: ModuleId,
+export function getAuthDisableReason(
+  _cfg: ProjectConfig,
+  id: ProjectConfig["auth"],
 ): DisableReason {
+  if (id === "clerk") return "Em breve";
+  return null;
+}
+
+export function getModuleDisableReason(cfg: ProjectConfig, id: ModuleId): DisableReason {
   const meta = MODULES[id];
   if (meta.requires?.auth && cfg.auth === "none") return "Precisa do Better Auth";
   if (meta.requires?.backend && cfg.backend === "none") return "Precisa de um backend";
@@ -120,18 +122,10 @@ export function getModuleDisableReason(
   if (id === "next-intl" && cfg.frontend !== "next") {
     return "next-intl funciona só com frontend Next.js";
   }
-  if (
-    cfg.frontend === "next" &&
-    id === "pt-br-i18n" &&
-    cfg.modules.includes("next-intl")
-  ) {
+  if (cfg.frontend === "next" && id === "pt-br-i18n" && cfg.modules.includes("next-intl")) {
     return "Com next-intl ativo, pt-BR i18n é redundante — next-intl já cobre locale e mensagens";
   }
-  if (
-    cfg.frontend === "next" &&
-    id === "next-intl" &&
-    cfg.modules.includes("pt-br-i18n")
-  ) {
+  if (cfg.frontend === "next" && id === "next-intl" && cfg.modules.includes("pt-br-i18n")) {
     return "Desative pt-BR i18n antes — no Next.js use next-intl para i18n do App Router";
   }
   if (id === "opentelemetry" && cfg.runtime === "workers") {
@@ -143,10 +137,7 @@ export function getModuleDisableReason(
   return null;
 }
 
-export function getAddonDisableReason(
-  cfg: ProjectConfig,
-  id: AddonId,
-): DisableReason {
+export function getAddonDisableReason(cfg: ProjectConfig, id: AddonId): DisableReason {
   if (id === "husky" && cfg.addons.includes("lefthook")) {
     return "Incompatível com Lefthook — escolha um gerenciador de hooks";
   }
@@ -228,6 +219,7 @@ export function validateConfig(cfg: ProjectConfig): string[] {
   pushIf(getBackendDisableReason(cfg, cfg.backend), "backend");
   pushIf(getRuntimeDisableReason(cfg, cfg.runtime), "runtime");
   pushIf(getApiDisableReason(cfg, cfg.api), "api");
+  pushIf(getAuthDisableReason(cfg, cfg.auth), "auth");
   pushIf(getOrmDisableReason(cfg, cfg.orm), "orm");
   pushIf(getDbHostingDisableReason(cfg, cfg.dbHosting), "dbHosting");
   pushIf(getDeployDisableReason(cfg, cfg.deploy), "deploy");
@@ -235,14 +227,15 @@ export function validateConfig(cfg: ProjectConfig): string[] {
 
   // Cross-field invariants the per-field helpers don't cover
   if (cfg.auth === "better-auth" && cfg.db === "none") {
+    errors.push("auth: Better Auth precisa de um banco (usa o adapter Drizzle no packages/db)");
+  }
+  if (cfg.auth === "better-auth" && cfg.runtime === "workers") {
     errors.push(
-      "auth: Better Auth precisa de um banco (usa o adapter Drizzle no packages/db)",
+      "auth: Better Auth não está disponível em Cloudflare Workers neste template — use Bun ou Node",
     );
   }
   if (cfg.desktop === "tauri" && cfg.frontend === "none") {
-    errors.push(
-      "desktop: Tauri precisa de um frontend web — ele empacota a UI numa janela nativa",
-    );
+    errors.push("desktop: Tauri precisa de um frontend web — ele empacota a UI numa janela nativa");
   }
 
   for (const m of cfg.modules) {

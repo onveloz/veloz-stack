@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_CONFIG,
   applyImplicitStackRules,
-  validateConfig,
+  DEFAULT_CONFIG,
   type ProjectConfig,
+  validateConfig,
 } from "@veloz-stack/types";
+import { describe, expect, it } from "vitest";
 import { generate } from "../index";
 
 function cfg(overrides: Partial<ProjectConfig>): ProjectConfig {
@@ -23,6 +23,51 @@ describe("generate()", () => {
     expect(files).toContain("tsconfig.json");
     expect(files).toContain(".gitignore");
     expect(files).toContain("README.md");
+  });
+
+  it("default stack emits architecture decision records", () => {
+    const files = paths(cfg({}));
+
+    expect(files).toContain("docs/adr/README.md");
+    expect(files).toContain("docs/adr/0001-record-architecture-decisions.md");
+    expect(files).toContain("docs/adr/0002-use-better-auth.md");
+    expect(files).toContain("docs/adr/0003-use-orpc.md");
+    expect(files).toContain("docs/adr/0004-database-layer.md");
+
+    const readme = generate(cfg({})).read("docs/adr/README.md")!;
+    expect(readme).toContain("0002-use-better-auth");
+    expect(readme).toContain("0003-use-orpc");
+    expect(readme).toContain("0004-database-layer");
+
+    const authAdr = generate(cfg({})).read("docs/adr/0002-use-better-auth.md")!;
+    expect(authAdr).toContain("protectedProcedure");
+    expect(authAdr).toContain("packages/auth");
+  });
+
+  it("auth none omits Better Auth ADR", () => {
+    const files = paths(cfg({ auth: "none" }));
+
+    expect(files).toContain("docs/adr/0001-record-architecture-decisions.md");
+    expect(files).not.toContain("docs/adr/0002-use-better-auth.md");
+
+    const readme = generate(cfg({ auth: "none" })).read("docs/adr/README.md")!;
+    expect(readme).not.toContain("0002-use-better-auth");
+  });
+
+  it("db none omits database layer ADR", () => {
+    const files = paths(cfg({ db: "none", orm: "none", auth: "none" }));
+
+    expect(files).not.toContain("docs/adr/0004-database-layer.md");
+
+    const readme = generate(cfg({ db: "none", orm: "none", auth: "none" })).read(
+      "docs/adr/README.md",
+    )!;
+    expect(readme).not.toContain("0004-database-layer");
+  });
+
+  it("claude module CLAUDE.md points agents at docs/adr", () => {
+    const claude = generate(cfg({ modules: ["claude"] })).read("CLAUDE.md")!;
+    expect(claude).toContain("docs/adr/");
   });
 
   it("writes veloz-stack.jsonc when cliVersion is provided", () => {
@@ -47,6 +92,31 @@ describe("generate()", () => {
     expect(bunFiles).not.toContain("pnpm-workspace.yaml");
   });
 
+  it("pnpm substitutes central deps with catalog: and emits a catalog stanza", () => {
+    const vfs = generate(cfg({ pm: "pnpm", projectName: "cat-test" }));
+    const rootPkg = JSON.parse(vfs.read("package.json")!);
+    expect(rootPkg.devDependencies.typescript).toBe("catalog:");
+    const wsYaml = vfs.read("pnpm-workspace.yaml")!;
+    expect(wsYaml).toContain("\ncatalog:\n");
+    expect(wsYaml).toMatch(/"@types\/node":/);
+    expect(wsYaml).toMatch(/typescript.*\^6\.0\.3/);
+  });
+
+  it("bun nests workspaces.catalog alongside workspace packages globs", () => {
+    const vfs = generate(cfg({ pm: "bun" }));
+    const rootPkg = JSON.parse(vfs.read("package.json")!);
+    expect(rootPkg.workspaces.packages).toEqual(["apps/*", "packages/*"]);
+    expect(rootPkg.workspaces.catalog).toMatchObject({ typescript: expect.any(String) });
+    expect(rootPkg.devDependencies.typescript).toBe("catalog:");
+    expect(vfs.exists("pnpm-workspace.yaml")).toBe(false);
+  });
+
+  it("npm leaves literal semver and emits no workspace catalog YAML", () => {
+    const vfs = generate(cfg({ pm: "npm" }));
+    expect(vfs.exists("pnpm-workspace.yaml")).toBe(false);
+    const rootPkg = JSON.parse(vfs.read("package.json")!);
+    expect(String(rootPkg.devDependencies.typescript)).toMatch(/^[\^~=]/);
+  });
   it("default stack includes server + web + api + auth + db packages", () => {
     const files = paths(cfg({}));
 
@@ -148,9 +218,7 @@ describe("generate()", () => {
   it("--db none --auth none drops the db package", () => {
     // Note: `db: none` with `auth: better-auth` is invalid (Better Auth's
     // drizzleAdapter needs the db package). Covered by validateConfig.
-    const files = paths(
-      cfg({ db: "none", orm: "none", dbHosting: "none", auth: "none" }),
-    );
+    const files = paths(cfg({ db: "none", orm: "none", dbHosting: "none", auth: "none" }));
     expect(files.some((p) => p.startsWith("packages/db/"))).toBe(false);
   });
 
@@ -354,9 +422,7 @@ describe("modules", () => {
     const vfs = generate(cfg({ modules: ["abacatepay"] }));
     expect(vfs.read(".claude/skills/abacatepay/SKILL.md")).toContain("AbacatePay");
     expect(vfs.read("packages/abacatepay/src/index.ts")).toContain("createPixCharge");
-    expect(vfs.read("packages/abacatepay/src/webhook.ts")).toContain(
-      "verifyAbacatePayWebhook",
-    );
+    expect(vfs.read("packages/abacatepay/src/webhook.ts")).toContain("verifyAbacatePayWebhook");
     expect(vfs.read(".env.example")).toContain("ABACATE_KEY");
   });
 
@@ -448,9 +514,7 @@ describe("addons", () => {
   });
 
   it("lefthookCi adds pre-push hooks and GitHub Actions workflow", () => {
-    const vfs = generate(
-      cfg({ addons: ["lefthook", "biome"], lefthookCi: true, pm: "pnpm" }),
-    );
+    const vfs = generate(cfg({ addons: ["lefthook", "biome"], lefthookCi: true, pm: "pnpm" }));
     const hook = vfs.read("lefthook.yml")!;
     expect(hook).toContain("pre-push:");
     expect(hook).toContain("pnpm run check-types");
@@ -554,14 +618,10 @@ describe("addons", () => {
 
 describe("examples: pix-checkout", () => {
   it("emits a checkout router when abacatepay module is picked", () => {
-    const vfs = generate(
-      cfg({ examples: ["pix-checkout"], modules: ["abacatepay"] }),
-    );
+    const vfs = generate(cfg({ examples: ["pix-checkout"], modules: ["abacatepay"] }));
     expect(vfs.read("packages/api/src/routers/checkout.ts")).toContain("createPixCharge");
     expect(vfs.read("packages/api/src/routers/index.ts")).toContain("checkoutRouter");
-    expect(vfs.read("packages/api/src/routers/index.ts")).toContain(
-      "checkout: checkoutRouter",
-    );
+    expect(vfs.read("packages/api/src/routers/index.ts")).toContain("checkout: checkoutRouter");
   });
 
   it("silently skips when abacatepay module is not picked", () => {
@@ -591,6 +651,14 @@ describe("examples: todo", () => {
   it("todo with better-auth uses protectedProcedure", () => {
     const vfs = generate(cfg({ examples: ["todo"] }));
     expect(vfs.read("packages/api/src/routers/todo.ts")).toContain("protectedProcedure");
+    expect(vfs.read("packages/api/src/routers/todo.ts")).toContain("ORPCError");
+    expect(vfs.read("packages/db/src/schema/todo.ts")).toContain("userId");
+  });
+
+  it("todo with sqlite uses sqliteTable schema", () => {
+    const vfs = generate(cfg({ examples: ["todo"], db: "sqlite" }));
+    expect(vfs.read("packages/db/src/schema/todo.ts")).toContain("sqliteTable");
+    expect(vfs.read("packages/db/src/schema/todo.ts")).not.toContain("pgTable");
   });
 
   it("todo with no auth falls back to publicProcedure", () => {
@@ -645,10 +713,9 @@ describe("Prisma", () => {
 
 describe("applyImplicitStackRules", () => {
   it("sets backend next when only frontend next is implied (CLI default hono)", () => {
-    const resolved = applyImplicitStackRules(
-      cfg({ frontend: "next", backend: "hono" }),
-      { frontend: true },
-    );
+    const resolved = applyImplicitStackRules(cfg({ frontend: "next", backend: "hono" }), {
+      frontend: true,
+    });
     expect(resolved.backend).toBe("next");
     expect(validateConfig(resolved)).toEqual([]);
   });
@@ -687,9 +754,7 @@ describe("validateConfig", () => {
 
   it("rejects backend next without frontend next", () => {
     const errs = validateConfig(cfg({ backend: "next", frontend: "tanstack-start" }));
-    expect(errs.some((e) => e.includes("Backend Next só funciona com frontend Next"))).toBe(
-      true,
-    );
+    expect(errs.some((e) => e.includes("Backend Next só funciona com frontend Next"))).toBe(true);
   });
 
   it("rejects backend next with runtime workers", () => {
@@ -697,9 +762,7 @@ describe("validateConfig", () => {
       cfg({ backend: "next", frontend: "next", runtime: "workers", deploy: "cloudflare" }),
     );
     expect(
-      errs.some((e) =>
-        e.includes("Route Handlers do Next.js não rodam em Cloudflare Workers"),
-      ),
+      errs.some((e) => e.includes("Route Handlers do Next.js não rodam em Cloudflare Workers")),
     ).toBe(true);
   });
 
@@ -720,6 +783,43 @@ describe("validateConfig", () => {
   it("rejects husky and lefthook together", () => {
     const errs = validateConfig(cfg({ addons: ["husky", "lefthook", "biome"] }));
     expect(errs.some((e) => e.includes("Husky e Lefthook"))).toBe(true);
+  });
+
+  /** Every axis marketed as disabled in compatibility.ts must surface "Em breve" via validateConfig. */
+  it("rejects unimplemented stacks with Em breve (parity with stack builder)", () => {
+    const cases: { overrides: Partial<ProjectConfig>; prefix: string }[] = [
+      { overrides: { backend: "fastify" }, prefix: "backend" },
+      { overrides: { backend: "elysia" }, prefix: "backend" },
+      { overrides: { api: "trpc" }, prefix: "api" },
+      { overrides: { api: "rest" }, prefix: "api" },
+      { overrides: { auth: "clerk" }, prefix: "auth" },
+      {
+        overrides: {
+          db: "mongodb",
+          orm: "mongoose",
+          dbHosting: "mongodb-atlas",
+          auth: "none",
+        },
+        prefix: "orm",
+      },
+      {
+        overrides: {
+          db: "mysql",
+          orm: "drizzle",
+          dbHosting: "planetscale",
+          auth: "none",
+        },
+        prefix: "orm",
+      },
+    ];
+
+    for (const { overrides, prefix } of cases) {
+      const errs = validateConfig(cfg(overrides));
+      expect(
+        errs.some((e) => e.startsWith(`${prefix}: `) && e.includes("Em breve")),
+        `expected "${prefix}: … Em breve" in ${JSON.stringify(errs)} for ${JSON.stringify(overrides)}`,
+      ).toBe(true);
+    }
   });
 });
 
@@ -782,6 +882,130 @@ describe("backend next", () => {
     expect(client).not.toContain("VITE_SERVER_URL");
   });
 
+  it("better-auth + orpc emits session/me routes and auth panel", () => {
+    const vfs = generate(cfg({ auth: "better-auth", api: "orpc" }));
+    const router = vfs.read("packages/api/src/routers/index.ts")!;
+    expect(router).toContain("session:");
+    expect(router).toContain("me:");
+    expect(router).toContain("sessionOutputSchema");
+    expect(router).toContain("context.user");
+    expect(vfs.read("packages/api/src/schemas/user.ts")).toContain("userSchema");
+    expect(vfs.read("apps/web/src/components/AuthPanel.tsx")).toContain("orpc.session");
+    expect(vfs.read("apps/web/src/routes/index.tsx")).toContain("<AuthPanel />");
+  });
+
+  it("better-auth + orpc on next emits AuthPanel under apps/web/components", () => {
+    const vfs = generate(
+      cfg({ frontend: "next", backend: "next", auth: "better-auth", api: "orpc" }),
+    );
+    expect(vfs.read("apps/web/components/AuthPanel.tsx")).toContain("orpc.me");
+    expect(vfs.read("apps/web/app/page.tsx")).toContain("<AuthPanel />");
+  });
+
+  it("auth none omits session/me routes and auth panel", () => {
+    const vfs = generate(cfg({ auth: "none", api: "orpc" }));
+    const router = vfs.read("packages/api/src/routers/index.ts")!;
+    expect(router).not.toContain("session:");
+    expect(router).not.toContain("me:");
+    expect(router).not.toContain('from "zod"');
+    expect(vfs.read("packages/api/src/schemas/user.ts")).toBeUndefined();
+    expect(vfs.read("apps/web/src/components/AuthPanel.tsx")).toBeUndefined();
+  });
+
+  it("better-auth user schemas use zod v4-compatible z helpers", () => {
+    const vfs = generate(cfg({ auth: "better-auth", api: "orpc" }));
+    const schemas = vfs.read("packages/api/src/schemas/user.ts")!;
+    expect(schemas).toContain('from "zod"');
+    expect(schemas).toContain("z.object");
+    expect(schemas).not.toContain("@orpc/zod");
+  });
+
+  it("better-auth + svelte-kit emits AuthPanel and login route", () => {
+    const vfs = generate(cfg({ frontend: "svelte-kit", auth: "better-auth", api: "orpc" }));
+    expect(vfs.read("apps/web/src/lib/AuthPanel.svelte")).toContain("client.session");
+    expect(vfs.read("apps/web/src/routes/+page.svelte")).toContain("AuthPanel");
+    expect(vfs.read("apps/web/src/routes/login/+page.svelte")).toBeDefined();
+  });
+
+  it("better-auth + nuxt emits AuthPanel and login page", () => {
+    const vfs = generate(cfg({ frontend: "nuxt", auth: "better-auth", api: "orpc" }));
+    expect(vfs.read("apps/web/components/AuthPanel.vue")).toContain("client.session");
+    expect(vfs.read("apps/web/app.vue")).toContain("AuthPanel");
+    expect(vfs.read("apps/web/pages/login.vue")).toBeDefined();
+  });
+
+  it("better-auth + astro emits AuthPanel island and login page", () => {
+    const vfs = generate(cfg({ frontend: "astro", auth: "better-auth", api: "orpc" }));
+    expect(vfs.read("apps/web/src/components/AuthPanel.tsx")).toContain("orpc.session");
+    expect(vfs.read("apps/web/src/pages/index.astro")).toContain("AuthPanel");
+    expect(vfs.read("apps/web/src/pages/login.astro")).toBeDefined();
+  });
+
+  it("better-auth + expo emits AuthPanel and auth client", () => {
+    const vfs = generate(
+      cfg({ mobile: "expo", frontend: "none", auth: "better-auth", api: "orpc" }),
+    );
+    expect(vfs.read("apps/mobile/src/components/AuthPanel.tsx")).toContain("orpc.session");
+    expect(vfs.read("apps/mobile/app/index.tsx")).toContain("AuthPanel");
+    expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("better-auth/react");
+    expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("@better-auth/expo/client");
+    expect(vfs.read("apps/mobile/src/lib/auth-client.ts")).toContain("useSession");
+  });
+
+  it("better-auth + expo + api:none AuthPanel skips orpc hooks", () => {
+    const vfs = generate(
+      cfg({ mobile: "expo", frontend: "none", auth: "better-auth", api: "none" }),
+    );
+    const panel = vfs.read("apps/mobile/src/components/AuthPanel.tsx")!;
+    expect(panel).not.toContain("orpc");
+    expect(panel).toContain("useSession");
+  });
+
+  it("better-auth + api:none next AuthPanel skips orpc hooks", () => {
+    const vfs = generate(
+      cfg({ frontend: "next", backend: "next", auth: "better-auth", api: "none" }),
+    );
+    const panel = vfs.read("apps/web/components/AuthPanel.tsx")!;
+    expect(panel).not.toContain('from "@/lib/orpc"');
+    expect(panel).not.toContain("orpc.session");
+    expect(panel).toContain("useSession");
+  });
+
+  it("validateConfig rejects temporarily disabled backends with Em breve", () => {
+    expect(validateConfig(cfg({ backend: "express" })).join("\n")).toContain("Em breve");
+  });
+
+  it("better-auth + next emits orpc-server helper and login route", () => {
+    const vfs = generate(
+      cfg({ frontend: "next", backend: "next", auth: "better-auth", api: "orpc" }),
+    );
+    expect(vfs.read("apps/web/lib/orpc-server.ts")).toContain("createRouterClient");
+    expect(vfs.read("apps/web/app/login/page.tsx")).toContain("AuthPanel");
+  });
+
+  it("ui none + auth still renders AuthPanel on tanstack home", () => {
+    const vfs = generate(cfg({ ui: "none", auth: "better-auth", api: "orpc" }));
+    expect(vfs.read("apps/web/src/routes/index.tsx")).toContain("<AuthPanel />");
+  });
+
+  it("rejects better-auth + workers runtime", () => {
+    const errors = validateConfig(
+      cfg({ auth: "better-auth", runtime: "workers", deploy: "cloudflare" }),
+    );
+    expect(
+      errors.some((e) => e.includes("Better Auth não está disponível em Cloudflare Workers")),
+    ).toBe(true);
+  });
+
+  it("pix-checkout uses ORPCError and scopes description when auth enabled", () => {
+    const vfs = generate(
+      cfg({ examples: ["pix-checkout"], modules: ["abacatepay"], auth: "better-auth" }),
+    );
+    const checkout = vfs.read("packages/api/src/routers/checkout.ts")!;
+    expect(checkout).toContain("ORPCError");
+    expect(checkout).toContain("context.user.id");
+  });
+
   it("veloz.json omits apps/server and sets web healthCheck when backend next", () => {
     const vfs = generate(cfg({ deploy: "veloz", frontend: "next", backend: "next" }));
     const doc = JSON.parse(vfs.read("veloz.json")!);
@@ -798,9 +1022,7 @@ describe("backend next", () => {
   });
 
   it("abacatepay module wires into apps/web when backend next", () => {
-    const vfs = generate(
-      cfg({ frontend: "next", backend: "next", modules: ["abacatepay"] }),
-    );
+    const vfs = generate(cfg({ frontend: "next", backend: "next", modules: ["abacatepay"] }));
     const web = JSON.parse(vfs.read("apps/web/package.json")!);
     expect(web.dependencies["@test-app/abacatepay"]).toBe("workspace:*");
     expect(vfs.read("apps/server/package.json")).toBeUndefined();
@@ -845,9 +1067,7 @@ describe("module workspace wiring", () => {
   it("mercadopago module ships a typed client + HMAC webhook verifier", () => {
     const vfs = generate(cfg({ modules: ["mercadopago"] }));
     expect(vfs.read("packages/mercadopago/src/index.ts")).toContain("createPixPayment");
-    expect(vfs.read("packages/mercadopago/src/webhook.ts")).toContain(
-      "verifyMercadoPagoWebhook",
-    );
+    expect(vfs.read("packages/mercadopago/src/webhook.ts")).toContain("verifyMercadoPagoWebhook");
     const pkg = JSON.parse(vfs.read("apps/server/package.json")!);
     expect(pkg.dependencies["@test-app/mercadopago"]).toBe("workspace:*");
   });
@@ -917,6 +1137,44 @@ describe("module workspace wiring", () => {
       (k) => k.startsWith("@test-app/") && !["@test-app/api", "@test-app/auth"].includes(k),
     );
     expect(extras).toEqual([]);
+  });
+});
+
+describe("testing scaffold", () => {
+  it("emits vitest config, root scripts, and api smoke test by default", () => {
+    const vfs = generate(cfg({}));
+    expect(vfs.read("vitest.config.ts")).toContain("passWithNoTests");
+    expect(vfs.read("packages/api/src/smoke.test.ts")).toContain("API router is defined");
+    const root = JSON.parse(vfs.read("package.json")!);
+    expect(root.scripts.test).toBe("turbo run test");
+    expect(root.scripts["test:e2e"]).toBe("playwright test");
+    expect(root.devDependencies.vitest).toBeDefined();
+    expect(root.devDependencies["@playwright/test"]).toBeDefined();
+    const api = JSON.parse(vfs.read("packages/api/package.json")!);
+    expect(api.scripts.test).toBe("vitest run");
+    expect(api.devDependencies.vitest).toBeDefined();
+  });
+
+  it("omits playwright when frontend is none", () => {
+    const vfs = generate(cfg({ frontend: "none", modules: ["claude"] }));
+    expect(vfs.exists("playwright.config.ts")).toBe(false);
+    expect(vfs.exists("e2e/smoke.spec.ts")).toBe(false);
+    const root = JSON.parse(vfs.read("package.json")!);
+    expect(root.scripts["test:e2e"]).toBeUndefined();
+    expect(root.devDependencies["@playwright/test"]).toBeUndefined();
+  });
+
+  it("uses vitest run at root when turborepo addon is off", () => {
+    const vfs = generate(cfg({ addons: [] }));
+    const root = JSON.parse(vfs.read("package.json")!);
+    expect(root.scripts.test).toBe("vitest run");
+  });
+
+  it("playwright config picks the frontend dev port", () => {
+    const next = generate(cfg({ frontend: "next", backend: "next" }));
+    expect(next.read("playwright.config.ts")).toContain("3000");
+    const ts = generate(cfg({ frontend: "tanstack-start" }));
+    expect(ts.read("playwright.config.ts")).toContain("3001");
   });
 });
 

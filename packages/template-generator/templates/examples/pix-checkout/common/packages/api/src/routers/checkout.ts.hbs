@@ -1,8 +1,29 @@
 import { z } from "zod";
+import { ORPCError } from "@orpc/server";
 import { createPixCharge, checkPixCharge } from "@{{projectName}}/abacatepay";
 import { {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedure{{/if}} } from "../index";
 
 const procedure = {{#if (eq auth "better-auth")}}protectedProcedure{{else}}publicProcedure{{/if}};
+
+const pixChargeCreateSchema = z.object({
+  id: z.string(),
+  brCode: z.string(),
+  brCodeBase64: z.string(),
+});
+
+const pixChargeStatusSchema = z.object({
+  id: z.string(),
+  status: z.string().optional().default("PENDING"),
+});
+
+function isPixNotFound(error: unknown): error is { status: 404 } {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "status" in error &&
+    (error as { status?: number }).status === 404
+  );
+}
 
 export const checkoutRouter = {
   /** Create a PIX QR for a given cart amount. Amount is reais — we convert. */
@@ -10,30 +31,59 @@ export const checkoutRouter = {
     .input(
       z.object({
         amountReais: z.number().positive().max(999_999),
-        description: z.string().max(200),
+        // 189 = 200 - 11 chars for "[userId] " prefix when auth is enabled
+        description: z.string().max({{#if (eq auth "better-auth")}}189{{else}}200{{/if}}),
       }),
     )
-    .handler(async ({ input }) => {
+    .handler(async ({ input{{#if (eq auth "better-auth")}}, context{{/if}} }) => {
       const amountCentavos = Math.round(input.amountReais * 100);
-      const charge = await createPixCharge({
-        amountCentavos,
-        description: input.description,
-      });
-      return {
-        id: (charge as { id?: string }).id,
-        brCode: (charge as { brCode?: string }).brCode,
-        brCodeBase64: (charge as { brCodeBase64?: string }).brCodeBase64,
-      };
+      const description =
+        {{#if (eq auth "better-auth")}}
+        `[${context.user.id.slice(0, 8)}] ${input.description}`;
+        {{else}}
+        input.description;
+        {{/if}}
+      try {
+        const charge = await createPixCharge({
+          amountCentavos,
+          description,
+        });
+        const parsed = pixChargeCreateSchema.safeParse(charge);
+        if (!parsed.success) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Resposta incompleta da API PIX",
+          });
+        }
+        return parsed.data;
+      } catch (error) {
+        if (error instanceof ORPCError) throw error;
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Falha ao criar cobrança PIX",
+        });
+      }
     }),
 
   /** Poll charge status. In prod prefer the webhook — but polling works for a demo. */
   status: procedure
     .input(z.object({ id: z.string() }))
     .handler(async ({ input }) => {
-      const charge = await checkPixCharge(input.id);
-      return {
-        id: (charge as { id?: string }).id,
-        status: (charge as { status?: string }).status ?? "PENDING",
-      };
+      try {
+        const charge = await checkPixCharge(input.id);
+        const parsed = pixChargeStatusSchema.safeParse(charge);
+        if (!parsed.success) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Resposta incompleta da API PIX",
+          });
+        }
+        return parsed.data;
+      } catch (error) {
+        if (error instanceof ORPCError) throw error;
+        if (isPixNotFound(error)) {
+          throw new ORPCError("NOT_FOUND", { message: "Cobrança não encontrada" });
+        }
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Falha ao consultar status da cobrança",
+        });
+      }
     }),
 };

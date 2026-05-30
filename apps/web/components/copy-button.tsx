@@ -28,7 +28,7 @@ export function CopyButton({
       aria-label={label ? `Copiar: ${label}` : "Copiar para a área de transferência"}
     >
       {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
-      <span>{copied ? "Copiado" : label ?? "Copiar"}</span>
+      <span>{copied ? "Copiado" : (label ?? "Copiar")}</span>
     </button>
   );
 }

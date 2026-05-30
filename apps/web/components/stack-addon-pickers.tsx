@@ -1,18 +1,21 @@
 "use client";
 
-import type { KeyboardEvent } from "react";
 import type { ProjectConfig } from "@veloz-stack/types";
+import { useSearchParams } from "next/navigation";
+import type { KeyboardEvent } from "react";
+import { useMemo } from "react";
+import { ADDON_META } from "@/app/new/stack-builder-labels";
 import { BrandLogo } from "@/components/brand-logo";
 import { ToggleOptionRow } from "@/components/toggle-option-row";
 import {
   GIT_HOOK_CHOICES,
-  LINTER_CHOICES,
+  GIT_HOOK_CHOICES_DEFAULT_UI,
   type GitHookChoice,
-  type LinterChoice,
   getGitHookChoice,
   getLinterChoice,
+  LINTER_CHOICES,
+  type LinterChoice,
 } from "@/lib/stack-addons";
-import { ADDON_META } from "@/app/new/stack-builder-labels";
 
 const GIT_HOOK_LABELS: Record<GitHookChoice, { label: string; detail: string }> = {
   none: { label: "Nenhum", detail: "Sem hooks Git no scaffold" },
@@ -61,7 +64,7 @@ function ExclusiveChoiceGroup<T extends string>({
     onChange(next);
   }
 
-  function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, id: T) {
+  function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, _id: T) {
     if (e.key === "ArrowDown" || e.key === "ArrowRight") {
       e.preventDefault();
       move(1);
@@ -75,15 +78,9 @@ function ExclusiveChoiceGroup<T extends string>({
     <div className="border border-border p-3 bg-secondary/40 space-y-2">
       <div>
         <p className="text-sm font-medium">{title}</p>
-        {hint ? (
-          <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>
-        ) : null}
+        {hint ? <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p> : null}
       </div>
-      <ul
-        role="radiogroup"
-        aria-label={title}
-        className="border border-border divide-y divide-border bg-background"
-      >
+      <ul aria-label={title} className="border border-border divide-y divide-border bg-background">
         {choices.map((id) => {
           const active = value === id;
           const meta = labels[id];
@@ -147,9 +144,24 @@ export function StackAddonPickers({
   onLefthookCiChange: () => void;
   onLefthookAdvancedChange: () => void;
 }) {
+  const searchParams = useSearchParams();
+  const showLegacyHusky =
+    searchParams.get("showLegacy") === "1" || process.env.NEXT_PUBLIC_SHOW_LEGACY_HUSKY === "true";
+
   const gitHook = getGitHookChoice(config.addons);
   const linter = getLinterChoice(config.addons);
   const turborepoOn = config.addons.includes("turborepo");
+
+  const gitHookChoices = useMemo((): readonly GitHookChoice[] => {
+    if (showLegacyHusky) return GIT_HOOK_CHOICES;
+    // Users with husky in URL/import config can still switch away cleanly.
+    if (gitHook === "husky") return ["husky", ...GIT_HOOK_CHOICES_DEFAULT_UI];
+    return GIT_HOOK_CHOICES_DEFAULT_UI;
+  }, [showLegacyHusky, gitHook]);
+
+  const gitHooksHint = showLegacyHusky
+    ? "Escolha um — Husky e Lefthook são gerenciadores alternativos."
+    : "Lefthook é a opção recomendada. Husky fica só com ?showLegacy=1 ou NEXT_PUBLIC_SHOW_LEGACY_HUSKY (legado).";
 
   return (
     <div className="space-y-4">
@@ -174,8 +186,8 @@ export function StackAddonPickers({
 
       <ExclusiveChoiceGroup
         title="Hooks Git"
-        hint="Escolha um — Husky e Lefthook são gerenciadores alternativos, não complementares."
-        choices={GIT_HOOK_CHOICES}
+        hint={gitHooksHint}
+        choices={gitHookChoices}
         labels={GIT_HOOK_LABELS}
         value={gitHook}
         logos={{ husky: "husky", lefthook: "lefthook" }}
@@ -223,9 +235,7 @@ export function StackAddonPickers({
               (turborepoOn ? "bg-brand border-brand" : "border-border-strong")
             }
           >
-            {turborepoOn ? (
-              <span className="block w-2 h-2 bg-brand-foreground" />
-            ) : null}
+            {turborepoOn ? <span className="block w-2 h-2 bg-brand-foreground" /> : null}
           </div>
         </button>
       </div>

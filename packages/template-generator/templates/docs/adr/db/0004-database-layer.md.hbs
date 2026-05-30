@@ -1,0 +1,35 @@
+# ADR 0004: Camada de dados com {{orm}} · {{db}}
+
+## Status
+
+Aceito (escolha do scaffold)
+
+## Contexto
+
+Dados de domínio e (quando auth está ativo) tabelas de sessão/usuário vivem em um pacote
+compartilhado do monorepo, consumido pelo backend{{#if (eq api "orpc")}} e pelas procedures oRPC{{else}} e pela camada de API{{/if}}.
+
+## Decisão
+
+- Pacote **`packages/db`** como única fronteira de acesso ao banco.
+- ORM: **{{orm}}** · dialect/hosting: **{{db}}** · hosting configurado via env
+  (ver `.env.example` e `veloz-stack.jsonc`).
+{{#if (eq orm "drizzle")}}
+- Schemas Drizzle em `packages/db/src/schema/`; export central em `schema/index.ts`.
+- Migrations via scripts do root (`db:push`, `db:studio`, etc. — ver `package.json`).
+{{/if}}
+{{#if (eq orm "prisma")}}
+- Schema Prisma em `packages/db/prisma/`; client gerado consumido como `@{{projectName}}/db`.
+{{/if}}
+{{#if (eq auth "better-auth")}}
+- Tabelas de auth (Better Auth) coexistem no mesmo pacote `packages/db` — não duplicar
+  schema de usuário em outro lugar.
+{{/if}}
+
+## Consequências
+
+- Queries tipadas pelo ORM; evite SQL cru salvo necessidade comprovada (performance,
+  migração pontual).
+- Não abrir segundo client de banco ou ORM paralelo (ex.: Prisma + Drizzle) sem ADR.
+- Novas entidades de domínio entram como schema/migration em `packages/db`, não inline
+  no handler HTTP.

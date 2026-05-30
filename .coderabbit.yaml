@@ -2,3 +2,9 @@
 language: "en-US"
 reviews:
   profile: assertive
+  path_instructions:
+    - path: "packages/template-generator/templates/testing/playwright.config.ts.hbs"
+      instructions: >
+        When frontend is tanstack-start, port 3001 is intentional: the monorepo runs
+        Hono on 3000 and the Vite web app on 3001 (see apps/web/vite.config.ts).
+        Do not suggest changing it to 3000.

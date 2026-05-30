@@ -1,6 +1,8 @@
 "use client";
 
+{{#unless (eq api "none")}}
 import { useQuery } from "@tanstack/react-query";
+{{/unless}}
 import {
   ArrowUpRight,
   BookOpen,
@@ -12,7 +14,9 @@ import {
   Terminal,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+{{#unless (eq api "none")}}
 import { orpc } from "@/lib/orpc";
+{{/unless}}
 
 const STACK: Array<{ label: string; accent?: boolean }> = [
   { label: "{{frontend}}", accent: true },
@@ -28,8 +32,29 @@ const MODULES: string[] = {{{json modules}}};
 
 export default function Home() {
   const t = useTranslations("Home");
+{{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
-  const connected = health.data === "OK";
+  const apiStatus = health.isLoading
+    ? "loading"
+    : health.data === "OK"
+      ? "ok"
+      : "error";
+  const bannerDot =
+    apiStatus === "loading"
+      ? "bg-yellow-500"
+      : apiStatus === "ok"
+        ? "bg-green-500"
+        : "bg-red-500";
+  const bannerLabel =
+    apiStatus === "loading"
+      ? t("api.checking")
+      : apiStatus === "ok"
+        ? t("api.connected")
+        : t("api.disconnected");
+{{else}}
+  const bannerDot = "bg-neutral-500";
+  const bannerLabel = t("api.noRpc");
+{{/unless}}
 
   return (
     <main className="min-h-screen dot-grid">
@@ -39,19 +64,11 @@ export default function Home() {
             <span
               className={
                 "w-1.5 h-1.5 rounded-full " +
-                (connected
-                  ? "bg-green-500"
-                  : health.isLoading
-                  ? "bg-yellow-500"
-                  : "bg-red-500")
+                bannerDot
               }
             />
             <span className="text-white/60">
-              {health.isLoading
-                ? t("api.checking")
-                : connected
-                ? t("api.connected")
-                : t("api.disconnected")}
+              {bannerLabel}
             </span>
           </div>
           <div className="flex items-center gap-3 mb-4">

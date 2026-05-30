@@ -1,5 +1,5 @@
+import { applyImplicitStackRules, DEFAULT_CONFIG } from "@veloz-stack/types";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG, applyImplicitStackRules } from "@veloz-stack/types";
 import { buildReproducibleCommand } from "./reproducible-command";
 
 describe("buildReproducibleCommand", () => {
@@ -60,15 +60,15 @@ describe("buildReproducibleCommand", () => {
   });
 
   it("uses the selected package manager in the create prefix", () => {
-    expect(
-      buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "b", pm: "bun" }),
-    ).toMatch(/^bun create veloz-stack@latest/);
-    expect(
-      buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "p", pm: "pnpm" }),
-    ).toMatch(/^pnpm create veloz-stack@latest/);
-    expect(
-      buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "n", pm: "npm" }),
-    ).toMatch(/^npm create veloz-stack@latest/);
+    expect(buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "b", pm: "bun" })).toMatch(
+      /^bun create veloz-stack@latest/,
+    );
+    expect(buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "p", pm: "pnpm" })).toMatch(
+      /^pnpm create veloz-stack@latest/,
+    );
+    expect(buildReproducibleCommand({ ...DEFAULT_CONFIG, projectName: "n", pm: "npm" })).toMatch(
+      /^npm create veloz-stack@latest/,
+    );
   });
 
   it("skips empty list flags", () => {
@@ -82,5 +82,13 @@ describe("buildReproducibleCommand", () => {
     expect(cmd).not.toContain("--modules");
     expect(cmd).not.toContain("--examples");
     expect(cmd).not.toContain("--addons");
+  });
+
+  it("escapes shell metacharacters in project name", () => {
+    const cmd = buildReproducibleCommand({
+      ...DEFAULT_CONFIG,
+      projectName: 'test project$(`rm -rf /`)"\\',
+    });
+    expect(cmd).toContain('"test project\\$(\\`rm -rf /\\`)\\"\\\\"');
   });
 });

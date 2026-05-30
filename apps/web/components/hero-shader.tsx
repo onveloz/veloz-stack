@@ -9,7 +9,7 @@ import { MeshGradient } from "@paper-design/shaders-react";
  */
 export function HeroShader({ className }: { className?: string }) {
   return (
-    <div className={"absolute inset-0 overflow-hidden " + (className ?? "")}>
+    <div className={`absolute inset-0 overflow-hidden ${className ?? ""}`}>
       <MeshGradient
         colors={["#0f0f0f", "#1f1005", "#FF4D00", "#E64500", "#4a1a00"]}
         distortion={0.85}

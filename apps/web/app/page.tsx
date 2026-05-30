@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { ArrowRight, Sparkles, Terminal, Zap } from "lucide-react";
-import { Logo } from "@/components/logo";
+import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { HeroShader } from "@/components/hero-shader";
+import { Logo } from "@/components/logo";
 
 const INSTALL_CMD = "bun create veloz-stack@latest";
 
@@ -75,8 +75,8 @@ export default function Home() {
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 text-balance">
               Scaffolder full-stack TypeScript opinado. Escolha seus blocos, receba um monorepo
-              pronto pra produção com PIX, LGPD, auth por SMS, skills do Claude, e deploy no
-              Veloz num comando.
+              pronto pra produção com PIX, LGPD, auth por SMS, skills do Claude, e deploy no Veloz
+              num comando.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
@@ -132,8 +132,8 @@ export default function Home() {
               Monte seus blocos. Pule o boilerplate.
             </h2>
             <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
-              Cada módulo chega com código, env vars, handlers de webhook e uma skill do Claude —
-              o agente já sabe a integração no instante do scaffold.
+              Cada módulo chega com código, env vars, handlers de webhook e uma skill do Claude — o
+              agente já sabe a integração no instante do scaffold.
             </p>
             <Link
               href="/new"

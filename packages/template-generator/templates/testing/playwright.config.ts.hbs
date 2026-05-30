@@ -1,0 +1,35 @@
+import { defineConfig, devices } from "@playwright/test";
+
+const port =
+  {{#if (eq frontend "next")}}
+  3000
+  {{else if (eq frontend "tanstack-start")}}
+  {{!-- Web dev server on 3001 — Hono API uses 3000 (see apps/web/vite.config.ts). --}}
+  3001
+  {{else if (eq frontend "nuxt")}}
+  3000
+  {{else if (eq frontend "astro")}}
+  4321
+  {{else if (eq frontend "svelte-kit")}}
+  5173
+  {{else}}
+  3000
+  {{/if}};
+
+export default defineConfig({
+  testDir: "./e2e",
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: "list",
+  use: {
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`,
+    trace: "on-first-retry",
+  },
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+  ],
+});

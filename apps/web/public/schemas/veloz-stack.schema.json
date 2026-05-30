@@ -104,6 +104,7 @@
   "required": [
     "version",
     "createdAt",
+    "reproducibleCommand",
     "preset",
     "frontend",
     "mobile",

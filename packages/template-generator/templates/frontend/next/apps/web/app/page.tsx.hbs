@@ -1,6 +1,8 @@
 "use client";
 
+{{#unless (eq api "none")}}
 import { useQuery } from "@tanstack/react-query";
+{{/unless}}
 import {
   ArrowUpRight,
   BookOpen,
@@ -13,7 +15,12 @@ import {
   Sparkles,
   Terminal,
 } from "lucide-react";
+{{#unless (eq api "none")}}
 import { orpc } from "@/lib/orpc";
+{{/unless}}
+{{#if (eq auth "better-auth")}}
+import { AuthPanel } from "@/components/AuthPanel";
+{{/if}}
 
 const STACK: Array<{ label: string; accent?: boolean }> = [
   { label: "{{frontend}}", accent: true },
@@ -28,8 +35,23 @@ const STACK: Array<{ label: string; accent?: boolean }> = [
 const MODULES: string[] = {{{json modules}}};
 
 export default function Home() {
+{{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
-  const connected = health.data === "OK";
+  const bannerDot =
+    health.data === "OK"
+      ? "bg-green-500"
+      : health.isLoading
+        ? "bg-yellow-500"
+        : "bg-red-500";
+  const bannerLabel = health.isLoading
+    ? "Verificando API…"
+    : health.data === "OK"
+      ? "API conectada"
+      : "API desconectada";
+{{else}}
+  const bannerDot = "bg-neutral-500";
+  const bannerLabel = "Sem tipo RPC configurado — frontend apenas";
+{{/unless}}
 
   return (
     <main className="min-h-screen dot-grid">
@@ -39,19 +61,11 @@ export default function Home() {
             <span
               className={
                 "w-1.5 h-1.5 rounded-full " +
-                (connected
-                  ? "bg-green-500"
-                  : health.isLoading
-                  ? "bg-yellow-500"
-                  : "bg-red-500")
+                bannerDot
               }
             />
             <span className="text-white/60">
-              {health.isLoading
-                ? "Verificando API…"
-                : connected
-                ? "API conectada"
-                : "API desconectada"}
+              {bannerLabel}
             </span>
           </div>
           <div className="flex items-center gap-3 mb-4">
@@ -64,6 +78,10 @@ export default function Home() {
             <code>CLAUDE.md</code> e peça ajuda pro agente.
           </p>
         </div>
+
+        {{#if (eq auth "better-auth")}}
+        <AuthPanel />
+        {{/if}}
 
         <section className="mb-12">
           <h2 className="text-[11px] uppercase tracking-wider text-white/50 mb-3">

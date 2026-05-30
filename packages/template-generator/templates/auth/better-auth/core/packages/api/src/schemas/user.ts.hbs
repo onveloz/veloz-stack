@@ -1,0 +1,33 @@
+import { z } from "zod";
+
+/** Public user fields returned by auth-aware oRPC routes. */
+export const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  image: z.string().nullable(),
+});
+
+export const sessionOutputSchema = z.object({
+  user: userSchema.nullable(),
+});
+
+export const meOutputSchema = z.object({
+  user: userSchema,
+});
+
+type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
+};
+
+export function toPublicUser(user: AuthUser) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    image: user.image ?? null,
+  };
+}

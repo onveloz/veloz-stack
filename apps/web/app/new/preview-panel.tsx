@@ -1,8 +1,8 @@
 "use client";
 
+import type { ProjectConfig } from "@veloz-stack/types";
 import { ChevronRight, FileCode2, FolderClosed, FolderOpen, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { ProjectConfig } from "@veloz-stack/types";
 
 type TreeNode =
   | { kind: "file"; name: string; path: string }
@@ -18,9 +18,9 @@ function buildTree(paths: string[]): TreeNode[] {
       parent.push({ kind: "file", name: head, path: fullPath });
       return;
     }
-    let dir = parent.find(
-      (n) => n.kind === "dir" && n.name === head,
-    ) as Extract<TreeNode, { kind: "dir" }> | undefined;
+    let dir = parent.find((n) => n.kind === "dir" && n.name === head) as
+      | Extract<TreeNode, { kind: "dir" }>
+      | undefined;
     if (!dir) {
       dir = {
         kind: "dir",
@@ -84,7 +84,7 @@ function usePreviewVfs(config: ProjectConfig) {
     return () => {
       cancelled = true;
     };
-  }, [configKey, config]);
+  }, [configKey]);
 
   return { tree, fileCount, loading };
 }
@@ -100,10 +100,7 @@ export function PreviewPanel({
   const { tree, fileCount, loading } = usePreviewVfs(config);
 
   return (
-    <div
-      className="flex flex-col h-full"
-      style={maxHeight ? { maxHeight } : undefined}
-    >
+    <div className="flex flex-col h-full" style={maxHeight ? { maxHeight } : undefined}>
       <div className="px-4 py-2 border-b border-border flex items-center justify-between bg-secondary/30 shrink-0">
         <div className="flex items-center gap-2">
           <FileCode2 className="w-3.5 h-3.5 text-brand" />
@@ -135,9 +132,7 @@ export function PreviewPanel({
 }
 
 function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
-  const [open, setOpen] = useState(
-    node.kind === "dir" ? node.startOpen : true,
-  );
+  const [open, setOpen] = useState(node.kind === "dir" ? node.startOpen : true);
 
   if (node.kind === "file") {
     return (
@@ -161,7 +156,7 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
         style={{ paddingLeft: 4 + depth * 12 }}
       >
         <ChevronRight
-          className={"w-3 h-3 shrink-0 transition-transform " + (open ? "rotate-90" : "")}
+          className={`w-3 h-3 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
         />
         {open ? (
           <FolderOpen className="w-3 h-3 shrink-0 text-brand" />
@@ -170,8 +165,7 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
         )}
         <span className="truncate text-foreground">{node.name}</span>
       </button>
-      {open &&
-        node.children.map((c) => <TreeRow key={c.path} node={c} depth={depth + 1} />)}
+      {open && node.children.map((c) => <TreeRow key={c.path} node={c} depth={depth + 1} />)}
     </div>
   );
 }

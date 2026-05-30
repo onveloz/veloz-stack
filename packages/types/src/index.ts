@@ -1,14 +1,7 @@
 import { z } from "zod";
 import { MODULE_IDS } from "./modules";
 
-export const FrontendId = z.enum([
-  "tanstack-start",
-  "next",
-  "nuxt",
-  "svelte-kit",
-  "astro",
-  "none",
-]);
+export const FrontendId = z.enum(["tanstack-start", "next", "nuxt", "svelte-kit", "astro", "none"]);
 export type FrontendId = z.infer<typeof FrontendId>;
 
 export const MobileId = z.enum(["expo", "none"]);
@@ -64,14 +57,7 @@ export type PackageManagerId = z.infer<typeof PackageManagerId>;
 export const ExampleId = z.enum(["todo", "ai-chat", "pix-checkout", "none"]);
 export type ExampleId = z.infer<typeof ExampleId>;
 
-export const PresetId = z.enum([
-  "veloz-br",
-  "minimal",
-  "mern",
-  "pern",
-  "next-native",
-  "custom",
-]);
+export const PresetId = z.enum(["veloz-br", "minimal", "mern", "pern", "next-native", "custom"]);
 export type PresetId = z.infer<typeof PresetId>;
 
 export const AddonId = z.enum(["turborepo", "biome", "husky", "oxlint", "lefthook"]);
@@ -84,9 +70,12 @@ export const ModuleId = z.enum(MODULE_IDS);
 export type ModuleId = z.infer<typeof ModuleId>;
 
 export const ProjectConfig = z.object({
-  projectName: z.string().min(1).regex(/^[a-z0-9][a-z0-9-_]*$/, {
-    message: "lowercase letters, digits, hyphen, underscore",
-  }),
+  projectName: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9][a-z0-9-_]*$/, {
+      message: "lowercase letters, digits, hyphen, underscore",
+    }),
   frontend: FrontendId,
   mobile: MobileId.default("none"),
   desktop: DesktopId.default("none"),
@@ -128,7 +117,7 @@ export const VelozStackConfigFile = ProjectConfig.omit({
 });
 export type VelozStackConfigFile = z.infer<typeof VelozStackConfigFile>;
 
-export * from "./veloz-stack-config";
-export * from "./modules";
-export * from "./defaults";
 export * from "./compatibility";
+export * from "./defaults";
+export * from "./modules";
+export * from "./veloz-stack-config";

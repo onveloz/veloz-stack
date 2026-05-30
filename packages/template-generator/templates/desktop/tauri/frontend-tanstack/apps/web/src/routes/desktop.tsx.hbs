@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 // Cast porque o Vite plugin do TanStack Router só conhece '/' até a primeira
 // regeneração de routeTree.gen — o stub que o scaffold ship cobre apenas '/'.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: route tree stub antes da 1ª geração do plugin
 export const Route = (createFileRoute as any)("/desktop")({ component: DesktopDemo });
 
 import { createFileRoute } from "@tanstack/react-router";

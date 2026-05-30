@@ -1,7 +1,8 @@
 import type { ModuleId, ProjectConfig } from "@veloz-stack/types";
 import { version } from "../deps";
-import { applyRootScriptsToPkg } from "./post-process-lint";
 import type { VirtualFs } from "../vfs";
+import { applyCatalogRefs } from "./catalog-emit";
+import { applyRootScriptsToPkg } from "./post-process-lint";
 
 /** Modules that ship a workspace package, and the directory under `packages/` each creates. */
 const SERVER_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
@@ -39,12 +40,46 @@ const WEB_WORKSPACE_PACKAGES: Partial<Record<ModuleId, string>> = {
  * final picture — scripts keyed off the final stack.
  */
 export function postProcess(vfs: VirtualFs, config: ProjectConfig): void {
+  stripOrpcClientWhenApiNone(vfs, config);
   setRootScripts(vfs, config);
-  emitWorkspaceFile(vfs, config);
   wireModuleDependencies(vfs, config);
   wireNextIntlDependency(vfs, config);
   stripNextRootPageForNextIntl(vfs, config);
   appendModuleEnvVars(vfs, config);
+  applyCatalogRefs(vfs, config);
+}
+
+/** No `packages/api` — remove generated oRPC client files and workspace api/orpc deps from package.json. */
+function stripOrpcClientWhenApiNone(vfs: VirtualFs, config: ProjectConfig): void {
+  if (config.api !== "none") return;
+
+  const paths = [
+    "apps/web/lib/orpc.ts",
+    "apps/web/lib/orpc-server.ts",
+    "apps/web/src/utils/orpc.ts",
+    "apps/web/src/lib/orpc.ts",
+    "apps/mobile/src/lib/orpc.ts",
+    "apps/web/composables/useOrpc.ts",
+  ];
+  for (const p of paths) {
+    if (vfs.exists(p)) vfs.remove(p);
+  }
+
+  const projApi = `@${config.projectName}/api`;
+  for (const [path] of vfs.entries()) {
+    if (!path.endsWith("package.json")) continue;
+    vfs.updateJson<Record<string, unknown>>(path, (pkg) => {
+      const deps = pkg.dependencies as Record<string, string> | undefined;
+      if (deps && typeof deps === "object") {
+        const next = { ...deps };
+        for (const k of Object.keys(next)) {
+          if (k === projApi || k.startsWith("@orpc/")) delete next[k];
+        }
+        pkg.dependencies = next;
+      }
+      return pkg;
+    });
+  }
 }
 
 function setRootScripts(vfs: VirtualFs, config: ProjectConfig): void {
@@ -102,12 +137,6 @@ function wireModuleDependencies(vfs: VirtualFs, config: ProjectConfig): void {
   }
 }
 
-function emitWorkspaceFile(vfs: VirtualFs, config: ProjectConfig): void {
-  if (config.pm === "pnpm") {
-    vfs.write("pnpm-workspace.yaml", "packages:\n  - apps/*\n  - packages/*\n");
-  }
-}
-
 function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
   const additions: string[] = [];
 
@@ -151,12 +180,7 @@ function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
     );
   }
   if (config.modules.includes("twilio")) {
-    additions.push(
-      "\n# Twilio",
-      "TWILIO_SID=",
-      "TWILIO_TOKEN=",
-      "TWILIO_SMS_FROM=",
-    );
+    additions.push("\n# Twilio", "TWILIO_SID=", "TWILIO_TOKEN=", "TWILIO_SMS_FROM=");
   }
   if (config.modules.includes("upstash-redis")) {
     additions.push("\n# Upstash Redis", "UPSTASH_REDIS_URL=", "UPSTASH_REDIS_TOKEN=");
@@ -204,5 +228,5 @@ function appendModuleEnvVars(vfs: VirtualFs, config: ProjectConfig): void {
   if (additions.length === 0) return;
 
   const existing = vfs.read(".env.example") ?? "";
-  vfs.write(".env.example", existing.trimEnd() + "\n" + additions.join("\n") + "\n");
+  vfs.write(".env.example", `${existing.trimEnd()}\n${additions.join("\n")}\n`);
 }

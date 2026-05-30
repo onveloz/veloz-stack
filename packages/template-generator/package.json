@@ -16,20 +16,26 @@
     }
   },
   "scripts": {
+    "sync-versions": "node scripts/sync-versions.mjs",
     "gen": "node scripts/build-templates.mjs",
     "prebuild": "pnpm gen",
     "check-types": "pnpm gen && tsc --noEmit",
     "test": "pnpm gen && vitest run",
     "test:watch": "vitest"
   },
-  "files": ["src", "templates", "scripts"],
+  "files": [
+    "src",
+    "templates",
+    "scripts"
+  ],
   "dependencies": {
     "@veloz-stack/types": "workspace:*",
     "handlebars": "^4.7.8"
   },
   "devDependencies": {
-    "@types/node": "^22.13.14",
+    "@types/node": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "^2.8.3"
   }
 }

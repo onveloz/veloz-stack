@@ -6,11 +6,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./context": "./src/context.ts",
-    "./routers/index": "./src/routers/index.ts"
+    "./routers/index": "./src/routers/index.ts"{{#if (eq auth "better-auth")}},
+    "./schemas/user": "./src/schemas/user.ts"{{/if}}
   },
   "dependencies": {
-    "@orpc/server": "^1.12.2",
-    "@orpc/zod": "^1.12.2",
+    "@orpc/server": "{{version "@orpc/server"}}",
     {{#if (eq auth "better-auth")}}
     "@{{projectName}}/auth": "workspace:*",
     {{/if}}
@@ -18,14 +18,15 @@
     "@{{projectName}}/db": "workspace:*",
     {{/if}}
     {{#if (and (ne db "none") (eq orm "drizzle"))}}
-    "drizzle-orm": "^0.36.0",
+    "drizzle-orm": "{{version "drizzle-orm"}}",
     {{/if}}
     {{#if (and (includes examples "pix-checkout") (includes modules "abacatepay"))}}
     "@{{projectName}}/abacatepay": "workspace:*",
     {{/if}}
-    "zod": "^3.23.8"
+    "zod": "{{version "zod"}}"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "typescript": "{{version "typescript"}}",
+    "@types/node": "{{version "@types/node"}}"
   }
 }

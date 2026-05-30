@@ -3,17 +3,22 @@ packages:
   - packages/*
 
 catalog:
-  typescript: ^5.6.3
-  zod: ^3.23.8
-  hono: ^4.12.19
-  "@orpc/client": ^1.12.2
-  "@orpc/server": ^1.12.2
-  "@orpc/zod": ^1.12.2
-  better-auth: ^1.4.18
-  drizzle-orm: ^0.36.0
-  drizzle-kit: ^0.28.0
-  nuqs: ^2.2.3
-  shiki: ^3.23.0
-  tsup: ^8.3.5
-  tsx: ^4.19.2
-  vitest: 3.2.4
+  "@biomejs/biome": ^2.4.15
+  "@clack/prompts": ^0.9.1
+  "@tailwindcss/postcss": ^4.3.0
+  "@types/node": ^20.17.0
+  "@types/react": ^19.2.15
+  "@types/react-dom": ^19.2.3
+  lefthook: ^2.1.8
+  lucide-react: ^1.16.0
+  next: ^16.2.6
+  nuqs: ^2.8.9
+  react: ^19.2.6
+  react-dom: ^19.2.6
+  tailwindcss: ^4.3.0
+  tsdown: ^0.12.0
+  tsx: ^4.22.3
+  turbo: ^2.9.14
+  typescript: ^6.0.3
+  vitest: ^4.1.7
+  zod: ^4.4.3

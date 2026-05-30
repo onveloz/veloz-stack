@@ -9,7 +9,6 @@
  * compiles against 1.x and 2.x. Check their /api-reference when you pull a
  * new version.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import { NodeSDK } from "@ararahq/sdk";
 
 const apiKey = process.env.ARARA_KEY;
@@ -17,7 +16,7 @@ if (!apiKey) {
   throw new Error("ARARA_KEY is required (ara_live_… or ara_test_…). Get one at app.ararahq.com");
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: stable runtime cast; see README above NodeSDK versioning
 export const ararahq = new (NodeSDK as any)({ apiKey });
 
 /** BR cellphone format: +5511999998888 (country + area + number, digits only). */

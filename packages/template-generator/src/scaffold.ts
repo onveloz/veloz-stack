@@ -1,5 +1,5 @@
 import type { ProjectConfig } from "@veloz-stack/types";
-import { generate, type GenerateOptions } from "./index";
+import { type GenerateOptions, generate } from "./index";
 import { writeTree } from "./writer";
 
 export { writeTree };

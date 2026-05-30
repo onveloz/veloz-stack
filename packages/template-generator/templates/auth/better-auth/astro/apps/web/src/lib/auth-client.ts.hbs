@@ -1,0 +1,20 @@
+import { createAuthClient } from "better-auth/react";
+
+function resolveServerUrl(): string {
+  if (import.meta.env.PUBLIC_SERVER_URL) {
+    return import.meta.env.PUBLIC_SERVER_URL;
+  }
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  if (import.meta.env.DEV) {
+    return "http://localhost:3000";
+  }
+  throw new Error("PUBLIC_SERVER_URL is required in production");
+}
+
+export const authClient = createAuthClient({
+  baseURL: resolveServerUrl(),
+});
+
+export const { signIn, signOut, signUp, useSession } = authClient;

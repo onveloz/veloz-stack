@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { orpc } from "@/utils/orpc";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: mesmo padrão de stub que /desktop até routeTree.gen existe
 export const Route = (createFileRoute as any)("/checkout")({
   component: CheckoutPage,
 });

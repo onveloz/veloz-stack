@@ -1,0 +1,15 @@
+import { createRouterClient } from "@orpc/server";
+import { headers } from "next/headers";
+import { appRouter } from "@{{projectName}}/api/routers/index";
+import { createContext } from "@{{projectName}}/api/context";
+
+/**
+ * Server-side oRPC client for RSC / Route Handlers.
+ * Forwards request cookies so `session` / `me` work in Server Components.
+ */
+export async function getServerOrpc() {
+  const h = await headers();
+  return createRouterClient(appRouter, {
+    context: await createContext({ headers: h }),
+  });
+}

@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+{{#unless (eq api "none")}}
 import { useQuery } from "@tanstack/react-query";
+{{/unless}}
 import { useState } from "react";
 import {
   ArrowUpRight,
@@ -14,7 +16,12 @@ import {
   Terminal,
 } from "lucide-react";
 
+{{#unless (eq api "none")}}
 import { orpc } from "@/utils/orpc";
+{{/unless}}
+{{#if (eq auth "better-auth")}}
+import { AuthPanel } from "@/components/AuthPanel";
+{{/if}}
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,8 +56,25 @@ const STACK: Array<{ label: string; brand?: boolean }> = [
 const MODULES: string[] = {{{json modules}}};
 
 function HomeComponent() {
+{{#unless (eq api "none")}}
   const health = useQuery(orpc.healthCheck.queryOptions());
-  const connected = health.data === "OK";
+  const bannerDot =
+    health.data === "OK"
+      ? "bg-green-500"
+      : health.isLoading
+        ? "bg-yellow-500"
+        : "bg-red-500";
+  const bannerLabel = health.isLoading
+    ? "Verificando API…"
+    : health.data === "OK"
+      ? "API conectada"
+      : "API desconectada";
+  const badgeVariant = health.data === "OK" ? ("brand" as const) : ("outline" as const);
+{{else}}
+  const bannerDot = "bg-neutral-500";
+  const bannerLabel = "Sem tipo RPC configurado — frontend apenas";
+  const badgeVariant = "outline" as const;
+{{/unless}}
   const [name, setName] = useState("");
 
   return (
@@ -59,24 +83,16 @@ function HomeComponent() {
         {/* Hero */}
         <div>
           <Badge
-            variant={connected ? "brand" : "outline"}
+            variant={badgeVariant}
             className="mb-6"
           >
             <span
               className={
                 "size-1.5 rounded-full " +
-                (connected
-                  ? "bg-green-500"
-                  : health.isLoading
-                  ? "bg-yellow-500"
-                  : "bg-red-500")
+                bannerDot
               }
             />
-            {health.isLoading
-              ? "Verificando API…"
-              : connected
-              ? "API conectada"
-              : "API desconectada"}
+            {bannerLabel}
           </Badge>
           <div className="flex items-center gap-3 mb-4">
             <div className="size-4 bg-brand shadow-[0_0_40px_-10px_var(--color-brand)]" />
@@ -89,6 +105,10 @@ function HomeComponent() {
             <code>apps/web/src/routes/index.tsx</code> ou peça pro Claude.
           </p>
         </div>
+
+        {{#if (eq auth "better-auth")}}
+        <AuthPanel />
+        {{/if}}
 
         {/* shadcn showcase */}
         <Card>

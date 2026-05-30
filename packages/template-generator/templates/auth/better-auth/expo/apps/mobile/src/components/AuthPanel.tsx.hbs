@@ -1,0 +1,211 @@
+import { useMutation{{#unless (eq api "none")}}, useQuery{{/unless}}, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { signIn, signOut, signUp, useSession } from "@/lib/auth-client";
+{{#unless (eq api "none")}}
+import { orpc } from "@/lib/orpc";
+{{/unless}}
+
+export function AuthPanel() {
+  const queryClient = useQueryClient();
+  const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
+{{#unless (eq api "none")}}
+  const rpcSession = useQuery({
+    ...orpc.session.queryOptions(),
+    enabled: !session?.user,
+  });
+  const me = useQuery({
+    ...orpc.me.queryOptions(),
+    enabled: !!session?.user,
+  });
+{{/unless}}
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [error, setError] = useState<string | null>(null);
+
+  const invalidateAuth = () => {
+    void refetchSession();
+{{#unless (eq api "none")}}
+    void queryClient.invalidateQueries({ queryKey: orpc.session.key() });
+    void queryClient.invalidateQueries({ queryKey: orpc.me.key() });
+{{/unless}}
+  };
+
+  const authAction = useMutation({
+    mutationFn: async () => {
+      setError(null);
+      if (mode === "sign-up") {
+        const res = await signUp.email({ email, password, name });
+        if (res.error) throw new Error(res.error.message ?? "Falha ao criar conta");
+        return;
+      }
+      const res = await signIn.email({ email, password });
+      if (res.error) throw new Error(res.error.message ?? "Falha ao entrar");
+    },
+    onSuccess: invalidateAuth,
+    onError: (err: Error) => setError(err.message),
+  });
+
+  const signingOut = useMutation({
+    mutationFn: async () => {
+      await signOut();
+    },
+    onSuccess: invalidateAuth,
+  });
+
+  const user = session?.user
+    {{#unless (eq api "none")}}
+    ? session.user
+    : rpcSession.data?.user ?? null
+    {{else}}
+    ?? null
+    {{/unless}};
+  const loading = sessionLoading{{#unless (eq api "none")}} || rpcSession.isLoading || me.isLoading{{/unless}};
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>AUTENTICAÇÃO</Text>
+      <Text style={styles.lede}>
+        Better Auth{{#unless (eq api "none")}}
+          {" "}+ oRPC — sessão via cookies (use LAN IP no device físico).
+        {{else}}
+          {" "}— sessão no app (SecureStore + Better Auth Expo).
+        {{/unless}}
+      </Text>
+
+      <View style={styles.card}>
+        <Text style={styles.status}>
+          {loading
+            ? "Carregando sessão…"
+            : user
+              ? `Autenticado como ${user.name}`
+              : "Não autenticado"}
+        </Text>
+{{#unless (eq api "none")}}
+        {user && me.data?.user && (
+          <Text style={styles.meta}>
+            oRPC me: {String(me.data.user.id).slice(0, 8)}…
+          </Text>
+        )}
+{{/unless}}
+
+        {user ? (
+          <TouchableOpacity
+            style={styles.btn}
+            disabled={signingOut.isPending}
+            onPress={() => signingOut.mutate()}
+          >
+            <Text style={styles.btnText}>Sair</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.form}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <Text style={styles.label}>Senha</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+            {mode === "sign-up" && (
+              <>
+                <Text style={styles.label}>Nome</Text>
+                <TextInput style={styles.input} value={name} onChangeText={setName} />
+              </>
+            )}
+            {error && <Text style={styles.error}>{error}</Text>}
+            <TouchableOpacity
+              style={[styles.btn, styles.btnPrimary]}
+              disabled={authAction.isPending}
+              onPress={() => {
+                if (mode === "sign-up" && name.trim().length === 0) {
+                  setError("Informe seu nome");
+                  return;
+                }
+                if (password.length < 8) {
+                  setError("A senha deve ter pelo menos 8 caracteres");
+                  return;
+                }
+                authAction.mutate();
+              }}
+            >
+              <Text style={[styles.btnText, styles.btnTextPrimary]}>
+                {authAction.isPending
+                  ? "Processando…"
+                  : mode === "sign-up"
+                    ? "Criar conta"
+                    : "Entrar"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setMode(mode === "sign-in" ? "sign-up" : "sign-in")}>
+              <Text style={styles.switchMode}>
+                {mode === "sign-in" ? "Criar conta" : "Já tenho conta"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  section: { marginBottom: 32 },
+  sectionTitle: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 11,
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  lede: { color: "rgba(255,255,255,0.6)", fontSize: 13, marginBottom: 12 },
+  card: {
+    backgroundColor: "#161616",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    padding: 16,
+    gap: 12,
+  },
+  status: { color: "#e5e5e5", fontSize: 14 },
+  meta: { color: "rgba(255,255,255,0.6)", fontSize: 12 },
+  form: { gap: 8 },
+  label: { color: "rgba(255,255,255,0.6)", fontSize: 12 },
+  input: {
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#0f0f0f",
+    color: "#e5e5e5",
+    padding: 10,
+    marginBottom: 4,
+  },
+  btn: {
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  btnPrimary: {
+    borderColor: "rgba(255,77,0,0.4)",
+    backgroundColor: "rgba(255,77,0,0.1)",
+  },
+  btnText: { color: "#e5e5e5", fontSize: 12 },
+  btnTextPrimary: { color: "#FF4D00" },
+  error: { color: "#f87171", fontSize: 12 },
+  switchMode: { color: "#FF4D00", fontSize: 12, marginTop: 4 },
+});
