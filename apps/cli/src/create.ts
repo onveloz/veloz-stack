@@ -1,7 +1,6 @@
-import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { basename, dirname, isAbsolute, resolve } from "node:path";
+import { dirname, isAbsolute, resolve } from "node:path";
 import { scaffold } from "@veloz-stack/template-generator/scaffold";
 import {
   AddonId,
@@ -11,11 +10,14 @@ import {
   getUiDisableReason,
   MODULE_IDS,
   PRESETS,
+  projectNameValidationError,
+  sanitizeProjectName,
   validateConfig,
 } from "@veloz-stack/types";
 import type { ModuleId, ProjectConfig } from "./stack-types.js";
 import chalk from "chalk";
 import { gatherInteractive } from "./prompts.js";
+import { initGitRepo, installDependencies } from "./post-scaffold.js";
 
 const require = createRequire(import.meta.url);
 const CLI_VERSION = readCliVersion();
@@ -76,6 +78,9 @@ export async function runCreate(input: CreateInput): Promise<void> {
   const config = await resolveConfig(input);
   applyUiFallback(input, config);
   const target = resolveTargetDirectory(config);
+  if (target === null) {
+    process.exit(1);
+  }
 
   const errors = validateConfig(config);
   if (errors.length > 0) {
@@ -121,13 +126,18 @@ function applyUiFallback(input: CreateInput, config: ProjectConfig): void {
   }
 }
 
-function resolveTargetDirectory(config: ProjectConfig): string {
+function resolveTargetDirectory(config: ProjectConfig): string | null {
   const raw = config.projectName.trim();
-  const safeName =
-    basename(raw)
-      .replaceAll(/[^a-z0-9-_]/gi, "-")
-      .replaceAll(/^-+/g, "")
-      .toLowerCase() || "my-veloz-stack";
+  const safeName = sanitizeProjectName(raw, DEFAULT_CONFIG.projectName);
+  const nameError = projectNameValidationError(safeName);
+  if (nameError) {
+    console.error(
+      chalk.red(
+        `\n✗ Nome de projeto inválido "${safeName}" após normalização: ${nameError}`,
+      ),
+    );
+    return null;
+  }
   config.projectName = safeName;
   if (isAbsolute(raw)) {
     return resolve(dirname(raw), safeName);
@@ -150,7 +160,10 @@ async function writeScaffold(
     cliVersion: CLI_VERSION,
   });
   if (config.git) {
-    execSync("git init", { cwd: target, stdio: "ignore" });
+    initGitRepo(target);
+  }
+  if (config.install) {
+    installDependencies(target, config);
   }
   printScaffoldSuccess(config, fileCount);
 }
@@ -158,7 +171,9 @@ async function writeScaffold(
 function printScaffoldSuccess(config: ProjectConfig, fileCount: number): void {
   writeStdout(chalk.green(`\n✓ ${fileCount} arquivos criados.`));
   writeStdout(chalk.dim(`  cd ${config.projectName}`));
-  writeStdout(chalk.dim(`  ${config.pm} install`));
+  if (!config.install) {
+    writeStdout(chalk.dim(`  ${config.pm} install`));
+  }
   writeStdout(chalk.dim(`  ${config.pm} dev`));
 
   if (config.deploy === "veloz") {

@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 import { MODULE_IDS } from "./modules";
+import { ProjectNameSchema } from "./project-name";
 
 /** Web framework axis (TanStack Start, Next.js, meta-frameworks, or none). */
 export const FrontendId = z.enum([
@@ -136,12 +137,7 @@ export type ModuleId = z.infer<typeof ModuleId>;
 
 /** Full stack selection for scaffolding (CLI flags, web builder state, generator input). */
 export const ProjectConfig = z.object({
-  projectName: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9][a-z0-9-_]*$/, {
-      message: "lowercase letters, digits, hyphen, underscore",
-    }),
+  projectName: ProjectNameSchema,
   frontend: FrontendId,
   mobile: MobileId.default("none"),
   desktop: DesktopId.default("none"),
@@ -235,3 +231,9 @@ export {
   VELOZ_STACK_CONFIG_FILENAME,
   VELOZ_STACK_CONFIG_SCHEMA_URL,
 } from "./veloz-stack-config";
+export {
+  PROJECT_NAME_FALLBACK,
+  ProjectNameSchema,
+  projectNameValidationError,
+  sanitizeProjectName,
+} from "./project-name";

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Verify relative markdown links resolve to files in the repo.
- * Skips http(s), mailto, and anchor-only targets.
+ * Skips http(s), mailto, anchor-only targets, and links inside fenced code blocks.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -28,6 +28,13 @@ function listMarkdown(dir, acc = []) {
   return acc;
 }
 
+/** @param {string} text */
+function stripFencedCodeBlocks(text) {
+  return text
+    .replaceAll(/```[\s\S]*?```/g, "")
+    .replaceAll(/~~~[\s\S]*?~~~/g, "");
+}
+
 const SKIP_PREFIXES = [
   "docs/plans/archive/",
   "packages/template-generator/templates/",
@@ -41,7 +48,7 @@ for (const file of listMarkdown(ROOT)) {
   if (SKIP_PREFIXES.some((p) => relFile.startsWith(p))) {
     continue;
   }
-  const text = fs.readFileSync(file, "utf8");
+  const text = stripFencedCodeBlocks(fs.readFileSync(file, "utf8"));
   const dir = path.dirname(file);
   for (const m of text.matchAll(linkRe)) {
     const raw = m[1].trim();
