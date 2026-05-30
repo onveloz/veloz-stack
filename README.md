@@ -17,7 +17,7 @@ Pick your stack visually at [www.veloz-stack.com/new](https://www.veloz-stack.co
 ## Packages
 
 - `apps/web` — landing + stack picker (Next.js 16)
-- `apps/cli` — `create-veloz-stack` CLI (Bun + Ink)
+- `apps/cli` — `create-veloz-stack` CLI (Clack prompts + Node/Bun runtime)
 - `packages/types` — canonical Zod schemas for all stack options
 - `packages/template-generator` — templates & dependency map
 
