@@ -29,7 +29,7 @@ flowchart LR
 | Path                          | Role                                                              |
 | ----------------------------- | ----------------------------------------------------------------- |
 | `apps/web`                    | Next.js marketing site + `/new` stack builder                     |
-| `apps/cli`                    | `create-veloz-stack` — interactive Ink UI or flags                |
+| `apps/cli`                    | `create-veloz-stack` — interactive Clack prompts or flags         |
 | `packages/types`              | Canonical enums, labels, presets, compatibility, stack resolution |
 | `packages/template-generator` | Embedded templates, Handlebars processors, scaffold pipeline      |
 

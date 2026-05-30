@@ -34,7 +34,7 @@
     "@veloz-stack/template-generator": "workspace:*",
     "@veloz-stack/types": "workspace:*",
     "chalk": "^5.4.1",
-    "incur": "^0.4.1",
+    "incur": "^0.4.8",
     "zod": "catalog:"
   },
   "devDependencies": {
