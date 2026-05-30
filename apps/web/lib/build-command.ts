@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG } from "@veloz-stack/types";
+import { DEFAULT_CONFIG, sanitizeProjectName } from "@veloz-stack/types";
 
 import type { ProjectConfig } from "@/lib/veloz-stack-types";
 
@@ -84,14 +84,6 @@ function toolingFlags(cfg: ProjectConfig): string[] {
   return flags;
 }
 
-function sanitizeProjectName(name: string): string {
-  const normalized = name.trim() || DEFAULT_CONFIG.projectName;
-  const sanitized = normalized
-    .replaceAll(/[^a-zA-Z0-9._-]/g, "-")
-    .replaceAll(/^-+/g, "");
-  return sanitized || DEFAULT_CONFIG.projectName;
-}
-
 /**
  * Build a copy-paste CLI command for the current stack config.
  * Omits flags that match {@link DEFAULT_CONFIG}; emits explicit `--modules ''` when
@@ -103,7 +95,10 @@ export function buildCommand(
 ): string {
   const runner = opts?.pm ?? cfg.pm;
   const head = createHead(runner);
-  const projectName = sanitizeProjectName(cfg.projectName);
+  const projectName = sanitizeProjectName(
+    cfg.projectName,
+    DEFAULT_CONFIG.projectName,
+  );
   const flags = [
     ...stackFlags(cfg),
     ...moduleAndExampleFlags(cfg),

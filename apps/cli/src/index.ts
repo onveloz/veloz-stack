@@ -15,8 +15,23 @@ import {
   RuntimeId as RuntimeIdSchema,
   UiId as UiIdSchema,
 } from "@veloz-stack/types";
+import { createRequire } from "node:module";
 import { Cli, z } from "incur";
 import { runCreate } from "./create.js";
+
+const require = createRequire(import.meta.url);
+const CLI_VERSION: string = (() => {
+  const raw: unknown = require("../package.json");
+  if (
+    typeof raw === "object" &&
+    raw !== null &&
+    "version" in raw &&
+    typeof raw.version === "string"
+  ) {
+    return raw.version;
+  }
+  throw new Error("Invalid apps/cli/package.json");
+})();
 
 // Re-wrap each enum with incur's own zod instance so schema identity checks
 // inside incur recognize them.
@@ -44,7 +59,7 @@ const PackageManagerId = reenum(PackageManagerIdSchema);
 const UiId = reenum(UiIdSchema);
 
 const cli = Cli.create("create-veloz-stack", {
-  version: "0.0.1",
+  version: CLI_VERSION,
   description:
     "Scaffolder TypeScript opinado pro Brasil — PIX, LGPD, SMS, pronto pro Claude. Deploy no Veloz.",
   sync: {
