@@ -4,7 +4,7 @@ Guidance for changing the **template generator**, **CLI**, and **stack builder**
 
 ## Toolchain
 
-- **Node.js** 22 in CI; local **>=20.11.0** per root `package.json` `engines` (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+- **Node.js** 24 in CI and local **>=24.0.0** per root `package.json` `engines` (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 - **oxlint** + **oxfmt** lint and format this monorepo (`pnpm lint`, `pnpm lint:fix`; see [`.oxlintrc.json`](.oxlintrc.json) and [`lefthook.yml`](lefthook.yml)).
 - **Lefthook** installs local git hooks (`pnpm prepare` → `lefthook install`).
 - **Bun** is installed in CI for e2e scaffolds that use `bun create` / Bun workspaces.
