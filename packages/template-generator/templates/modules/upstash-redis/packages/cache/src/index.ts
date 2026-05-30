@@ -11,6 +11,7 @@ if (!url || !token) {
   throw new Error("UPSTASH_REDIS_URL and UPSTASH_REDIS_TOKEN are required");
 }
 
+/** @internal Scaffold export. */
 export const redis = new Redis({ url, token });
 
 /** JSON wrapper: serialise on set, deserialise on get. */
@@ -25,3 +26,4 @@ export const json = {
     await redis.del(key);
   },
 };
+

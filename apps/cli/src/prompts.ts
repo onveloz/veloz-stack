@@ -1,4 +1,12 @@
-import * as p from "@clack/prompts";
+import {
+  cancel,
+  confirm,
+  intro,
+  isCancel,
+  multiselect,
+  select,
+  text,
+} from "@clack/prompts";
 import {
   ApiId,
   AuthId,
@@ -8,7 +16,9 @@ import {
   DbHostingId,
   DbId,
   DeployId,
+  DesktopId,
   FrontendId,
+  MobileId,
   getApiDisableReason,
   getAuthDisableReason,
   getBackendDisableReason,
@@ -24,207 +34,395 @@ import {
   OrmId,
   PackageManagerId,
   PRESETS,
-  type ProjectConfig,
+  PresetId,
   RuntimeId,
   UiId,
 } from "@veloz-stack/types";
+import type {
+  ModuleId,
+  PresetId as PresetIdType,
+  ProjectConfig,
+} from "./stack-types.js";
 import chalk from "chalk";
 
 type CreateInput = Partial<ProjectConfig> & { projectName?: string };
 
+const COMING_SOON = new Set<string>(COMING_SOON_PRESETS);
+
+interface PickOneParams<T extends string> {
+  message: string;
+  options: readonly T[];
+  initial: T;
+  disabled: (id: T) => string | null;
+  labels?: (id: T) => string;
+}
+
+/** Interactive Clack prompts; applies the same implicit stack rules as the web builder. */
 export async function gatherInteractive(
   seeded: ProjectConfig,
   input: CreateInput,
 ): Promise<ProjectConfig> {
-  p.intro(chalk.hex("#FF4D00").bold("◆ veloz/stack"));
+  intro(chalk.hex("#FF4D00").bold("◆ veloz/stack"));
 
   const cfg: ProjectConfig = { ...seeded };
 
-  // Project name
-  if (!input.projectName) {
-    const name = await p.text({
-      message: "Qual o nome do projeto?",
-      placeholder: seeded.projectName,
-      defaultValue: seeded.projectName,
-      validate: (v) => {
-        if (!v) return;
-        if (!/^[a-z0-9][a-z0-9-_]*$/.test(v))
-          return "Use letras minúsculas, dígitos, hífens e underscores.";
-      },
-    });
-    cancelIfNeeded(name);
-    cfg.projectName = name as string;
-  }
-
-  // Preset
-  if (input.preset === undefined) {
-    const preset = await p.select({
-      message: "Qual modelo pronto?",
-      initialValue: seeded.preset,
-      options: (Object.keys(PRESETS) as Array<keyof typeof PRESETS>)
-        .filter((k) => !COMING_SOON_PRESETS.includes(k as (typeof COMING_SOON_PRESETS)[number]))
-        .map((k) => ({
-          value: k,
-          label: PRESETS[k].label,
-          hint: PRESETS[k].description,
-        })),
-    });
-    cancelIfNeeded(preset);
-    if (preset !== "custom") {
-      Object.assign(cfg, PRESETS[preset as keyof typeof PRESETS].config);
-    }
-    cfg.preset = preset as typeof cfg.preset;
-  }
-
-  // Stack choices (only prompt if not already supplied by flags)
-  cfg.frontend = await pickOne(
-    "Frontend",
-    FrontendId.options,
-    input.frontend ?? cfg.frontend,
-    () => null,
-    frontendLabels,
-  );
-  if (input.backend === undefined) {
-    const cascaded = applyImplicitStackRules(cfg, {
-      backend: false,
-      runtime: input.runtime !== undefined,
-    });
-    cfg.backend = cascaded.backend;
-    cfg.runtime = cascaded.runtime;
-  }
-  cfg.backend = await pickOne("Backend", BackendId.options, input.backend ?? cfg.backend, (id) =>
-    getBackendDisableReason({ ...cfg, backend: id }, id),
-  );
-  cfg.runtime = await pickOne("Runtime", RuntimeId.options, input.runtime ?? cfg.runtime, (id) =>
-    getRuntimeDisableReason({ ...cfg, runtime: id }, id),
-  );
-  cfg.api = await pickOne(
-    "API",
-    ApiId.options,
-    input.api ?? cfg.api,
-    (id) => getApiDisableReason({ ...cfg, api: id }, id),
-    apiLabels,
-  );
-  cfg.db = await pickOne("Banco de dados", DbId.options, input.db ?? cfg.db, () => null);
-  cfg.orm = await pickOne("ORM", OrmId.options, input.orm ?? cfg.orm, (id) =>
-    getOrmDisableReason({ ...cfg, orm: id }, id),
-  );
-  cfg.dbHosting = await pickOne(
-    "Hospedagem do banco",
-    DbHostingId.options,
-    input.dbHosting ?? cfg.dbHosting,
-    (id) => getDbHostingDisableReason({ ...cfg, dbHosting: id }, id),
-  );
-  cfg.auth = await pickOne(
-    "Autenticação",
-    AuthId.options,
-    input.auth ?? cfg.auth,
-    (id) => getAuthDisableReason({ ...cfg, auth: id }, id),
-    authLabels,
-  );
-  cfg.deploy = await pickOne("Alvo de deploy", DeployId.options, input.deploy ?? cfg.deploy, (id) =>
-    getDeployDisableReason({ ...cfg, deploy: id }, id),
-  );
-  cfg.pm = await pickOne(
-    "Gerenciador de pacotes",
-    PackageManagerId.options,
-    input.pm ?? cfg.pm,
-    () => null,
-  );
-  cfg.ui = await pickOne(
-    "UI",
-    UiId.options,
-    input.ui ?? cfg.ui,
-    (id) => getUiDisableReason({ ...cfg, ui: id }, id),
-    uiLabels,
-  );
-
-  // Modules — grouped multi-select
-  if (input.modules === undefined) {
-    const options: Array<{ value: string; label: string; hint?: string }> = [];
-    for (const cat of MODULE_CATEGORIES) {
-      const mods = Object.values(MODULES).filter((m) => m.category === cat);
-      if (mods.length === 0) continue;
-      for (const m of mods) {
-        const reason = getModuleDisableReason(cfg, m.id);
-        options.push({
-          value: m.id,
-          label: `${MODULE_CATEGORY_LABELS[cat]} / ${m.name}${m.brazilian ? " · BR" : ""}`,
-          hint: reason ?? m.tagline,
-        });
-      }
-    }
-    const picked = await p.multiselect({
-      message: "Módulos (espaço pra alternar, enter pra confirmar)",
-      initialValues: cfg.modules as string[],
-      required: false,
-      options,
-    });
-    cancelIfNeeded(picked);
-    cfg.modules = (picked as string[]).filter((id) => {
-      const m = MODULES[id as keyof typeof MODULES];
-      return m && !getModuleDisableReason(cfg, m.id);
-    }) as typeof cfg.modules;
-  }
-
-  // Toggles
-  if (input.install === undefined) {
-    const install = await p.confirm({
-      message: "Instalar dependências?",
-      initialValue: cfg.install,
-    });
-    cancelIfNeeded(install);
-    cfg.install = install as boolean;
-  }
-  if (input.git === undefined) {
-    const git = await p.confirm({
-      message: "Inicializar repositório git?",
-      initialValue: cfg.git,
-    });
-    cancelIfNeeded(git);
-    cfg.git = git as boolean;
-  }
+  await promptProjectName(cfg, input);
+  await promptPreset(cfg, input);
+  await promptPlatformStack(cfg, input);
+  await promptDataStack(cfg, input);
+  await promptProductStack(cfg, input);
+  await promptModules(cfg, input);
+  await promptToggles(cfg, input);
 
   return cfg;
 }
 
-async function pickOne<T extends string>(
-  message: string,
-  options: readonly T[],
-  initial: T,
-  disabled: (id: T) => string | null,
-  labels?: (id: T) => string,
-): Promise<T> {
-  const opts = options.map((id) => {
-    const reason = disabled(id);
-    return {
-      value: id as string,
-      label: (labels ? labels(id) : titleCase(id)) + (reason ? chalk.dim(` (${reason})`) : ""),
-    };
+async function promptProjectName(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  if (input.projectName) {
+    return;
+  }
+  const name = await text({
+    message: "Qual o nome do projeto?",
+    placeholder: cfg.projectName,
+    defaultValue: cfg.projectName,
+    validate: (v): string | undefined => {
+      if (v && !/^[a-z0-9][a-z0-9-_]*$/.test(v)) {
+        return "Use letras minúsculas, dígitos, hífens e underscores.";
+      }
+      return undefined;
+    },
   });
-  const picked = await p.select({
-    message,
-    initialValue: initial as string,
-    options: opts,
+  cancelIfNeeded(name);
+  cfg.projectName = expectString(name, "project name");
+}
+
+async function promptPreset(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  if (input.preset !== undefined) {
+    return;
+  }
+  const preset = await select({
+    message: "Qual modelo pronto?",
+    initialValue: cfg.preset,
+    options: availablePresetOptions(),
+  });
+  cancelIfNeeded(preset);
+  const presetId = expectPresetId(preset);
+  if (presetId !== "custom") {
+    Object.assign(cfg, PRESETS[presetId].config);
+  }
+  cfg.preset = presetId;
+}
+
+function availablePresetOptions() {
+  return PresetId.options
+    .filter(isAvailablePreset)
+    .filter((preset) => isPresetKey(preset))
+    .map((k) => ({
+      value: k,
+      label: PRESETS[k].label,
+      hint: PRESETS[k].description,
+    }));
+}
+
+function isAvailablePreset(preset: PresetIdType): boolean {
+  return !COMING_SOON.has(preset);
+}
+
+function isPresetKey(preset: PresetIdType): preset is keyof typeof PRESETS {
+  return Object.hasOwn(PRESETS, preset);
+}
+
+async function promptPlatformStack(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  cfg.frontend = await pickOne({
+    message: "Frontend",
+    options: FrontendId.options,
+    initial: coalesce(input.frontend, cfg.frontend),
+    disabled: () => null,
+    labels: frontendLabels,
+  });
+  applyBackendCascade(cfg, input);
+  cfg.backend = await pickOne({
+    message: "Backend",
+    options: BackendId.options,
+    initial: coalesce(input.backend, cfg.backend),
+    disabled: (id) => getBackendDisableReason({ ...cfg, backend: id }, id),
+  });
+  cfg.runtime = await pickOne({
+    message: "Runtime",
+    options: RuntimeId.options,
+    initial: coalesce(input.runtime, cfg.runtime),
+    disabled: (id) => getRuntimeDisableReason({ ...cfg, runtime: id }, id),
+  });
+  await promptExtraPlatforms(cfg, input);
+}
+
+async function promptExtraPlatforms(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  cfg.mobile = await pickOne({
+    message: "Mobile",
+    options: MobileId.options,
+    initial: coalesce(input.mobile, cfg.mobile),
+    disabled: () => null,
+    labels: mobileLabels,
+  });
+  cfg.desktop = await pickOne({
+    message: "Desktop",
+    options: DesktopId.options,
+    initial: coalesce(input.desktop, cfg.desktop),
+    disabled: () => null,
+    labels: desktopLabels,
+  });
+}
+
+function applyBackendCascade(cfg: ProjectConfig, input: CreateInput): void {
+  if (input.backend !== undefined) {
+    return;
+  }
+  const cascaded = applyImplicitStackRules(cfg, {
+    backend: false,
+    runtime: input.runtime !== undefined,
+  });
+  cfg.backend = cascaded.backend;
+  cfg.runtime = cascaded.runtime;
+}
+
+async function promptDataStack(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  cfg.api = await pickOne({
+    message: "API",
+    options: ApiId.options,
+    initial: coalesce(input.api, cfg.api),
+    disabled: (id) => getApiDisableReason({ ...cfg, api: id }, id),
+    labels: apiLabels,
+  });
+  cfg.db = await pickOne({
+    message: "Banco de dados",
+    options: DbId.options,
+    initial: coalesce(input.db, cfg.db),
+    disabled: () => null,
+  });
+  cfg.orm = await pickOne({
+    message: "ORM",
+    options: OrmId.options,
+    initial: coalesce(input.orm, cfg.orm),
+    disabled: (id) => getOrmDisableReason({ ...cfg, orm: id }, id),
+  });
+  cfg.dbHosting = await pickOne({
+    message: "Hospedagem do banco",
+    options: DbHostingId.options,
+    initial: coalesce(input.dbHosting, cfg.dbHosting),
+    disabled: (id) => getDbHostingDisableReason({ ...cfg, dbHosting: id }, id),
+  });
+}
+
+async function promptProductStack(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  cfg.auth = await pickOne({
+    message: "Autenticação",
+    options: AuthId.options,
+    initial: coalesce(input.auth, cfg.auth),
+    disabled: (id) => getAuthDisableReason({ ...cfg, auth: id }, id),
+    labels: authLabels,
+  });
+  cfg.deploy = await pickOne({
+    message: "Alvo de deploy",
+    options: DeployId.options,
+    initial: coalesce(input.deploy, cfg.deploy),
+    disabled: (id) => getDeployDisableReason({ ...cfg, deploy: id }, id),
+  });
+  cfg.pm = await pickOne({
+    message: "Gerenciador de pacotes",
+    options: PackageManagerId.options,
+    initial: coalesce(input.pm, cfg.pm),
+    disabled: () => null,
+  });
+  cfg.ui = await pickOne({
+    message: "UI",
+    options: UiId.options,
+    initial: coalesce(input.ui, cfg.ui),
+    disabled: (id) => getUiDisableReason({ ...cfg, ui: id }, id),
+    labels: uiLabels,
+  });
+}
+
+async function promptModules(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  if (input.modules !== undefined) {
+    return;
+  }
+  const picked = await multiselect({
+    message: "Módulos (espaço pra alternar, enter pra confirmar)",
+    initialValues: cfg.modules,
+    required: false,
+    options: buildModuleOptions(cfg),
   });
   cancelIfNeeded(picked);
-  // If the user picked a disabled option, the inline label warned them —
-  // but we still accept the choice; `validateConfig` will fail-fast later.
-  return picked as T;
+  cfg.modules = expectStringArray(picked).filter((id) =>
+    isEnabledModuleId(cfg)(id),
+  );
+}
+
+function buildModuleOptions(cfg: ProjectConfig) {
+  const options: { value: string; label: string; hint?: string }[] = [];
+  for (const cat of MODULE_CATEGORIES) {
+    const mods = Object.values(MODULES).filter((m) => m.category === cat);
+    for (const m of mods) {
+      const reason = getModuleDisableReason(cfg, m.id);
+      options.push({
+        value: m.id,
+        label: moduleOptionLabel(cat, m.name, m.brazilian === true),
+        hint: reason ?? m.tagline,
+      });
+    }
+  }
+  return options;
+}
+
+function moduleOptionLabel(
+  category: keyof typeof MODULE_CATEGORY_LABELS,
+  name: string,
+  brazilian: boolean,
+): string {
+  const brSuffix = brazilian ? " · BR" : "";
+  return `${MODULE_CATEGORY_LABELS[category]} / ${name}${brSuffix}`;
+}
+
+async function promptToggles(
+  cfg: ProjectConfig,
+  input: CreateInput,
+): Promise<void> {
+  if (input.install === undefined) {
+    const install = await confirm({
+      message: "Instalar dependências?",
+      initialValue: cfg.install,
+    });
+    cancelIfNeeded(install);
+    cfg.install = expectBoolean(install);
+  }
+  if (input.git === undefined) {
+    const git = await confirm({
+      message: "Inicializar repositório git?",
+      initialValue: cfg.git,
+    });
+    cancelIfNeeded(git);
+    cfg.git = expectBoolean(git);
+  }
+}
+
+function coalesce<T>(value: T | undefined, fallback: T): T {
+  return value ?? fallback;
+}
+
+function isEnabledModuleId(cfg: ProjectConfig): (id: string) => id is ModuleId {
+  return (id): id is ModuleId => {
+    if (!isModuleId(id)) {
+      return false;
+    }
+    return !getModuleDisableReason(cfg, id);
+  };
+}
+
+function isModuleId(id: string): id is ModuleId {
+  return id in MODULES;
+}
+
+async function pickOne<T extends string>(params: PickOneParams<T>): Promise<T> {
+  const opts = params.options.map((id) => {
+    const reason = params.disabled(id);
+    const labelFn = params.labels ?? titleCase;
+    const option: { value: T; label: string; hint?: string } = {
+      value: id,
+      label: labelFn(id),
+    };
+    if (reason) {
+      option.hint = reason;
+    }
+    return option;
+  });
+  const picked = await select({
+    message: params.message,
+    initialValue: params.initial,
+    options: opts as { value: string; label: string; hint?: string }[],
+  });
+  cancelIfNeeded(picked);
+  return expectOptionValue(picked, params.options);
 }
 
 function cancelIfNeeded(v: unknown): void {
-  if (p.isCancel(v)) {
-    p.cancel("Abortado.");
+  if (isCancel(v)) {
+    cancel("Abortado.");
     process.exit(0);
   }
 }
 
+function expectString(v: unknown, label: string): string {
+  if (typeof v !== "string") {
+    throw new TypeError(`Expected string for ${label}`);
+  }
+  return v;
+}
+
+function expectBoolean(v: unknown): boolean {
+  if (typeof v !== "boolean") {
+    throw new TypeError("Expected boolean");
+  }
+  return v;
+}
+
+function expectPresetId(v: unknown): ProjectConfig["preset"] {
+  const parsed = PresetId.safeParse(v);
+  if (!parsed.success) {
+    throw new TypeError(`Invalid preset: ${String(v)}`);
+  }
+  return parsed.data;
+}
+
+function expectStringArray(v: unknown): string[] {
+  if (!Array.isArray(v) || !v.every((item) => typeof item === "string")) {
+    throw new TypeError("Expected string array");
+  }
+  return v;
+}
+
+function expectOptionValue<T extends string>(
+  v: unknown,
+  options: readonly T[],
+): T {
+  if (typeof v !== "string") {
+    throw new TypeError(`Invalid selection: ${String(v)}`);
+  }
+  for (const option of options) {
+    if (option === v) {
+      return option;
+    }
+  }
+  throw new TypeError(`Invalid selection: ${v}`);
+}
+
 function titleCase(s: string): string {
-  if (s === "none") return "Nenhum";
+  if (s === "none") {
+    return "Nenhum";
+  }
   return s
     .split("-")
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
 
@@ -241,21 +439,51 @@ function frontendLabels(id: string): string {
 }
 
 function apiLabels(id: string): string {
-  if (id === "orpc") return "oRPC";
-  if (id === "trpc") return "tRPC";
+  if (id === "orpc") {
+    return "oRPC";
+  }
+  if (id === "trpc") {
+    return "tRPC";
+  }
   return titleCase(id);
 }
 
 function authLabels(id: string): string {
-  if (id === "better-auth") return "Better Auth";
-  if (id === "clerk") return "Clerk";
-  if (id === "none") return "Nenhuma";
+  if (id === "better-auth") {
+    return "Better Auth";
+  }
+  if (id === "clerk") {
+    return "Clerk";
+  }
+  if (id === "none") {
+    return "Nenhuma";
+  }
   return titleCase(id);
 }
 
 function uiLabels(id: string): string {
-  if (id === "shadcn") return "shadcn/ui (Tailwind 4)";
-  if (id === "tailwind") return "Tailwind 4 (sem componentes)";
-  if (id === "none") return "Nenhum (CSS puro)";
+  if (id === "shadcn") {
+    return "shadcn/ui (Tailwind 4)";
+  }
+  if (id === "tailwind") {
+    return "Tailwind 4 (sem componentes)";
+  }
+  if (id === "none") {
+    return "Nenhum (CSS puro)";
+  }
+  return titleCase(id);
+}
+
+function mobileLabels(id: string): string {
+  if (id === "expo") {
+    return "Expo";
+  }
+  return titleCase(id);
+}
+
+function desktopLabels(id: string): string {
+  if (id === "tauri") {
+    return "Tauri";
+  }
   return titleCase(id);
 }

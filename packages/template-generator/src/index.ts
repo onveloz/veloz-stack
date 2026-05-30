@@ -1,57 +1,30 @@
 import type { ProjectConfig } from "@veloz-stack/types";
-import { processAddons } from "./handlers/addons";
-import { processApi } from "./handlers/api";
-import { processAuth } from "./handlers/auth";
-import { processBackend } from "./handlers/backend";
-import { processBase } from "./handlers/base";
-import { processDb } from "./handlers/db";
-import { processDeploy } from "./handlers/deploy";
-import { processDesktop } from "./handlers/desktop";
-import { processAdrs } from "./handlers/docs";
-import { processExamples } from "./handlers/examples";
-import { processFrontend } from "./handlers/frontend";
-import { processMobile } from "./handlers/mobile";
-import { processModules } from "./handlers/modules";
-import { postProcess } from "./handlers/post-process";
-import { processTesting } from "./handlers/testing";
-import { processUi } from "./handlers/ui";
+import { runGeneratePipeline } from "./generate-pipeline";
 import { writeVelozStackConfigToVfs } from "./veloz-stack-config";
 import { VirtualFs } from "./vfs";
 
 export { VirtualFs } from "./vfs";
 
-export type GenerateOptions = {
+/** Options for {@link generate} (CLI version stamp for `veloz-stack.jsonc`). */
+export interface GenerateOptions {
   /** CLI version stamped into `veloz-stack.jsonc` (omitted in browser preview). */
   cliVersion?: string;
-};
+}
 
 /**
- * Order matters — mirrors BTS: base → frontend → backend → db → api → auth
- * → deploy → modules → post-process. Each handler is responsible for its
- * own file tree; post-processors merge shared JSON at the end.
+ * Runs {@link runGeneratePipeline}: base → platform → data/deploy → extras
+ * → post-process. Each handler owns its file tree; post-process merges shared
+ * JSON at the end.
  *
- * This entry is browser-safe: it has NO node:fs imports so the web picker
- * can call it client-side to render a preview tree. Server-only writing
- * lives in `./scaffold`.
+ * Browser-safe: no `node:fs` imports so the web picker can preview the VFS.
+ * Disk writes live in `./scaffold`.
  */
-export function generate(config: ProjectConfig, options?: GenerateOptions): VirtualFs {
+export function generate(
+  config: ProjectConfig,
+  options?: GenerateOptions,
+): VirtualFs {
   const vfs = new VirtualFs();
-  processBase(vfs, config);
-  processFrontend(vfs, config);
-  processUi(vfs, config);
-  processMobile(vfs, config);
-  processDesktop(vfs, config);
-  processBackend(vfs, config);
-  processDb(vfs, config);
-  processApi(vfs, config);
-  processAuth(vfs, config);
-  processAdrs(vfs, config);
-  processDeploy(vfs, config);
-  processExamples(vfs, config);
-  processModules(vfs, config);
-  processAddons(vfs, config);
-  processTesting(vfs, config);
-  postProcess(vfs, config);
+  runGeneratePipeline(vfs, config);
   if (options?.cliVersion) {
     writeVelozStackConfigToVfs(vfs, config, options.cliVersion);
   }

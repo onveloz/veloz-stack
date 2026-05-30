@@ -31,10 +31,13 @@ export function formatReais(reais: number): string {
   return BRL.format(reais);
 }
 
+/** @internal Scaffold pipeline step. */
 export function formatDate(d: Date | string): string {
   return DATE.format(typeof d === "string" ? new Date(d) : d);
 }
 
+/** @internal Scaffold pipeline step. */
 export function formatDateTime(d: Date | string): string {
   return DATETIME.format(typeof d === "string" ? new Date(d) : d);
 }
+

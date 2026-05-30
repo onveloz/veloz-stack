@@ -32,6 +32,7 @@ async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await r.json()) as T;
 }
 
+/** @internal Generated-app type. */
 export type PixOrderInput = {
   /** Integer centavos. Caller must `Math.round(reais * 100)` if they have decimals. */
   amountCentavos: number;
@@ -47,6 +48,7 @@ export type PixOrderInput = {
   pixExpiresIn?: number;
 };
 
+/** @internal Scaffold pipeline step. */
 export function createPixOrder(input: PixOrderInput) {
   return req<{ id: string; charges: Array<{ id: string; last_transaction: unknown }> }>(
     "/orders",
@@ -77,6 +79,8 @@ export function createPixOrder(input: PixOrderInput) {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export function getOrder(id: string) {
   return req<{ id: string; status: string }>(`/orders/${id}`);
 }
+

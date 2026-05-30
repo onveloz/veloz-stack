@@ -8,6 +8,7 @@
  * Central version map consumed by scaffold handlers and Handlebars processors.
  */
 
+/** Semver ranges keyed by package name (from versions.yaml). */
 export const DEPENDENCY_VERSIONS = {
   typescript: "^6.0.3",
   tsx: "^4.22.3",
@@ -95,6 +96,8 @@ export const DEPENDENCY_VERSIONS = {
   "next-intl": "^4.12.0",
   oxlint: "^1.66.0",
   oxfmt: "^0.51.0",
+  "oxlint-plugin-complexity": "^2.1.2",
+  "oxlint-tsgolint": "^0.23.0",
   "@biomejs/biome": "^2.4.15",
   turbo: "^2.9.14",
   husky: "^9.1.7",
@@ -108,14 +111,13 @@ export const DEPENDENCY_VERSIONS = {
   "@opentelemetry/sdk-node": "^0.218.0",
 } as const satisfies Record<string, string>;
 
+/** Keys accepted by {@link version}. */
 export type DependencyName = keyof typeof DEPENDENCY_VERSIONS;
 
+/** Resolve a catalog dependency name to its pinned range. */
 export function version(name: DependencyName): string {
-  const v = DEPENDENCY_VERSIONS[name];
-  if (!v) {
-    throw new Error(
-      `Dependency "${String(name)}" not in central version map. Add it to versions.yaml.`,
-    );
+  if (!(name in DEPENDENCY_VERSIONS)) {
+    throw new Error(`Dependency "${name}" not in central version map.`);
   }
-  return v;
+  return DEPENDENCY_VERSIONS[name];
 }

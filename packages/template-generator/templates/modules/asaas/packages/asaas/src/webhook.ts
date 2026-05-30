@@ -9,6 +9,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 
+/** @internal Scaffold pipeline step. */
 export function verifyAsaasWebhook(
   receivedToken: string | null | undefined,
   expected = process.env.ASAAS_WEBHOOK_TOKEN,
@@ -19,3 +20,4 @@ export function verifyAsaasWebhook(
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
 }
+

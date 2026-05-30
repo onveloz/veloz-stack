@@ -30,6 +30,7 @@ async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await r.json()) as T;
 }
 
+/** @internal Generated-app type. */
 export type Customer = {
   id: string;
   name: string;
@@ -38,8 +39,10 @@ export type Customer = {
   phone?: string;
 };
 
+/** @internal Generated-app type. */
 export type BillingType = "PIX" | "BOLETO" | "CREDIT_CARD" | "UNDEFINED";
 
+/** @internal Generated-app type. */
 export type Payment = {
   id: string;
   customer: string;
@@ -50,6 +53,7 @@ export type Payment = {
   invoiceUrl?: string;
 };
 
+/** @internal Scaffold pipeline step. */
 export function createCustomer(body: {
   name: string;
   email: string;
@@ -63,6 +67,7 @@ export function createCustomer(body: {
   });
 }
 
+/** @internal Scaffold pipeline step. */
 export function createPayment(body: {
   /** Customer id returned by createCustomer. */
   customer: string;
@@ -79,6 +84,7 @@ export function createPayment(body: {
   });
 }
 
+/** @internal Scaffold pipeline step. */
 export function getPixQr(paymentId: string) {
   return req<{
     encodedImage: string;
@@ -87,6 +93,8 @@ export function getPixQr(paymentId: string) {
   }>(`/payments/${paymentId}/pixQrCode`);
 }
 
+/** @internal Scaffold pipeline step. */
 export function getPayment(paymentId: string) {
   return req<Payment>(`/payments/${paymentId}`);
 }
+

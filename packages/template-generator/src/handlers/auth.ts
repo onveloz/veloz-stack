@@ -1,6 +1,54 @@
-import type { ProjectConfig } from "@veloz-stack/types";
+import type { FrontendId, ProjectConfig } from "@veloz-stack/types";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
+
+const AUTH_FRONTEND_PREFIX: Partial<Record<FrontendId, string>> = {
+  next: "auth/better-auth/next/",
+  "tanstack-start": "auth/better-auth/tanstack-start/",
+  "svelte-kit": "auth/better-auth/svelte-kit/",
+  nuxt: "auth/better-auth/nuxt/",
+  astro: "auth/better-auth/astro/",
+};
+
+function emitAuthSchemaOverlays(vfs: VirtualFs, config: ProjectConfig): void {
+  if (config.orm === "drizzle" && config.db === "postgres") {
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "auth/better-auth/drizzle-pg/",
+      destPrefix: "",
+      config,
+    });
+  }
+  if (config.orm === "drizzle" && config.db === "sqlite") {
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "auth/better-auth/drizzle-sqlite/",
+      destPrefix: "",
+      config,
+    });
+  }
+  if (config.orm === "prisma" && config.db !== "none") {
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "auth/better-auth/prisma/",
+      destPrefix: "",
+      config,
+    });
+  }
+}
+
+function emitAuthFrontendOverlays(vfs: VirtualFs, config: ProjectConfig): void {
+  const prefix = AUTH_FRONTEND_PREFIX[config.frontend];
+  if (!prefix) {
+    return;
+  }
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: prefix,
+    destPrefix: "",
+    config,
+  });
+}
 
 /**
  * Better Auth ships as per-ORM + per-dialect overlays:
@@ -14,35 +62,26 @@ import type { VirtualFs } from "../vfs";
  * packages/db alongside db's own files.
  */
 export function processAuth(vfs: VirtualFs, config: ProjectConfig): void {
-  if (config.auth !== "better-auth") return;
+  if (config.auth !== "better-auth") {
+    return;
+  }
 
-  processTemplatesFromPrefix(vfs, "auth/better-auth/core/", "", config);
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: "auth/better-auth/core/",
+    destPrefix: "",
+    config,
+  });
 
-  if (config.orm === "drizzle" && config.db === "postgres") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/drizzle-pg/", "", config);
-  }
-  if (config.orm === "drizzle" && config.db === "sqlite") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/drizzle-sqlite/", "", config);
-  }
-  if (config.orm === "prisma" && config.db !== "none") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/prisma/", "", config);
-  }
-  if (config.frontend === "next") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/next/", "", config);
-  }
-  if (config.frontend === "tanstack-start") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/tanstack-start/", "", config);
-  }
-  if (config.frontend === "svelte-kit") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/svelte-kit/", "", config);
-  }
-  if (config.frontend === "nuxt") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/nuxt/", "", config);
-  }
-  if (config.frontend === "astro") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/astro/", "", config);
-  }
+  emitAuthSchemaOverlays(vfs, config);
+  emitAuthFrontendOverlays(vfs, config);
+
   if (config.mobile === "expo") {
-    processTemplatesFromPrefix(vfs, "auth/better-auth/expo/", "", config);
+    processTemplatesFromPrefix({
+      vfs,
+      sourcePrefix: "auth/better-auth/expo/",
+      destPrefix: "",
+      config,
+    });
   }
 }

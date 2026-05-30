@@ -12,12 +12,14 @@ if (!apiKey) {
   throw new Error("POSTHOG_KEY is required (phc_...)");
 }
 
+/** @internal Scaffold export. */
 export const posthog = new PostHog(apiKey, {
   host: process.env.POSTHOG_HOST ?? "https://us.i.posthog.com",
   flushAt: 20,
   flushInterval: 10_000,
 });
 
+/** @internal Scaffold pipeline step. */
 export async function captureEvent(
   distinctId: string,
   event: string,
@@ -26,6 +28,7 @@ export async function captureEvent(
   posthog.capture({ distinctId, event, properties });
 }
 
+/** @internal Scaffold pipeline step. */
 export async function isFeatureEnabled(
   flagKey: string,
   distinctId: string,
@@ -38,3 +41,5 @@ export async function isFeatureEnabled(
 export async function shutdownPosthog() {
   await posthog.shutdown();
 }
+
+

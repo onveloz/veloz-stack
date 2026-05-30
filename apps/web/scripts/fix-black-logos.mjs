@@ -12,18 +12,23 @@
  * Safe to re-run.
  */
 import { readdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const DIR = join(__dirname, "..", "public", "logos");
 
 function repaint(svg) {
   let out = svg;
 
   // 1. Repaint explicit black fills/strokes
-  out = out.replace(/fill=("(?:black|#000|#000000|#111111?|#222222?)")/gi, 'fill="#ffffff"');
-  out = out.replace(/stroke=("(?:black|#000|#000000|#111111?|#222222?)")/gi, 'stroke="#ffffff"');
+  out = out.replaceAll(
+    /fill=("(?:black|#000|#000000|#111111?|#222222?)")/gi,
+    'fill="#ffffff"',
+  );
+  out = out.replaceAll(
+    /stroke=("(?:black|#000|#000000|#111111?|#222222?)")/gi,
+    'stroke="#ffffff"',
+  );
 
   // 2. Inject fill on root <svg> if missing
   const svgTag = out.match(/<svg[^>]*>/);
@@ -35,7 +40,9 @@ function repaint(svg) {
 }
 
 function hasGradientPaint(svg) {
-  return /<(?:linear|radial)Gradient/i.test(svg) || /fill="url\s*\(#/i.test(svg);
+  return (
+    /<(?:linear|radial)Gradient/i.test(svg) || /fill="url\s*\(#/i.test(svg)
+  );
 }
 
 function isMostlyColored(svg) {
@@ -46,45 +53,64 @@ function isMostlyColored(svg) {
       .replace(/^(fill|stroke)="/i, "")
       .replace(/"$/, "")
       .toLowerCase();
-    if (v === "none" || v === "currentcolor") continue;
-    if (v === "black" || v === "#000" || v === "#000000") continue;
-    if (v === "white" || v === "#fff" || v === "#ffffff") continue;
-    if (v.startsWith("url(")) continue;
+    if (v === "none" || v === "currentcolor") {
+      continue;
+    }
+    if (v === "black" || v === "#000" || v === "#000000") {
+      continue;
+    }
+    if (v === "white" || v === "#fff" || v === "#ffffff") {
+      continue;
+    }
+    if (v.startsWith("url(")) {
+      continue;
+    }
     return true;
   }
   return false;
 }
 
-async function main() {
-  const files = (await readdir(DIR)).filter((f) => f.endsWith(".svg"));
+try {
+  const dirEntries = await readdir(DIR);
+  const files = dirEntries.filter((f) => f.endsWith(".svg"));
   const fixed = [];
   const skipped = [];
 
-  for (const f of files) {
-    const path = join(DIR, f);
-    const orig = await readFile(path, "utf8");
+  const outcomes = await Promise.all(
+    files.map(async (f) => {
+      const filePath = join(DIR, f);
+      const orig = await readFile(filePath, "utf8");
 
-    // Gradients / brand marks (e.g. Next.js) must not be flattened to white.
-    if (isMostlyColored(orig) || hasGradientPaint(orig)) {
-      skipped.push(f);
-      continue;
-    }
+      // Gradients / brand marks (e.g. Next.js) must not be flattened to white.
+      if (isMostlyColored(orig) || hasGradientPaint(orig)) {
+        return { kind: "skipped", name: f };
+      }
 
-    const next = repaint(orig);
-    if (next !== orig) {
-      await writeFile(path, next, "utf8");
-      fixed.push(f);
+      const next = repaint(orig);
+      if (next !== orig) {
+        await writeFile(filePath, next, "utf8");
+        return { kind: "fixed", name: f };
+      }
+      return null;
+    }),
+  );
+
+  for (const outcome of outcomes) {
+    if (outcome?.kind === "fixed") {
+      fixed.push(outcome.name);
+    } else if (outcome?.kind === "skipped") {
+      skipped.push(outcome.name);
     }
   }
 
   console.log(`Fixed ${fixed.length}:`);
-  for (const f of fixed) console.log(`  ✓ ${f}`);
+  for (const f of fixed) {
+    console.log(`  ✓ ${f}`);
+  }
   if (skipped.length > 0) {
     console.log(`\nSkipped ${skipped.length} (already have brand colors).`);
   }
-}
-
-main().catch((err) => {
-  console.error(err);
+} catch (error) {
+  console.error(error);
   process.exit(1);
-});
+}

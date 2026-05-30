@@ -1,8 +1,10 @@
-import type { AddonId, ProjectConfig } from "./index";
-import { MODULES, type ModuleId } from "./modules";
+import type { AddonId, ModuleId, ProjectConfig } from "./index";
+import { MODULES } from "./modules";
 
+/** Human-readable reason an axis value is disabled in the picker, or `null` when allowed. */
 export type DisableReason = string | null;
 
+/** Returns a disable reason for the frontend axis, or `null` if allowed. */
 export function getFrontendDisableReason(
   _cfg: ProjectConfig,
   _id: ProjectConfig["frontend"],
@@ -13,6 +15,7 @@ export function getFrontendDisableReason(
   return null;
 }
 
+/** Returns a Portuguese disable reason when this backend choice is invalid for `cfg`, or `null` if allowed. */
 export function getBackendDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["backend"],
@@ -29,34 +32,53 @@ export function getBackendDisableReason(
   return null;
 }
 
-export function getRuntimeDisableReason(
-  cfg: ProjectConfig,
-  id: ProjectConfig["runtime"],
-): DisableReason {
-  if (id === "workers" && cfg.backend === "next") {
+function getWorkersRuntimeDisableReason(cfg: ProjectConfig): DisableReason {
+  if (cfg.backend === "next") {
     return "Route Handlers do Next.js não rodam em Cloudflare Workers";
   }
-  if (id === "workers" && cfg.backend !== "hono" && cfg.backend !== "none") {
+  if (cfg.backend !== "hono" && cfg.backend !== "none") {
     return "Runtime Workers precisa de backend Hono";
   }
-  if (id === "workers" && cfg.deploy !== "cloudflare" && cfg.deploy !== "none") {
+  if (cfg.deploy !== "cloudflare" && cfg.deploy !== "none") {
     return "Runtime Workers só faz deploy no Cloudflare";
   }
-  if (id === "workers" && cfg.auth === "better-auth") {
+  if (cfg.auth === "better-auth") {
     return "Better Auth no Workers exige Hyperdrive/D1 — use runtime Bun ou Node por enquanto";
   }
   return null;
 }
 
-export function getOrmDisableReason(cfg: ProjectConfig, id: ProjectConfig["orm"]): DisableReason {
+/** Returns a disable reason for the runtime axis, or `null` if allowed. */
+export function getRuntimeDisableReason(
+  cfg: ProjectConfig,
+  id: ProjectConfig["runtime"],
+): DisableReason {
+  if (id === "workers") {
+    return getWorkersRuntimeDisableReason(cfg);
+  }
+  return null;
+}
+
+function getDrizzleOrmDisableReason(cfg: ProjectConfig): DisableReason {
+  if (cfg.db === "none") {
+    return "Nenhum banco selecionado";
+  }
+  if (cfg.db === "postgres" || cfg.db === "sqlite") {
+    return null;
+  }
+  return "Em breve";
+}
+
+/** Returns a disable reason for the ORM axis, or `null` if allowed. */
+export function getOrmDisableReason(
+  cfg: ProjectConfig,
+  id: ProjectConfig["orm"],
+): DisableReason {
   if (id === "mongoose") {
     return "Em breve";
   }
-  if (id === "drizzle" && cfg.db !== "none" && cfg.db !== "postgres" && cfg.db !== "sqlite") {
-    return "Em breve";
-  }
-  if (cfg.db === "mongodb" && id !== "prisma" && id !== "none") {
-    return "MongoDB só combina com Mongoose ou Prisma";
+  if (id === "drizzle") {
+    return getDrizzleOrmDisableReason(cfg);
   }
   if (cfg.db === "none" && id !== "none") {
     return "Nenhum banco selecionado";
@@ -64,24 +86,51 @@ export function getOrmDisableReason(cfg: ProjectConfig, id: ProjectConfig["orm"]
   return null;
 }
 
+const DB_HOSTING_DB_MISMATCH: Partial<
+  Record<ProjectConfig["dbHosting"], string>
+> = {
+  neon: "Neon é só Postgres",
+  supabase: "Supabase é só Postgres",
+  planetscale: "PlanetScale é só MySQL",
+  turso: "Turso é só SQLite",
+  "mongodb-atlas": "Atlas é só MongoDB",
+};
+
+const DB_HOSTING_REQUIRED_DB: Partial<
+  Record<ProjectConfig["dbHosting"], ProjectConfig["db"]>
+> = {
+  neon: "postgres",
+  supabase: "postgres",
+  planetscale: "mysql",
+  turso: "sqlite",
+  "mongodb-atlas": "mongodb",
+};
+
+/** Returns a disable reason for the database hosting axis, or `null` if allowed. */
 export function getDbHostingDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["dbHosting"],
 ): DisableReason {
-  if (cfg.db === "none" && id !== "none") return "Nenhum banco selecionado";
-  if (id === "neon" && cfg.db !== "postgres") return "Neon é só Postgres";
-  if (id === "supabase" && cfg.db !== "postgres") return "Supabase é só Postgres";
-  if (id === "planetscale" && cfg.db !== "mysql") return "PlanetScale é só MySQL";
-  if (id === "turso" && cfg.db !== "sqlite") return "Turso é só SQLite";
-  if (id === "mongodb-atlas" && cfg.db !== "mongodb") return "Atlas é só MongoDB";
+  if (cfg.db === "none" && id !== "none") {
+    return "Nenhum banco selecionado";
+  }
+  const requiredDb = DB_HOSTING_REQUIRED_DB[id];
+  if (requiredDb && cfg.db !== requiredDb) {
+    return DB_HOSTING_DB_MISMATCH[id] ?? null;
+  }
   return null;
 }
 
+/** Returns a disable reason for the deploy axis, or `null` if allowed. */
 export function getDeployDisableReason(
   cfg: ProjectConfig,
   id: ProjectConfig["deploy"],
 ): DisableReason {
-  if (id === "cloudflare" && cfg.runtime !== "workers" && cfg.runtime !== "node") {
+  if (
+    id === "cloudflare" &&
+    cfg.runtime !== "workers" &&
+    cfg.runtime !== "node"
+  ) {
     return "Deploy no Cloudflare precisa de runtime workers ou node";
   }
   if (id === "cloudflare" && cfg.backend === "next") {
@@ -90,44 +139,93 @@ export function getDeployDisableReason(
   return null;
 }
 
-export function getUiDisableReason(cfg: ProjectConfig, id: ProjectConfig["ui"]): DisableReason {
+/** Returns a disable reason for the UI axis, or `null` if allowed. */
+export function getUiDisableReason(
+  cfg: ProjectConfig,
+  id: ProjectConfig["ui"],
+): DisableReason {
   if (id === "shadcn" && cfg.frontend === "none") {
     return "shadcn precisa de um frontend React (tanstack-start ou next)";
   }
-  if (id === "shadcn" && cfg.frontend !== "tanstack-start" && cfg.frontend !== "next") {
+  if (
+    id === "shadcn" &&
+    cfg.frontend !== "tanstack-start" &&
+    cfg.frontend !== "next"
+  ) {
     return `shadcn é React-only — use tailwind ou none com ${cfg.frontend}`;
   }
   return null;
 }
 
-export function getApiDisableReason(cfg: ProjectConfig, id: ProjectConfig["api"]): DisableReason {
-  if (cfg.backend === "none" && id !== "none") return "Nenhum backend selecionado";
-  if (id === "trpc" || id === "rest") return "Em breve";
+/** Returns a disable reason for the API axis, or `null` if allowed. */
+export function getApiDisableReason(
+  cfg: ProjectConfig,
+  id: ProjectConfig["api"],
+): DisableReason {
+  if (cfg.backend === "none" && id !== "none") {
+    return "Nenhum backend selecionado";
+  }
+  if (id === "trpc" || id === "rest") {
+    return "Em breve";
+  }
   return null;
 }
 
+/** Returns a disable reason for the auth axis, or `null` if allowed. */
 export function getAuthDisableReason(
   _cfg: ProjectConfig,
   id: ProjectConfig["auth"],
 ): DisableReason {
-  if (id === "clerk") return "Em breve";
+  if (id === "clerk") {
+    return "Em breve";
+  }
   return null;
 }
 
-export function getModuleDisableReason(cfg: ProjectConfig, id: ModuleId): DisableReason {
-  const meta = MODULES[id];
-  if (meta.requires?.auth && cfg.auth === "none") return "Precisa do Better Auth";
-  if (meta.requires?.backend && cfg.backend === "none") return "Precisa de um backend";
-  if (meta.requires?.db && cfg.db === "none") return "Precisa de um banco";
+function getModuleRequiresDisableReason(
+  cfg: ProjectConfig,
+  meta: (typeof MODULES)[ModuleId],
+): DisableReason {
+  if (meta.requires?.auth && cfg.auth === "none") {
+    return "Precisa do Better Auth";
+  }
+  if (meta.requires?.backend && cfg.backend === "none") {
+    return "Precisa de um backend";
+  }
+  if (meta.requires?.db && cfg.db === "none") {
+    return "Precisa de um banco";
+  }
+  return null;
+}
+
+function getNextIntlModuleDisableReason(
+  cfg: ProjectConfig,
+  id: ModuleId,
+): DisableReason {
   if (id === "next-intl" && cfg.frontend !== "next") {
     return "next-intl funciona só com frontend Next.js";
   }
-  if (cfg.frontend === "next" && id === "pt-br-i18n" && cfg.modules.includes("next-intl")) {
+  if (
+    cfg.frontend === "next" &&
+    id === "pt-br-i18n" &&
+    cfg.modules.includes("next-intl")
+  ) {
     return "Com next-intl ativo, pt-BR i18n é redundante — next-intl já cobre locale e mensagens";
   }
-  if (cfg.frontend === "next" && id === "next-intl" && cfg.modules.includes("pt-br-i18n")) {
+  if (
+    cfg.frontend === "next" &&
+    id === "next-intl" &&
+    cfg.modules.includes("pt-br-i18n")
+  ) {
     return "Desative pt-BR i18n antes — no Next.js use next-intl para i18n do App Router";
   }
+  return null;
+}
+
+function getWorkersModuleDisableReason(
+  cfg: ProjectConfig,
+  id: ModuleId,
+): DisableReason {
   if (id === "opentelemetry" && cfg.runtime === "workers") {
     return "@opentelemetry/sdk-node não roda em Cloudflare Workers (use Bun/Node)";
   }
@@ -137,7 +235,34 @@ export function getModuleDisableReason(cfg: ProjectConfig, id: ModuleId): Disabl
   return null;
 }
 
-export function getAddonDisableReason(cfg: ProjectConfig, id: AddonId): DisableReason {
+/** Returns a disable reason for an integration module, or `null` if allowed. */
+export function getModuleDisableReason(
+  cfg: ProjectConfig,
+  id: ModuleId,
+): DisableReason {
+  const meta = MODULES[id];
+  if (meta.comingSoon) {
+    return "Em breve";
+  }
+
+  const requiresReason = getModuleRequiresDisableReason(cfg, meta);
+  if (requiresReason) {
+    return requiresReason;
+  }
+
+  const nextIntlReason = getNextIntlModuleDisableReason(cfg, id);
+  if (nextIntlReason) {
+    return nextIntlReason;
+  }
+
+  return getWorkersModuleDisableReason(cfg, id);
+}
+
+/** Returns a disable reason for a monorepo addon, or `null` if allowed. */
+export function getAddonDisableReason(
+  cfg: ProjectConfig,
+  id: AddonId,
+): DisableReason {
   if (id === "husky" && cfg.addons.includes("lefthook")) {
     return "Incompatível com Lefthook — escolha um gerenciador de hooks";
   }
@@ -162,11 +287,11 @@ export function isBrazilModule(id: ModuleId): boolean {
  * Fields the caller set via CLI flags (or another explicit source).
  * Omitted fields may receive implicit defaults — same rules as the web stack builder.
  */
-export type ExplicitStackFields = {
+export interface ExplicitStackFields {
   frontend?: boolean;
   backend?: boolean;
   runtime?: boolean;
-};
+}
 
 /** Shown when choosing Next.js frontend without an explicit separate backend. */
 export const FRONTEND_NEXT_BACKEND_CASCADE_REASON =
@@ -180,6 +305,32 @@ export const LEAVE_NEXT_BACKEND_CASCADE_REASON =
 export const LEAVE_NEXT_RUNTIME_CASCADE_REASON =
   "Stack Hono + TanStack usa Bun como runtime padrão";
 
+function applyNextFrontendBackendRule(
+  cfg: ProjectConfig,
+  explicit: ExplicitStackFields,
+): void {
+  if (
+    cfg.frontend === "next" &&
+    !explicit.backend &&
+    cfg.backend !== "next" &&
+    cfg.backend !== "none"
+  ) {
+    cfg.backend = "next";
+  }
+}
+
+function applyLeaveNextFrontendBackendRule(
+  cfg: ProjectConfig,
+  explicit: ExplicitStackFields,
+): void {
+  if (cfg.frontend !== "next" && !explicit.backend && cfg.backend === "next") {
+    cfg.backend = "hono";
+    if (!explicit.runtime && cfg.runtime === "node") {
+      cfg.runtime = "bun";
+    }
+  }
+}
+
 /**
  * Aligns CLI/non-interactive config with the web builder's cascades when the user
  * did not pass every related flag. Keeps split stacks (`--frontend next --backend hono`)
@@ -190,44 +341,60 @@ export function applyImplicitStackRules(
   explicit: ExplicitStackFields = {},
 ): ProjectConfig {
   const next = { ...cfg };
-
-  if (
-    next.frontend === "next" &&
-    !explicit.backend &&
-    next.backend !== "next" &&
-    next.backend !== "none"
-  ) {
-    next.backend = "next";
-  }
-
-  if (next.frontend !== "next" && !explicit.backend && next.backend === "next") {
-    next.backend = "hono";
-    if (!explicit.runtime && next.runtime === "node") {
-      next.runtime = "bun";
-    }
-  }
-
+  applyNextFrontendBackendRule(next, explicit);
+  applyLeaveNextFrontendBackendRule(next, explicit);
   return next;
 }
 
-export function validateConfig(cfg: ProjectConfig): string[] {
-  const errors: string[] = [];
-  const pushIf = (reason: DisableReason, prefix: string) => {
-    if (reason) errors.push(`${prefix}: ${reason}`);
-  };
-  pushIf(getFrontendDisableReason(cfg, cfg.frontend), "frontend");
-  pushIf(getBackendDisableReason(cfg, cfg.backend), "backend");
-  pushIf(getRuntimeDisableReason(cfg, cfg.runtime), "runtime");
-  pushIf(getApiDisableReason(cfg, cfg.api), "api");
-  pushIf(getAuthDisableReason(cfg, cfg.auth), "auth");
-  pushIf(getOrmDisableReason(cfg, cfg.orm), "orm");
-  pushIf(getDbHostingDisableReason(cfg, cfg.dbHosting), "dbHosting");
-  pushIf(getDeployDisableReason(cfg, cfg.deploy), "deploy");
-  pushIf(getUiDisableReason(cfg, cfg.ui), "ui");
+interface AxisValidator {
+  prefix: string;
+  reason: (cfg: ProjectConfig) => DisableReason;
+}
 
-  // Cross-field invariants the per-field helpers don't cover
+const AXIS_VALIDATORS: AxisValidator[] = [
+  {
+    prefix: "frontend",
+    reason: (cfg) => getFrontendDisableReason(cfg, cfg.frontend),
+  },
+  {
+    prefix: "backend",
+    reason: (cfg) => getBackendDisableReason(cfg, cfg.backend),
+  },
+  {
+    prefix: "runtime",
+    reason: (cfg) => getRuntimeDisableReason(cfg, cfg.runtime),
+  },
+  { prefix: "api", reason: (cfg) => getApiDisableReason(cfg, cfg.api) },
+  { prefix: "auth", reason: (cfg) => getAuthDisableReason(cfg, cfg.auth) },
+  { prefix: "orm", reason: (cfg) => getOrmDisableReason(cfg, cfg.orm) },
+  {
+    prefix: "dbHosting",
+    reason: (cfg) => getDbHostingDisableReason(cfg, cfg.dbHosting),
+  },
+  {
+    prefix: "deploy",
+    reason: (cfg) => getDeployDisableReason(cfg, cfg.deploy),
+  },
+  { prefix: "ui", reason: (cfg) => getUiDisableReason(cfg, cfg.ui) },
+];
+
+function collectAxisValidationErrors(cfg: ProjectConfig): string[] {
+  const errors: string[] = [];
+  for (const axis of AXIS_VALIDATORS) {
+    const reason = axis.reason(cfg);
+    if (reason) {
+      errors.push(`${axis.prefix}: ${reason}`);
+    }
+  }
+  return errors;
+}
+
+function collectCrossFieldValidationErrors(cfg: ProjectConfig): string[] {
+  const errors: string[] = [];
   if (cfg.auth === "better-auth" && cfg.db === "none") {
-    errors.push("auth: Better Auth precisa de um banco (usa o adapter Drizzle no packages/db)");
+    errors.push(
+      "auth: Better Auth precisa de um banco (usa o adapter Drizzle no packages/db)",
+    );
   }
   if (cfg.auth === "better-auth" && cfg.runtime === "workers") {
     errors.push(
@@ -235,34 +402,76 @@ export function validateConfig(cfg: ProjectConfig): string[] {
     );
   }
   if (cfg.desktop === "tauri" && cfg.frontend === "none") {
-    errors.push("desktop: Tauri precisa de um frontend web — ele empacota a UI numa janela nativa");
-  }
-
-  for (const m of cfg.modules) {
-    pushIf(getModuleDisableReason(cfg, m), `módulo ${m}`);
-  }
-
-  if (cfg.addons.includes("biome") && cfg.addons.includes("oxlint")) {
-    errors.push("addons: Biome e oxlint não podem ser usados juntos no mesmo projeto");
-  }
-  if (cfg.oxlintStrict && !cfg.addons.includes("oxlint")) {
-    errors.push("addons: oxlint strict requer o addon oxlint");
-  }
-  if (cfg.addons.includes("husky") && cfg.addons.includes("lefthook")) {
     errors.push(
-      "addons: Husky e Lefthook não podem ser usados juntos — escolha um gerenciador de hooks",
-    );
-  }
-  if (cfg.lefthookCi && !cfg.addons.includes("lefthook")) {
-    errors.push("lefthookCi: CI local/GitHub exige o addon Lefthook");
-  }
-  if (cfg.lefthookAdvanced && !cfg.addons.includes("lefthook")) {
-    errors.push("lefthookAdvanced: modo avançado exige o addon Lefthook");
-  }
-  if (cfg.lefthookCi && cfg.lefthookAdvanced) {
-    errors.push(
-      "lefthook: escolha CI básico ou avançado — não use lefthookCi e lefthookAdvanced juntos",
+      "desktop: Tauri precisa de um frontend web — ele empacota a UI numa janela nativa",
     );
   }
   return errors;
+}
+
+function collectModuleValidationErrors(cfg: ProjectConfig): string[] {
+  const errors: string[] = [];
+  for (const moduleId of cfg.modules) {
+    const reason = getModuleDisableReason(cfg, moduleId);
+    if (reason) {
+      errors.push(`módulo ${moduleId}: ${reason}`);
+    }
+  }
+  return errors;
+}
+
+interface AddonValidationRule {
+  when: (cfg: ProjectConfig) => boolean;
+  message: string;
+}
+
+const ADDON_VALIDATION_RULES: AddonValidationRule[] = [
+  {
+    when: (cfg) =>
+      cfg.addons.includes("biome") && cfg.addons.includes("oxlint"),
+    message:
+      "addons: Biome e oxlint não podem ser usados juntos no mesmo projeto",
+  },
+  {
+    when: (cfg) => cfg.oxlintStrict && !cfg.addons.includes("oxlint"),
+    message: "addons: oxlint strict requer o addon oxlint",
+  },
+  {
+    when: (cfg) =>
+      cfg.addons.includes("husky") && cfg.addons.includes("lefthook"),
+    message:
+      "addons: Husky e Lefthook não podem ser usados juntos — escolha um gerenciador de hooks",
+  },
+  {
+    when: (cfg) => cfg.lefthookCi && !cfg.addons.includes("lefthook"),
+    message: "lefthookCi: CI local/GitHub exige o addon Lefthook",
+  },
+  {
+    when: (cfg) => cfg.lefthookAdvanced && !cfg.addons.includes("lefthook"),
+    message: "lefthookAdvanced: modo avançado exige o addon Lefthook",
+  },
+  {
+    when: (cfg) => cfg.lefthookCi && cfg.lefthookAdvanced,
+    message:
+      "lefthook: escolha CI básico ou avançado — não use lefthookCi e lefthookAdvanced juntos",
+  },
+];
+
+function collectAddonValidationErrors(cfg: ProjectConfig): string[] {
+  return ADDON_VALIDATION_RULES.filter((rule) => rule.when(cfg)).map(
+    (rule) => rule.message,
+  );
+}
+
+/**
+ * Validates a stack configuration. Returns human-readable errors (`"axis: reason"`), empty when valid.
+ * Used by the web builder, CLI, and generator before emitting files.
+ */
+export function validateConfig(cfg: ProjectConfig): string[] {
+  return [
+    ...collectAxisValidationErrors(cfg),
+    ...collectCrossFieldValidationErrors(cfg),
+    ...collectModuleValidationErrors(cfg),
+    ...collectAddonValidationErrors(cfg),
+  ];
 }

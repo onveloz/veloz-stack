@@ -7,6 +7,7 @@
  */
 import * as Sentry from "@sentry/node";
 
+/** @internal Scaffold pipeline step. */
 export function initSentry() {
   const dsn = process.env.SENTRY_DSN;
   if (!dsn) return; // Silent no-op in dev
@@ -18,8 +19,12 @@ export function initSentry() {
   });
 }
 
+/** @internal Scaffold pipeline step. */
 export function captureError(err: unknown, context?: Record<string, unknown>) {
   Sentry.captureException(err, context ? { extra: context } : undefined);
 }
 
+/** @internal Scaffold export. */
 export { Sentry };
+
+

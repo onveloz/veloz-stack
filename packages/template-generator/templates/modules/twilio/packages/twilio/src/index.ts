@@ -12,16 +12,19 @@ if (!sid || !token) {
   throw new Error("TWILIO_SID and TWILIO_TOKEN are required");
 }
 
+/** @internal Scaffold export. */
 export const twilio = Twilio(sid, token);
 
 const smsFrom = process.env.TWILIO_SMS_FROM;
 const whatsappFrom = process.env.TWILIO_WHATSAPP_FROM ?? "whatsapp:+14155238886";
 
+/** @internal Scaffold pipeline step. */
 export async function sendSms(to: string, body: string) {
   if (!smsFrom) throw new Error("TWILIO_SMS_FROM is required for sendSms");
   return twilio.messages.create({ from: smsFrom, to, body });
 }
 
+/** @internal Scaffold pipeline step. */
 export async function sendWhatsApp(to: `+${string}`, body: string) {
   return twilio.messages.create({
     from: whatsappFrom,
@@ -40,3 +43,5 @@ export function verifyTwilioSignature(
   if (!token) return false;
   return Twilio.validateRequest(token, signature, url, params);
 }
+
+

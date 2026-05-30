@@ -5,15 +5,20 @@
  * ╚══════════════════════════════════════════════════════════════════════════════╝
  */
 
+/** Corepack-style specifier for bun, pnpm, or npm (from versions.yaml). */
 export function packageManagerSpecifier(pm: "bun" | "pnpm" | "npm"): string {
   switch (pm) {
-    case "bun":
+    case "bun": {
       return "bun@1.3.14";
-    case "pnpm":
+    }
+    case "pnpm": {
       return "pnpm@11.2.2";
-    case "npm":
+    }
+    case "npm": {
       return "npm@11.15.0";
-    default:
-      throw new Error(`Unknown package manager: ${pm}`);
+    }
+    default: {
+      throw new Error(`Unknown package manager: ${String(pm)}`);
+    }
   }
 }

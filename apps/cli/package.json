@@ -5,23 +5,23 @@
   "keywords": [
     "brasil",
     "brazilian",
-    "scaffolder",
-    "starter",
-    "typescript",
     "bun",
     "hono",
     "orpc",
     "pix",
-    "tanstack"
+    "scaffolder",
+    "starter",
+    "tanstack",
+    "typescript"
   ],
   "license": "MIT",
-  "type": "module",
   "bin": {
     "create-veloz-stack": "./dist/index.mjs"
   },
   "files": [
     "dist"
   ],
+  "type": "module",
   "scripts": {
     "build": "tsdown",
     "dev": "tsx src/index.ts",

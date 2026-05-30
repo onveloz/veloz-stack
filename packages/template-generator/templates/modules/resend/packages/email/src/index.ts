@@ -10,10 +10,12 @@ if (!apiKey) {
   throw new Error("RESEND_API_KEY is required (re_…). Create one at resend.com/api-keys");
 }
 
+/** @internal Scaffold export. */
 export const resend = new Resend(apiKey);
 
 const FROM_DEFAULT = process.env.EMAIL_FROM ?? "Veloz <noreply@veloz.local>";
 
+/** @internal Generated-app type. */
 export type SendEmailInput = {
   to: string | string[];
   subject: string;
@@ -24,6 +26,7 @@ export type SendEmailInput = {
   replyTo?: string;
 };
 
+/** @internal Scaffold pipeline step. */
 export async function sendEmail(input: SendEmailInput) {
   if (!input.html && !input.text && !input.react) {
     throw new Error("sendEmail: provide one of html, text, or react");
@@ -41,3 +44,5 @@ export async function sendEmail(input: SendEmailInput) {
   if (res.error) throw new Error(`Resend: ${res.error.message}`);
   return res.data!;
 }
+
+

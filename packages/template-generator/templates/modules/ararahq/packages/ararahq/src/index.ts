@@ -16,7 +16,11 @@ if (!apiKey) {
   throw new Error("ARARA_KEY is required (ara_live_… or ara_test_…). Get one at app.ararahq.com");
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: stable runtime cast; see README above NodeSDK versioning
+/**
+ * Arara SDK client. Cast at construction so this wrapper compiles across
+ * `@ararahq/sdk` API revisions (see module README).
+ * Environment is determined by ARARA_KEY prefix (`ara_test_…` or `ara_live_…`).
+ */
 export const ararahq = new (NodeSDK as any)({ apiKey });
 
 /** BR cellphone format: +5511999998888 (country + area + number, digits only). */

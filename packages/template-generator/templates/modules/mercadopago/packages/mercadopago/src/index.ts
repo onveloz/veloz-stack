@@ -12,12 +12,17 @@ if (!accessToken) {
   throw new Error("MP_TOKEN is required (TEST-... or live token). See dashboard → Credentials.");
 }
 
+/** @internal Scaffold export. */
 export const mp = new MercadoPagoConfig({ accessToken });
 
+/** @internal Scaffold export. */
 export const payments = new Payment(mp);
+/** @internal Scaffold export. */
 export const preferences = new Preference(mp);
+/** @internal Scaffold export. */
 export const customers = new Customer(mp);
 
+/** @internal Generated-app type. */
 export type PixPaymentInput = {
   /** Reais as decimal, e.g. 29.9 for R$ 29,90. */
   amountReais: number;
@@ -28,6 +33,7 @@ export type PixPaymentInput = {
   metadata?: Record<string, unknown>;
 };
 
+/** @internal Scaffold pipeline step. */
 export async function createPixPayment(input: PixPaymentInput) {
   const idempotencyKey = input.idempotencyKey ?? crypto.randomUUID();
   return payments.create({
@@ -42,6 +48,9 @@ export async function createPixPayment(input: PixPaymentInput) {
   });
 }
 
+/** @internal Scaffold pipeline step. */
 export async function getPayment(id: string | number) {
   return payments.get({ id: String(id) });
 }
+
+

@@ -14,6 +14,7 @@ export type Endereco = {
   complemento?: string;
 };
 
+/** @internal Scaffold pipeline step. */
 export async function lookupCep(cep: string): Promise<Endereco | null> {
   const digits = cep.replace(/\D/g, "");
   if (digits.length !== 8) throw new Error("CEP inválido: use 8 dígitos");
@@ -25,3 +26,4 @@ export async function lookupCep(cep: string): Promise<Endereco | null> {
   if (data.erro) return null;
   return data;
 }
+

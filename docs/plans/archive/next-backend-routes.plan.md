@@ -1,10 +1,15 @@
-Status: Final
+Status: **Done** (shipped)
 Execution scope: all_phases
+Completed: 2026-05
+
+> **Historical plan.** `backend: "next"` is implemented in types, handlers, deploy wiring, stack builder, CLI cascades, and CI (`backend-next`, `next-hono-split`). Keep this file for design context only — do not treat the Evidence section below as current state unless re-verified.
+
 Goal: Add `backend: "next"` to Veloz Stack so generated Next.js apps serve oRPC, Better Auth, and health checks via App Router route handlers in `apps/web`, with no `apps/server`, same-origin clients, and correct deploy/module/env wiring—while preserving `backend: "hono"` for split-server setups.
 
-Evidence:
-- [`packages/types/src/index.ts`](packages/types/src/index.ts) — `BackendId` is `hono | express | fastify | elysia | none` (no `next` yet); `ApiId` includes `orpc` only in handlers.
-- [`packages/template-generator/src/handlers/backend.ts`](packages/template-generator/src/handlers/backend.ts) — early-returns unless `backend === "hono"`; emits `apps/server/`.
+Evidence (snapshot at planning time — superseded where noted):
+
+- [`packages/types/src/index.ts`](packages/types/src/index.ts) — `BackendId` now includes `next` (was planned-only when this doc was written).
+- [`packages/template-generator/src/handlers/backend.ts`](packages/template-generator/src/handlers/backend.ts) — branches on `backend === "next"` for Route Handlers; `hono` still emits `apps/server/`.
 - [`packages/template-generator/templates/api/orpc/packages/api/src/context.ts.hbs`](packages/template-generator/templates/api/orpc/packages/api/src/context.ts.hbs) — Hono-coupled `CreateContextOptions.context: HonoContext`.
 - [`packages/template-generator/templates/backend/hono-node/src/index.ts.hbs`](packages/template-generator/templates/backend/hono-node/src/index.ts.hbs) — mounts `/rpc/*`, `/api/auth/*`, `/health` on port 3000.
 - [`packages/template-generator/templates/frontend/next/apps/web/lib/orpc.ts.hbs`](packages/template-generator/templates/frontend/next/apps/web/lib/orpc.ts.hbs) — `NEXT_PUBLIC_SERVER_URL ?? "http://localhost:3000"`.
@@ -17,6 +22,7 @@ Evidence:
 - External: [oRPC Next adapter](https://orpc.dev/docs/adapters/next), [Better Auth Next.js integration](https://www.better-auth.com/docs/integrations/next) (`toNextJsHandler`, `nextCookies`).
 
 Non-goals:
+
 - tRPC, REST, Clerk template implementations (types only today).
 - oRPC SSR `createRouterClient` / `instrumentation.ts` optimization.
 - Cloudflare Workers + `backend: next`.
@@ -24,6 +30,7 @@ Non-goals:
 - Research pipeline artifacts (repo has no `docs/research/*` or `scripts/research-competitor-intel.mjs`).
 
 Research metadata:
+
 - status: research-pending
 - research_failure: No `docs/research/top10-lock.json`, `docs/research/capability-evidence.json`, or `scripts/research-competitor-intel.mjs` in this repository.
 - risk_acknowledged: true
@@ -47,29 +54,29 @@ Research metadata:
 
 ## File map
 
-| Action | Path |
-|--------|------|
-| Edit | [`packages/types/src/index.ts`](packages/types/src/index.ts) — add `"next"` to `BackendId` |
-| Edit | [`packages/types/src/compatibility.ts`](packages/types/src/compatibility.ts) — next↔frontend, next↔workers, optional next↔cloudflare deploy |
-| Edit | [`apps/web/lib/option-hints.ts`](apps/web/lib/option-hints.ts) |
-| Edit | [`packages/template-generator/templates/api/orpc/packages/api/src/context.ts.hbs`](packages/template-generator/templates/api/orpc/packages/api/src/context.ts.hbs) |
-| Edit | [`packages/template-generator/templates/api/orpc/packages/api/package.json.hbs`](packages/template-generator/templates/api/orpc/packages/api/package.json.hbs) — remove `hono` dep |
-| Edit | [`packages/template-generator/templates/backend/hono-node/src/index.ts.hbs`](packages/template-generator/templates/backend/hono-node/src/index.ts.hbs) |
-| Edit | [`packages/template-generator/templates/backend/hono-bun/src/index.ts.hbs`](packages/template-generator/templates/backend/hono-bun/src/index.ts.hbs) |
-| Edit | [`packages/template-generator/templates/backend/hono-workers/src/index.ts.hbs`](packages/template-generator/templates/backend/hono-workers/src/index.ts.hbs) |
-| Add | `packages/template-generator/templates/backend/next/apps/web/app/api/rpc/[...path]/route.ts.hbs` |
-| Add | `packages/template-generator/templates/backend/next/apps/web/app/api/auth/[...all]/route.ts.hbs` |
-| Add | `packages/template-generator/templates/backend/next/apps/web/app/api/health/route.ts.hbs` |
-| Edit | [`packages/template-generator/src/handlers/backend.ts`](packages/template-generator/src/handlers/backend.ts) — `next` branch |
-| Edit | [`packages/template-generator/templates/frontend/next/apps/web/lib/orpc.ts.hbs`](packages/template-generator/templates/frontend/next/apps/web/lib/orpc.ts.hbs) — conditional URL |
-| Add/Edit | `packages/template-generator/templates/auth/better-auth/next/` — Next auth client + conditional `nextCookies` in core `index.ts.hbs` |
-| Edit | [`packages/template-generator/templates/base/.env.example.hbs`](packages/template-generator/templates/base/.env.example.hbs) |
-| Edit | [`packages/template-generator/src/handlers/deploy.ts`](packages/template-generator/src/handlers/deploy.ts) |
-| Add | `packages/template-generator/templates/deploy/veloz/Dockerfile.next.hbs` (or conditional Dockerfile) |
-| Edit | [`packages/template-generator/src/handlers/post-process.ts`](packages/template-generator/src/handlers/post-process.ts) |
-| Edit | [`packages/template-generator/src/__tests__/generator.test.ts`](packages/template-generator/src/__tests__/generator.test.ts) |
-| Edit | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — e2e + invalid-combo rows |
-| Edit | [`README.md`](README.md) — document `backend: next` |
+| Action   | Path                                                                                                                                                                               |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Edit     | [`packages/types/src/index.ts`](packages/types/src/index.ts) — add `"next"` to `BackendId`                                                                                         |
+| Edit     | [`packages/types/src/compatibility.ts`](packages/types/src/compatibility.ts) — next↔frontend, next↔workers, optional next↔cloudflare deploy                                        |
+| Edit     | [`apps/web/lib/option-hints.ts`](apps/web/lib/option-hints.ts)                                                                                                                     |
+| Edit     | [`packages/template-generator/templates/api/orpc/packages/api/src/context.ts.hbs`](packages/template-generator/templates/api/orpc/packages/api/src/context.ts.hbs)                 |
+| Edit     | [`packages/template-generator/templates/api/orpc/packages/api/package.json.hbs`](packages/template-generator/templates/api/orpc/packages/api/package.json.hbs) — remove `hono` dep |
+| Edit     | [`packages/template-generator/templates/backend/hono-node/src/index.ts.hbs`](packages/template-generator/templates/backend/hono-node/src/index.ts.hbs)                             |
+| Edit     | [`packages/template-generator/templates/backend/hono-bun/src/index.ts.hbs`](packages/template-generator/templates/backend/hono-bun/src/index.ts.hbs)                               |
+| Edit     | [`packages/template-generator/templates/backend/hono-workers/src/index.ts.hbs`](packages/template-generator/templates/backend/hono-workers/src/index.ts.hbs)                       |
+| Add      | `packages/template-generator/templates/backend/next/apps/web/app/api/rpc/[...path]/route.ts.hbs`                                                                                   |
+| Add      | `packages/template-generator/templates/backend/next/apps/web/app/api/auth/[...all]/route.ts.hbs`                                                                                   |
+| Add      | `packages/template-generator/templates/backend/next/apps/web/app/api/health/route.ts.hbs`                                                                                          |
+| Edit     | [`packages/template-generator/src/handlers/backend.ts`](packages/template-generator/src/handlers/backend.ts) — `next` branch                                                       |
+| Edit     | [`packages/template-generator/templates/frontend/next/apps/web/lib/orpc.ts.hbs`](packages/template-generator/templates/frontend/next/apps/web/lib/orpc.ts.hbs) — conditional URL   |
+| Add/Edit | `packages/template-generator/templates/auth/better-auth/next/` — Next auth client + conditional `nextCookies` in core `index.ts.hbs`                                               |
+| Edit     | [`packages/template-generator/templates/base/.env.example.hbs`](packages/template-generator/templates/base/.env.example.hbs)                                                       |
+| Edit     | [`packages/template-generator/src/handlers/deploy.ts`](packages/template-generator/src/handlers/deploy.ts)                                                                         |
+| Add      | `packages/template-generator/templates/deploy/veloz/Dockerfile.next.hbs` (or conditional Dockerfile)                                                                               |
+| Edit     | [`packages/template-generator/src/handlers/post-process.ts`](packages/template-generator/src/handlers/post-process.ts)                                                             |
+| Edit     | [`packages/template-generator/src/__tests__/generator.test.ts`](packages/template-generator/src/__tests__/generator.test.ts)                                                       |
+| Edit     | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — e2e + invalid-combo rows                                                                                                  |
+| Edit     | [`README.md`](README.md) — document `backend: next`                                                                                                                                |
 
 ## Task groups
 
@@ -129,6 +136,7 @@ Research metadata:
 ## Phases
 
 ### Phase 1 — Foundation (TG1 + TG2)
+
 **Workstream:** types-compat, context-refactor  
 **UAT Gate:** `validateConfig` passes/fails correctly; Hono-generated projects unchanged in RPC mount behavior.
 
@@ -137,6 +145,7 @@ Research metadata:
 3. Run unit tests + generate snapshot configs for regression diff.
 
 ### Phase 2 — Next backend emission (TG3 + TG4)
+
 **Workstream:** next-routes, clients-auth-env  
 **UAT Gate:** Scaffold `veloz-test-next-api` with `--frontend next --backend next --auth better-auth`; `pnpm install && pnpm --filter @veloz-test-next-api/web dev`; browser hits `/` health query OK; `/api/health` returns `{ok:true}`.
 
@@ -145,6 +154,7 @@ Research metadata:
 3. Generator tests for file presence and string assertions.
 
 ### Phase 3 — Ops wiring (TG5 + TG6)
+
 **Workstream:** deploy-modules-ci  
 **UAT Gate:** CI green; optional local `node-vercel-next` + new `backend-next` e2e combos scaffold and typecheck.
 
@@ -154,13 +164,13 @@ Research metadata:
 
 ## Skill/tool routing
 
-| Phase | Tool / agent | Mode |
-|-------|----------------|------|
-| 1–3 | Primary implementer | `etrnl-executor` or default agent |
-| 2 | Spec review | `etrnl-spec-reviewer` (read-only) on context + route handler contracts |
-| 3 | Quality review | `etrnl-quality-reviewer` on generator tests |
-| Optional | Adversarial pass | `etrnl-adversary` on Hono regression + auth URL matrix |
-| Post-merge UAT | `etrnl-browser-qa` | Only if manually validating scaffolded app in browser |
+| Phase          | Tool / agent        | Mode                                                                   |
+| -------------- | ------------------- | ---------------------------------------------------------------------- |
+| 1–3            | Primary implementer | `etrnl-executor` or default agent                                      |
+| 2              | Spec review         | `etrnl-spec-reviewer` (read-only) on context + route handler contracts |
+| 3              | Quality review      | `etrnl-quality-reviewer` on generator tests                            |
+| Optional       | Adversarial pass    | `etrnl-adversary` on Hono regression + auth URL matrix                 |
+| Post-merge UAT | `etrnl-browser-qa`  | Only if manually validating scaffolded app in browser                  |
 
 **WebSearch policy:** Allowed for oRPC/Better Auth API surface confirmation only; implementation must follow repo templates.
 
@@ -179,15 +189,15 @@ Research metadata:
 
 ## Failure modes
 
-| Failure | Mitigation |
-|---------|------------|
-| Hono `createContext` signature break | Update all three hono templates in same PR as context refactor; test hono default config |
-| Better Auth cookies fail same-origin | `nextCookies()` plugin + `credentials: "include"` on RPCLink |
-| Next+Hono auth client still uses VITE URL | Branch auth client template on `backend` |
-| Module packages missing at runtime | post-process targets `apps/web` for `backend: next`; api package.json already lists module deps for routers |
-| Veloz Docker still runs Hono | Separate `Dockerfile.next` selected in deploy handler |
-| Expo can't reach API | Document `EXPO_PUBLIC_SERVER_URL=http://<next-host>:3001` |
-| Users pick `backend: next` + `deploy: cloudflare` | Compatibility disable with message |
+| Failure                                           | Mitigation                                                                                                  |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Hono `createContext` signature break              | Update all three hono templates in same PR as context refactor; test hono default config                    |
+| Better Auth cookies fail same-origin              | `nextCookies()` plugin + `credentials: "include"` on RPCLink                                                |
+| Next+Hono auth client still uses VITE URL         | Branch auth client template on `backend`                                                                    |
+| Module packages missing at runtime                | post-process targets `apps/web` for `backend: next`; api package.json already lists module deps for routers |
+| Veloz Docker still runs Hono                      | Separate `Dockerfile.next` selected in deploy handler                                                       |
+| Expo can't reach API                              | Document `EXPO_PUBLIC_SERVER_URL=http://<next-host>:3001`                                                   |
+| Users pick `backend: next` + `deploy: cloudflare` | Compatibility disable with message                                                                          |
 
 ## Parallelization strategy
 
@@ -205,14 +215,14 @@ flowchart LR
 
 ## Verification gates
 
-| Gate | Command | Owner |
-|------|---------|-------|
-| Embed templates | `pnpm --filter @veloz-stack/template-generator gen` | implementer |
-| Unit | `pnpm --filter @veloz-stack/template-generator test` | implementer |
-| Monorepo types | `pnpm -r --parallel check-types` | implementer |
+| Gate                 | Command                                                                                                         | Owner       |
+| -------------------- | --------------------------------------------------------------------------------------------------------------- | ----------- |
+| Embed templates      | `pnpm --filter @veloz-stack/template-generator gen`                                                             | implementer |
+| Unit                 | `pnpm --filter @veloz-stack/template-generator test`                                                            | implementer |
+| Monorepo types       | `pnpm -r --parallel check-types`                                                                                | implementer |
 | Local scaffold smoke | `tsx apps/cli/src/index.ts /tmp/v-next --yes --frontend next --backend next --pm pnpm` then typecheck in output | implementer |
-| Plan readiness | `node ~/.claude/scripts/plan-readiness-check.mjs docs/plans/next-backend-routes.plan.md` | autoplan |
-| CI | GitHub Actions on PR | CI |
+| Plan readiness       | `node ~/.claude/scripts/plan-readiness-check.mjs docs/plans/archive/next-backend-routes.plan.md`                | autoplan    |
+| CI                   | GitHub Actions on PR                                                                                            | CI          |
 
 ## Rollback
 
@@ -222,13 +232,15 @@ flowchart LR
 
 ## Execution handoff
 
-Invoke `/etrnl-execute` with this plan path: `docs/plans/next-backend-routes.plan.md`.
+Invoke `/etrnl-execute` with this plan path: `docs/plans/archive/next-backend-routes.plan.md`.
 
 **Question policy for execute:**
+
 - Auto-continue Phases 1–3 mechanical work.
 - Ask before: changing default preset to `backend: next`, destructive CI matrix reductions, or scope expansion (SSR client, Cloudflare Next).
 
 **Subagent task packet (TG3 — example):**
+
 - **goal:** Emit Next App Router API routes for oRPC/auth/health
 - **context:** `backend: next` skips `apps/server`; uses shared `packages/api`
 - **scope:** `templates/backend/next/**`, `handlers/backend.ts` only
@@ -241,27 +253,27 @@ Invoke `/etrnl-execute` with this plan path: `docs/plans/next-backend-routes.pla
 
 ## Autoplan decision log
 
-| Phase | Decision | Rationale | Consensus | Gate |
-|-------|----------|-----------|-----------|------|
-| CEO | Add `backend: next` as optional, keep Hono | Next users expect native routes on Vercel; power users keep split server | Unanimous | none |
-| CEO | Do not change Veloz BR default preset | Avoid breaking existing docs/expectations | Unanimous | taste (logged) |
-| Eng | Headers-based `createContext` | Single `packages/api` for Hono + Next | Unanimous | none |
-| Eng | Include full deploy/module/CI in one delivery | User requested full scope | Unanimous | none |
-| Design | Same-origin removes CORS friction | Better Auth cookie flow | Unanimous | none |
-| Design | No stack-builder visual redesign | Hint text only | Unanimous | none |
-| DX | Branch auth client for next vs hono | Fix VITE-only client for Next+Hono | Unanimous | none |
-| DX | Document env for Expo → Next origin | Mobile unchanged architecturally | Unanimous | none |
-| Adversarial | Block `workers` + `next` backend | No Workers entry for Next API | Unanimous | none |
-| Adversarial | Hono regression test mandatory | Context refactor is blast radius | Unanimous | none |
-| Research | Mark research-pending | No research pipeline in repo | N/A | risk_acknowledged |
+| Phase       | Decision                                      | Rationale                                                                | Consensus | Gate              |
+| ----------- | --------------------------------------------- | ------------------------------------------------------------------------ | --------- | ----------------- |
+| CEO         | Add `backend: next` as optional, keep Hono    | Next users expect native routes on Vercel; power users keep split server | Unanimous | none              |
+| CEO         | Do not change Veloz BR default preset         | Avoid breaking existing docs/expectations                                | Unanimous | taste (logged)    |
+| Eng         | Headers-based `createContext`                 | Single `packages/api` for Hono + Next                                    | Unanimous | none              |
+| Eng         | Include full deploy/module/CI in one delivery | User requested full scope                                                | Unanimous | none              |
+| Design      | Same-origin removes CORS friction             | Better Auth cookie flow                                                  | Unanimous | none              |
+| Design      | No stack-builder visual redesign              | Hint text only                                                           | Unanimous | none              |
+| DX          | Branch auth client for next vs hono           | Fix VITE-only client for Next+Hono                                       | Unanimous | none              |
+| DX          | Document env for Expo → Next origin           | Mobile unchanged architecturally                                         | Unanimous | none              |
+| Adversarial | Block `workers` + `next` backend              | No Workers entry for Next API                                            | Unanimous | none              |
+| Adversarial | Hono regression test mandatory                | Context refactor is blast radius                                         | Unanimous | none              |
+| Research    | Mark research-pending                         | No research pipeline in repo                                             | N/A       | risk_acknowledged |
 
 ## Artifact requirements
 
-| Artifact | When |
-|----------|------|
-| `review-log.jsonl` | If spec/quality reviewers file findings |
-| `browser-qa-report.json` | Optional post-scaffold manual UAT only |
-| context-save | If execution spans multiple sessions |
+| Artifact                 | When                                    |
+| ------------------------ | --------------------------------------- |
+| `review-log.jsonl`       | If spec/quality reviewers file findings |
+| `browser-qa-report.json` | Optional post-scaffold manual UAT only  |
+| context-save             | If execution spans multiple sessions    |
 
 ## Assumptions
 
@@ -283,4 +295,4 @@ Invoke `/etrnl-execute` with this plan path: `docs/plans/next-backend-routes.pla
 
 ## Verdict
 
-**Ready for execution** — with `research-pending` noted; no code-level competitor evidence required to implement generator feature. Run `node ~/.claude/scripts/plan-readiness-check.mjs docs/plans/next-backend-routes.plan.md` before `/etrnl-execute`.
+**Ready for execution** — with `research-pending` noted; no code-level competitor evidence required to implement generator feature. Run `node ~/.claude/scripts/plan-readiness-check.mjs docs/plans/archive/next-backend-routes.plan.md` before `/etrnl-execute`.

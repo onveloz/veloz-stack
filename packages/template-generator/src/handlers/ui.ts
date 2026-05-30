@@ -1,5 +1,6 @@
 import type { ProjectConfig } from "@veloz-stack/types";
 import { version } from "../deps";
+import { asPackageJson } from "../package-json";
 import { processTemplatesFromPrefix } from "../template-utils";
 import type { VirtualFs } from "../vfs";
 
@@ -15,35 +16,56 @@ import type { VirtualFs } from "../vfs";
  * time we get here the combo is guaranteed sane.
  */
 export function processUi(vfs: VirtualFs, config: ProjectConfig): void {
-  if (config.frontend === "none") return;
+  if (config.frontend === "none") {
+    return;
+  }
 
   const frontendKey = frontendDirKey(config.frontend);
-  if (!frontendKey) return;
+  if (!frontendKey) {
+    return;
+  }
 
-  processTemplatesFromPrefix(vfs, `ui/${config.ui}/${frontendKey}/`, "", config);
+  processTemplatesFromPrefix({
+    vfs,
+    sourcePrefix: `ui/${config.ui}/${frontendKey}/`,
+    destPrefix: "",
+    config,
+  });
 
   if (config.ui === "shadcn") {
     addShadcnDeps(vfs);
   } else if (config.ui === "none") {
-    stripTailwindDeps(vfs, config);
+    stripTailwindDeps(vfs);
   }
 }
 
 function frontendDirKey(frontend: ProjectConfig["frontend"]): string | null {
   switch (frontend) {
-    case "tanstack-start":
+    case "tanstack-start": {
       return "frontend-tanstack";
-    case "next":
+    }
+    case "next": {
       return "frontend-next";
-    default:
+    }
+    case "astro":
+    case "none":
+    case "nuxt":
+    case "svelte-kit": {
       return null;
+    }
+    default: {
+      return null;
+    }
   }
 }
 
-function stripTailwindDeps(vfs: VirtualFs, config: ProjectConfig): void {
-  if (!vfs.exists("apps/web/package.json")) return;
+function stripTailwindDeps(vfs: VirtualFs): void {
+  if (!vfs.exists("apps/web/package.json")) {
+    return;
+  }
 
-  vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {
+  vfs.updateJson("apps/web/package.json", (raw) => {
+    const pkg = asPackageJson(raw);
     if (pkg.dependencies) {
       delete pkg.dependencies.tailwindcss;
       delete pkg.dependencies["@tailwindcss/vite"];
@@ -53,19 +75,17 @@ function stripTailwindDeps(vfs: VirtualFs, config: ProjectConfig): void {
     }
     return pkg;
   });
-
-  // Next ships an empty postcss.config since the page no longer uses
-  // Tailwind utilities; nothing else to do for tanstack (vite.config
-  // overlay already drops the plugin).
-  void config;
 }
 
 function addShadcnDeps(vfs: VirtualFs): void {
-  if (!vfs.exists("apps/web/package.json")) return;
+  if (!vfs.exists("apps/web/package.json")) {
+    return;
+  }
 
-  vfs.updateJson<Record<string, any>>("apps/web/package.json", (pkg) => {
+  vfs.updateJson("apps/web/package.json", (raw) => {
+    const pkg = asPackageJson(raw);
     pkg.dependencies = {
-      ...(pkg.dependencies ?? {}),
+      ...pkg.dependencies,
       "@radix-ui/react-dialog": version("@radix-ui/react-dialog"),
       "@radix-ui/react-slot": version("@radix-ui/react-slot"),
       "class-variance-authority": version("class-variance-authority"),

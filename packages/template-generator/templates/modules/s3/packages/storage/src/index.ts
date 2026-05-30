@@ -25,6 +25,7 @@ if (!accessKeyId || !secretAccessKey || !bucket) {
   );
 }
 
+/** @internal Scaffold export. */
 export const s3 = new S3Client({
   region,
   endpoint,
@@ -32,8 +33,10 @@ export const s3 = new S3Client({
   credentials: { accessKeyId, secretAccessKey },
 });
 
+/** @internal Scaffold export. */
 export const BUCKET = bucket;
 
+/** @internal Scaffold pipeline step. */
 export async function putObject(input: {
   key: string;
   body: Buffer | Uint8Array | string;
@@ -49,6 +52,7 @@ export async function putObject(input: {
   );
 }
 
+/** @internal Scaffold pipeline step. */
 export async function deleteObject(key: string) {
   await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }
@@ -70,3 +74,5 @@ export async function presignGet(key: string, expiresSec = 900) {
     { expiresIn: expiresSec },
   );
 }
+
+

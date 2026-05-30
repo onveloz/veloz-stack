@@ -1,8 +1,10 @@
-import type { ProjectConfig } from "./index";
-import { MODULES, type ModuleId } from "./modules";
+import type { ModuleId, ProjectConfig } from "./index";
+import { MODULES } from "./modules";
 
 /** Presets kept for compatibility / roadmap; blocked in UI & CLI selections until implemented. */
 export const COMING_SOON_PRESETS = ["mern", "pern"] as const;
+
+/** Default stack used by the Veloz BR preset and CLI when no flags are passed. */
 export const DEFAULT_CONFIG: ProjectConfig = {
   projectName: "my-veloz-stack",
   frontend: "tanstack-start",
@@ -21,7 +23,7 @@ export const DEFAULT_CONFIG: ProjectConfig = {
   examples: [],
   modules: Object.values(MODULES)
     .filter((m) => m.defaultOn)
-    .map((m) => m.id) as ModuleId[],
+    .map((m) => m.id),
   addons: ["turborepo", "biome"],
   oxlintStrict: false,
   lefthookCi: false,
@@ -31,6 +33,7 @@ export const DEFAULT_CONFIG: ProjectConfig = {
   preset: "veloz-br",
 };
 
+/** Named presets surfaced in the web builder and CLI (`--preset`). */
 export const PRESETS = {
   "veloz-br": {
     label: "Veloz BR",
@@ -77,7 +80,8 @@ export const PRESETS = {
   },
   "next-native": {
     label: "Next.js nativo",
-    description: "App Router · Route Handlers · oRPC same-origin · deploy Veloz",
+    description:
+      "App Router · Route Handlers · oRPC same-origin · deploy Veloz",
     config: {
       ...DEFAULT_CONFIG,
       preset: "next-native" as const,
@@ -90,6 +94,10 @@ export const PRESETS = {
       modules: [] as ModuleId[],
     },
   },
-} satisfies Record<string, { label: string; description: string; config: ProjectConfig }>;
+} satisfies Record<
+  string,
+  { label: string; description: string; config: ProjectConfig }
+>;
 
+/** Keys of {@link PRESETS} for type-safe preset selection. */
 export type PresetKey = keyof typeof PRESETS;

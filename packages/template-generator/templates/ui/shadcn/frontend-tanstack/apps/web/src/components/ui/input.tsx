@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/** shadcn/ui primitive copied into generated apps. */
 export const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
@@ -19,3 +20,4 @@ export const Input = React.forwardRef<
   );
 });
 Input.displayName = "Input";
+

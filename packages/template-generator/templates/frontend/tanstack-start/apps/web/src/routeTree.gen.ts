@@ -10,4 +10,5 @@ declare module "@tanstack/react-router" {
   }
 }
 
+/** Placeholder replaced by TanStack Router codegen in generated apps. */
 export const routeTree: any = undefined as any;

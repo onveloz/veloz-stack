@@ -11,6 +11,7 @@ async function j<T>(path: string): Promise<T> {
   return (await r.json()) as T;
 }
 
+/** @internal Scaffold pipeline step. */
 export function cep(cep: string) {
   const d = cep.replace(/\D/g, "");
   return j<{
@@ -23,6 +24,7 @@ export function cep(cep: string) {
   }>(`/cep/v2/${d}`);
 }
 
+/** @internal Scaffold pipeline step. */
 export function cnpj(cnpj: string) {
   const d = cnpj.replace(/\D/g, "");
   return j<{
@@ -34,8 +36,12 @@ export function cnpj(cnpj: string) {
   }>(`/cnpj/v1/${d}`);
 }
 
+/** @internal Scaffold export. */
 export const banks = () => j<Array<{ code: number; name: string; ispb: string }>>("/banks/v1");
+/** @internal Scaffold export. */
 export const feriados = (year: number) =>
   j<Array<{ date: string; name: string; type: string }>>(`/feriados/v1/${year}`);
+/** @internal Scaffold export. */
 export const ddd = (d: string) =>
   j<{ state: string; cities: string[] }>(`/ddd/v1/${d}`);
+

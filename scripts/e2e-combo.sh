@@ -43,6 +43,10 @@ fi
 pm_field=$(node -p "require('./package.json').packageManager || 'pnpm@0'" 2>/dev/null || echo "pnpm@0")
 pm=${pm_field%%@*}
 
+if [ -f .env.example ] && [ ! -f .env ]; then
+  cp .env.example .env
+fi
+
 install_with_retry() {
   local attempt=1
   local max=3

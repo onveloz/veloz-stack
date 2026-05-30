@@ -32,13 +32,24 @@ jobs:
         run: pnpm --filter @veloz-stack/template-generator gen
 
       - name: Type-check all workspaces
-        run: pnpm -r --parallel check-types
+        run: |
+          pnpm --filter @veloz-stack/template-generator exec tsc --noEmit
+          pnpm -r --parallel --filter '!@veloz-stack/template-generator' check-types
 
-      - name: Lint (Biome)
+      - name: Lint (oxlint + oxfmt)
         run: pnpm lint
+
+      - name: Docs (markdownlint)
+        run: pnpm docs:lint
+
+      - name: Docs (internal links)
+        run: pnpm docs:links
 
       - name: Unit tests (template-generator)
         run: pnpm --filter @veloz-stack/template-generator test
+
+      - name: Unit tests (web)
+        run: pnpm --filter @veloz-stack/web test
 
   e2e:
     name: e2e · ${{ matrix.combo.name }}
@@ -71,13 +82,22 @@ jobs:
 
           # ─────── Desktop axis (Tauri wraps the web frontend)
           - { name: desktop-tauri, args: "--desktop tauri" }
-          - { name: desktop-tauri-next, args: "--frontend next --desktop tauri" }
+          - {
+              name: desktop-tauri-next,
+              args: "--frontend next --desktop tauri",
+            }
 
           # ─────── UI axis
-          - { name: ui-shadcn-tanstack, args: "--frontend tanstack-start --ui shadcn" }
+          - {
+              name: ui-shadcn-tanstack,
+              args: "--frontend tanstack-start --ui shadcn",
+            }
           - { name: ui-shadcn-next, args: "--frontend next --ui shadcn" }
           - { name: ui-tailwind, args: "--ui tailwind" }
-          - { name: ui-none-tanstack, args: "--frontend tanstack-start --ui none" }
+          - {
+              name: ui-none-tanstack,
+              args: "--frontend tanstack-start --ui none",
+            }
           - { name: ui-none-next, args: "--frontend next --ui none" }
 
           # Auto-fallback: nuxt with default ui=shadcn must succeed
@@ -100,7 +120,10 @@ jobs:
           # ─────── DB axis
           - { name: db-postgres, args: "--db postgres --db-hosting veloz" }
           - { name: db-sqlite, args: "--db sqlite --db-hosting turso" }
-          - { name: db-none, args: "--db none --orm none --db-hosting none --auth none" }
+          - {
+              name: db-none,
+              args: "--db none --orm none --db-hosting none --auth none",
+            }
 
           # ─────── Deploy axis
           - { name: deploy-veloz, args: "--deploy veloz" }
@@ -108,7 +131,10 @@ jobs:
           - { name: deploy-fly, args: "--deploy fly" }
           - { name: deploy-render, args: "--deploy render" }
           - { name: deploy-docker, args: "--deploy docker" }
-          - { name: deploy-cloudflare, args: "--deploy cloudflare --runtime workers" }
+          - {
+              name: deploy-cloudflare,
+              args: "--deploy cloudflare --runtime workers --auth none",
+            }
           - { name: deploy-none, args: "--deploy none" }
 
           # ─────── Package manager axis
@@ -116,39 +142,78 @@ jobs:
           - { name: pm-bun, args: "--pm bun" }
 
           # ─────── Modules & examples
-          - { name: modules-br-bundle, args: "--modules claude,abacatepay,ararahq-sms,resend,pt-br-i18n,cpf-cnpj,himetrica" }
-          - { name: modules-international, args: "--modules claude,stripe-br,posthog,sentry" }
+          - {
+              name: modules-br-bundle,
+              args: "--modules claude,abacatepay,ararahq-sms,resend,pt-br-i18n,cpf-cnpj,himetrica",
+            }
+          - {
+              name: modules-international,
+              args: "--modules claude,stripe-br,posthog,sentry",
+            }
           - { name: modules-empty, args: "--modules ''" }
           - { name: examples-todo, args: "--examples todo" }
-          - { name: examples-pix, args: "--examples pix-checkout --modules claude,abacatepay" }
+          - {
+              name: examples-pix,
+              args: "--examples pix-checkout --modules claude,abacatepay",
+            }
 
           # ─────── Payment combos — every BR payment vendor
-          - { name: payments-all-br, args: "--modules claude,abacatepay,asaas,pagarme,mercadopago,stripe-br" }
+          - {
+              name: payments-all-br,
+              args: "--modules claude,abacatepay,asaas,pagarme,mercadopago,stripe-br",
+            }
 
           # ─────── Addons axis
           - { name: addons-turborepo-only, args: "--addons turborepo" }
           - { name: addons-biome-only, args: "--addons biome" }
           - { name: addons-husky, args: "--addons husky,biome" }
           - { name: addons-lefthook, args: "--addons lefthook,biome" }
-          - { name: addons-lefthook-ci, args: "--addons lefthook,biome --lefthook-ci" }
-          - { name: addons-lefthook-advanced, args: "--addons lefthook,biome,turborepo --lefthook-advanced" }
+          - {
+              name: addons-lefthook-ci,
+              args: "--addons lefthook,biome --lefthook-ci",
+            }
+          - {
+              name: addons-lefthook-advanced,
+              args: "--addons lefthook,biome,turborepo --lefthook-advanced",
+            }
           - { name: addons-all, args: "--addons turborepo,biome,husky" }
           - { name: addons-oxlint, args: "--addons turborepo,oxlint" }
-          - { name: addons-oxlint-strict, args: "--addons turborepo,oxlint --oxlint-strict" }
-          - { name: module-pino, args: "--preset minimal --runtime node --modules pino" }
+          - {
+              name: addons-oxlint-strict,
+              args: "--addons turborepo,oxlint --oxlint-strict",
+            }
+          - {
+              name: module-pino,
+              args: "--preset minimal --runtime node --modules pino",
+            }
           - {
               name: module-opentelemetry,
               args: "--preset minimal --runtime node --modules opentelemetry",
             }
-          - { name: module-next-intl, args: "--frontend next --modules next-intl" }
+          - {
+              name: module-next-intl,
+              args: "--frontend next --modules next-intl",
+            }
 
           # ─────── Cross-cutting combos
           - { name: prisma-next, args: "--orm prisma --frontend next" }
           - { name: prisma-todo, args: "--orm prisma --examples todo" }
-          - { name: astro-pnpm-drizzle, args: "--frontend astro --pm pnpm --orm drizzle" }
-          - { name: node-vercel-next, args: "--runtime node --deploy vercel --frontend next" }
-          - { name: triple-platform, args: "--frontend tanstack-start --mobile expo --desktop tauri" }
-          - { name: shadcn-tauri-next, args: "--frontend next --ui shadcn --desktop tauri" }
+          - {
+              name: astro-pnpm-drizzle,
+              args: "--frontend astro --pm pnpm --orm drizzle",
+            }
+          - {
+              name: node-vercel-next,
+              args: "--runtime node --deploy vercel --frontend next",
+            }
+          - {
+              name: triple-platform,
+              args: "--frontend tanstack-start --mobile expo --desktop tauri",
+            }
+          - {
+              name: shadcn-tauri-next,
+              args: "--frontend next --ui shadcn --desktop tauri",
+            }
 
           # ─────── Known-invalid guard (the CLI should exit non-zero)
           # Handled separately in the invalid-combos job below.
@@ -165,7 +230,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: "1.3.14"
 
       - run: pnpm install --frozen-lockfile
 

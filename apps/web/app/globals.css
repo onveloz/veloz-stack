@@ -38,6 +38,8 @@
   --input: #2a2a2a;
   --ring: #ff4d00;
 
+  --site-header-height: 2.75rem; /* matches SiteHeader h-11 */
+
   --success: #16a34a;
   --warning: #d97706;
   --destructive: #dc2626;
@@ -130,7 +132,10 @@
 
 /* Dotted grid background for hero */
 .dot-grid {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 1px
+  );
   background-size: 20px 20px;
 }
 

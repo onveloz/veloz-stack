@@ -1,59 +1,87 @@
 "use client";
 
 import type { ProjectConfig } from "@veloz-stack/types";
-import { ChevronRight, FileCode2, FolderClosed, FolderOpen, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  ChevronRight,
+  FileCode2,
+  FolderClosed,
+  FolderOpen,
+  Loader2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 type TreeNode =
   | { kind: "file"; name: string; path: string }
-  | { kind: "dir"; name: string; path: string; children: TreeNode[]; startOpen: boolean };
+  | {
+      kind: "dir";
+      name: string;
+      path: string;
+      children: TreeNode[];
+      startOpen: boolean;
+    };
+
+function sortTreeNodes(nodes: TreeNode[]): TreeNode[] {
+  nodes.sort((a, b) => {
+    if (a.kind !== b.kind) {
+      return a.kind === "dir" ? -1 : 1;
+    }
+    return a.name.localeCompare(b.name);
+  });
+  for (const node of nodes) {
+    if (node.kind === "dir") {
+      sortTreeNodes(node.children);
+    }
+  }
+  return nodes;
+}
+
+function findOrCreateDir(
+  parent: TreeNode[],
+  segment: { head: string; fullPath: string; rest: string[] },
+): TreeNode[] {
+  const { head, fullPath, rest } = segment;
+  const existing = parent.find(
+    (node): node is Extract<TreeNode, { kind: "dir" }> =>
+      node.kind === "dir" && node.name === head,
+  );
+  if (existing) {
+    return existing.children;
+  }
+  const dir: Extract<TreeNode, { kind: "dir" }> = {
+    kind: "dir",
+    name: head,
+    path: fullPath.slice(0, fullPath.length - rest.join("/").length - 1),
+    children: [],
+    startOpen: true,
+  };
+  parent.push(dir);
+  return dir.children;
+}
 
 function buildTree(paths: string[]): TreeNode[] {
   const root: TreeNode[] = [];
 
   function insert(parts: string[], fullPath: string, parent: TreeNode[]) {
     const [head, ...rest] = parts;
-    if (!head) return;
+    if (!head) {
+      return;
+    }
     if (rest.length === 0) {
       parent.push({ kind: "file", name: head, path: fullPath });
       return;
     }
-    let dir = parent.find((n) => n.kind === "dir" && n.name === head) as
-      | Extract<TreeNode, { kind: "dir" }>
-      | undefined;
-    if (!dir) {
-      dir = {
-        kind: "dir",
-        name: head,
-        path: fullPath.slice(0, fullPath.length - rest.join("/").length - 1),
-        children: [],
-        startOpen: true,
-      };
-      parent.push(dir);
-    }
-    insert(rest, fullPath, dir.children);
+    const children = findOrCreateDir(parent, { head, fullPath, rest });
+    insert(rest, fullPath, children);
   }
 
-  for (const p of paths) {
-    insert(p.split("/"), p, root);
+  for (const path of paths) {
+    insert(path.split("/"), path, root);
   }
 
-  const sort = (nodes: TreeNode[]): TreeNode[] => {
-    nodes.sort((a, b) => {
-      if (a.kind !== b.kind) return a.kind === "dir" ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-    for (const n of nodes) {
-      if (n.kind === "dir") sort(n.children);
-    }
-    return nodes;
-  };
-
-  return sort(root);
+  return sortTreeNodes(root);
 }
 
 function usePreviewVfs(config: ProjectConfig) {
-  const configKey = useMemo(() => JSON.stringify(config), [config]);
   const [tree, setTree] = useState<TreeNode[]>([]);
   const [fileCount, setFileCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -62,33 +90,38 @@ function usePreviewVfs(config: ProjectConfig) {
     let cancelled = false;
     setLoading(true);
 
-    void import("@veloz-stack/template-generator")
+    void import("@veloz-stack/template-generator/preview")
       .then(({ generate }) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
         const vfs = generate(config);
-        const paths = [...vfs.entries()].map(([p]) => p);
+        const paths = [...vfs.entries()].map(([path]) => path);
         setTree(buildTree(paths));
         setFileCount(vfs.size());
       })
-      .catch((err) => {
-        console.error(err);
+      .catch((error) => {
+        console.error(error);
         if (!cancelled) {
           setTree([]);
           setFileCount(0);
         }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [configKey]);
+  }, [config]);
 
   return { tree, fileCount, loading };
 }
 
+/** @internal Scaffold pipeline step. */
 export function PreviewPanel({
   config,
   maxHeight,
@@ -100,11 +133,16 @@ export function PreviewPanel({
   const { tree, fileCount, loading } = usePreviewVfs(config);
 
   return (
-    <div className="flex flex-col h-full" style={maxHeight ? { maxHeight } : undefined}>
+    <div
+      className="flex flex-col h-full"
+      style={maxHeight ? { maxHeight } : undefined}
+    >
       <div className="px-4 py-2 border-b border-border flex items-center justify-between bg-secondary/30 shrink-0">
         <div className="flex items-center gap-2">
           <FileCode2 className="w-3.5 h-3.5 text-brand" />
-          <span className="text-[11px] uppercase tracking-wider font-medium">Preview</span>
+          <span className="text-[11px] uppercase tracking-wider font-medium">
+            Preview
+          </span>
         </div>
         <span className="text-[11px] text-muted-foreground tabular-nums">
           {loading ? "…" : `${fileCount} ${fileCount === 1 ? "file" : "files"}`}
@@ -118,11 +156,13 @@ export function PreviewPanel({
           </div>
         ) : (
           <>
-            {tree.map((n) => (
-              <TreeRow key={n.path} node={n} depth={0} />
+            {tree.map((node) => (
+              <TreeRow key={node.path} node={node} depth={0} />
             ))}
             {tree.length === 0 && (
-              <div className="text-muted-foreground p-4">No files — everything set to none.</div>
+              <div className="text-muted-foreground p-4">
+                No files — everything set to none.
+              </div>
             )}
           </>
         )}
@@ -151,7 +191,9 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
     <div>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen((value) => !value);
+        }}
         className="flex items-center gap-1 w-full px-1 py-0.5 hover:bg-secondary text-left"
         style={{ paddingLeft: 4 + depth * 12 }}
       >
@@ -165,7 +207,11 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
         )}
         <span className="truncate text-foreground">{node.name}</span>
       </button>
-      {open && node.children.map((c) => <TreeRow key={c.path} node={c} depth={depth + 1} />)}
+      {open
+        ? node.children.map((child) => (
+            <TreeRow key={child.path} node={child} depth={depth + 1} />
+          ))
+        : null}
     </div>
   );
 }

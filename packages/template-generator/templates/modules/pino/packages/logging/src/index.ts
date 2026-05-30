@@ -18,6 +18,7 @@ export function getLogger(): Logger {
   return root;
 }
 
+/** @internal Scaffold export. */
 export const pinoMiddleware: MiddlewareHandler = async (c, next) => {
   const log = getLogger();
   const start = Date.now();
@@ -39,3 +40,4 @@ export const pinoMiddleware: MiddlewareHandler = async (c, next) => {
     throw err;
   }
 };
+

@@ -20,8 +20,13 @@ import { runCreate } from "./create.js";
 
 // Re-wrap each enum with incur's own zod instance so schema identity checks
 // inside incur recognize them.
-const reenum = <T extends { options: readonly string[] }>(s: T) =>
-  z.enum(s.options as [string, ...string[]]);
+const reenum = (s: { options: readonly string[] }) => {
+  const [first, ...rest] = s.options;
+  if (first === undefined) {
+    throw new Error("Enum schema must have at least one option");
+  }
+  return z.enum([first, ...rest]);
+};
 
 const PresetId = reenum(PresetIdSchema);
 const FrontendId = reenum(FrontendIdSchema);
@@ -60,20 +65,31 @@ const cli = Cli.create("create-veloz-stack", {
       "Modelo pronto: veloz-br | minimal | mern | pern | next-native | custom",
     ),
     frontend: FrontendId.optional().describe("Frontend web (single-select)"),
-    mobile: MobileId.optional().describe("App mobile (expo | none) — pode coexistir com frontend"),
-    desktop: DesktopId.optional().describe("App desktop (tauri | none) — embrulha o frontend web"),
+    mobile: MobileId.optional().describe(
+      "App mobile (expo | none) — pode coexistir com frontend",
+    ),
+    desktop: DesktopId.optional().describe(
+      "App desktop (tauri | none) — embrulha o frontend web",
+    ),
     backend: BackendId.optional().describe("Framework de backend"),
     runtime: RuntimeId.optional().describe("Runtime: bun | node | workers"),
     api: ApiId.optional().describe("Estilo de API: orpc | trpc | rest | none"),
     db: DbId.optional().describe("Banco de dados"),
     orm: OrmId.optional().describe("ORM"),
-    dbHosting: DbHostingId.optional().describe("Provedor de hospedagem do banco"),
+    dbHosting: DbHostingId.optional().describe(
+      "Provedor de hospedagem do banco",
+    ),
     auth: AuthId.optional().describe("Autenticação"),
     deploy: DeployId.optional().describe("Alvo de deploy"),
     pm: PackageManagerId.optional().describe("Gerenciador de pacotes"),
-    ui: UiId.optional().describe("UI: shadcn (Tailwind 4 + componentes prontos) | tailwind | none"),
+    ui: UiId.optional().describe(
+      "UI: shadcn (Tailwind 4 + componentes prontos) | tailwind | none",
+    ),
     modules: z.string().optional().describe("Módulos, separados por vírgula"),
-    examples: z.string().optional().describe("Exemplos prontos, separados por vírgula"),
+    examples: z
+      .string()
+      .optional()
+      .describe("Exemplos prontos, separados por vírgula"),
     addons: z
       .string()
       .optional()
@@ -92,9 +108,18 @@ const cli = Cli.create("create-veloz-stack", {
       .describe(
         "Com Lefthook: hooks rigorosos TS (biome ci, commitlint, pre-push pipeline) + CI avançado",
       ),
-    yes: z.boolean().optional().describe("Pula as perguntas, usa defaults/flags"),
-    install: z.boolean().optional().describe("Instala dependências depois do scaffold"),
-    git: z.boolean().optional().describe("Inicializa repositório git depois do scaffold"),
+    yes: z
+      .boolean()
+      .optional()
+      .describe("Pula as perguntas, usa defaults/flags"),
+    install: z
+      .boolean()
+      .optional()
+      .describe("Instala dependências depois do scaffold"),
+    git: z
+      .boolean()
+      .optional()
+      .describe("Inicializa repositório git depois do scaffold"),
     dryRun: z
       .boolean()
       .optional()
@@ -102,7 +127,9 @@ const cli = Cli.create("create-veloz-stack", {
     oxlintStrict: z
       .boolean()
       .optional()
-      .describe("Com addon oxlint: gera .oxlintrc.json com perfil mais estrito"),
+      .describe(
+        "Com addon oxlint: gera .oxlintrc.json com perfil mais estrito",
+      ),
   }),
   alias: { yes: "y" },
   examples: [
@@ -125,4 +152,4 @@ const cli = Cli.create("create-veloz-stack", {
   },
 });
 
-cli.serve();
+void cli.serve();

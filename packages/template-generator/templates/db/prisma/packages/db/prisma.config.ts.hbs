@@ -1,0 +1,11 @@
+import { defineConfig } from "prisma/config";
+
+const defaultDatabaseUrl =
+  "{{#if (eq db "postgres")}}postgresql://postgres:postgres@localhost:5432/{{projectName}}{{else if (eq db "mysql")}}mysql://root:root@localhost:3306/{{projectName}}{{else if (eq db "sqlite")}}file:./data.db{{else}}mongodb://localhost:27017/{{projectName}}{{/if}}";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  datasource: {
+    url: process.env.DATABASE_URL ?? defaultDatabaseUrl,
+  },
+});
